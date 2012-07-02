@@ -37,6 +37,14 @@ for i = 1:Nvoxels
     Mflag = 0;
     Vflag = 0;
     switch ModelNum
+        case '1'
+            temp.ProbeMod = 0;
+            M = data.M(:,:,i);
+            V = [];
+            if sum(isnan(M)) == 0
+                Mflag = 1;
+                Vflag = 1;
+            end
         case '4'
             M = data.M(:,:,i);
             V = [];
@@ -45,6 +53,9 @@ for i = 1:Nvoxels
                 Vflag = 1;
             end
         case '14'
+            % Calculate the minimum critical t-value for use with the
+            % Johnson-Neyman technique.
+            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
             M = data.M(:,:,i);
             V = data.V(:,:,i);
             if sum(isnan(M)) == 0; Mflag = 1;end
@@ -53,16 +64,26 @@ for i = 1:Nvoxels
     if Mflag & Vflag
         temp.M = M;
         temp.V = V;
-        
+
         [pointEst Parameters{i}] = subfnProcessModelFit(temp,ModelNum,1);
-        % have the option of turing the boot strapping off
-        if Nboot
+        
+        % have the option of turning the boot strapping off.
+        % turn off boot strapping on the interaction effect if the
+        % Johnson-Neyman shows no range of significant interactions.
+        %
+        if Nboot %& Parameters{i}.JohnsonNeyman ~= -99 
             % calculate the boot strap estimates
             [bstat] = subfnBootStrp(temp,Nboot,ModelNum);
+            [nboot Nmed NParameters] = size(bstat);
+            % Find the number of non-zero bstat values
+            if length(find(squeeze(bstat(1,1,:)))) == 1
+                NParameters = 1;
+            end
+            
             % calculate the BCAlimits
             [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst,ModelNum,Thresholds);
-            for j = 1:size(bstat,2)
-                for k = 1:size(bstat,3)
+            for j = 1:Nmed
+                for k = 1:NParameters
                     % there is an issue here with the
                     %Parameters{i}.AB{k,j}.pointEst = pointEst(k);
                     Parameters{i}.AB{k,j}.BCaci = BCaci{j,k};

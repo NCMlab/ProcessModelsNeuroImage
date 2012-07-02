@@ -1,7 +1,10 @@
 function [BCaci PERci] = subfnFindConfidenceIntervals(data,bstat,pointEst,ModelNum,Thresholds)
 Sbstat = sort(bstat);
 [nboot Nmed NParameters] = size(bstat);
-
+% Find the number of non-zero bstat values
+if length(find(squeeze(bstat(1,1,:)))) == 1
+    NParameters = 1;
+end
 BCaci = cell(Nmed,NParameters);
 PERci = cell(Nmed,NParameters);
 

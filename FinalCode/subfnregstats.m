@@ -28,6 +28,7 @@ design = x2fx(design);
   pval = 2*(tcdf(-abs(t), dfe));
 S = {};
 S.beta = beta;
+S.covb = covb;
 S.tstat = {};
 S.tstat.t = t;
 S.tstat.se = se;
