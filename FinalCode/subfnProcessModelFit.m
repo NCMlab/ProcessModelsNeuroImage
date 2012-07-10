@@ -1,16 +1,19 @@
-function [ParameterToBS Parameters] = subfnProcessModelFit(data,ModelNum,PointEst)
-% PointEst:
+function [ParameterToBS Parameters] = subfnProcessModelFit(data,PointEstFlag)
+% PointEstFlag:
 %           set to 0 if you only want to calculate the point estimate for
 %           the model. This is used for each bootstrapping test.
 %           set to 1 to estimate all parameters in the model.
 %
 ParameterToBS =[];
 Parameters = {};
-switch ModelNum
+
+switch data.ModelNum
     case '1'
         Ndata = size(data.Y,1);
         % the code below works if there is a covariate or not
-        if data.ProbeMod == 1
+        
+        % whether or not to run the regression at multiple values of the moderator
+        if data.ProbeMod == 1 
             Nsteps = 11;
             minM = min(data.M);
             maxM = max(data.M);
@@ -22,12 +25,12 @@ switch ModelNum
                 temp = regress(data.Y,[data.M data.X (data.M-probeM(j)).*data.X data.COV ones(Ndata,1)])
                 ParameterToBS(1,j) = temp(3);
             end
-            
         else
             temp = regress(data.Y,[data.M data.X (data.M).*data.X data.COV ones(Ndata,1)]);
-            ParameterToBS = temp(3);
+            ParameterToBS.values = temp(3);
+            ParameterToBS.names = 'Int';
         end
-        if PointEst
+        if PointEstFlag
             S = subfnregstats(data.Y,[data.M data.X (data.M).*data.X data.COV]);
             Parameters = {};
             
@@ -78,9 +81,10 @@ switch ModelNum
         end
         % the indirect effect which will be bootstrapped
         ab = a.*b;
-        ParameterToBS = ab;
+        ParameterToBS.values = ab;
+        ParameterToBS.names = 'AB';
         % Now all parameters of interest for the model are calculated.
-        if PointEst 
+        if PointEstFlag 
             S1 = cell(Nmed,1);
             if size(data.COV,2) > 0 % covariates
                 % B branch model
@@ -125,7 +129,7 @@ switch ModelNum
                 Parameters.B{i}.t = S2.tstat.t(i + 1);
                 Parameters.B{i}.p = S2.tstat.pval(i + 1);
                 Parameters.B{i}.df = S2.tstat.dfe;    
-                Parameters.AB{i}.pointEst = ab(i);
+                Parameters.AB{i}.PointEstFlag = ab(i);
             end
             Parameters.Bconst{i}.beta = S2.beta(1);
             Parameters.Bconst{i}.se = S2.tstat.se(1);
@@ -168,7 +172,7 @@ switch ModelNum
         rangeV = maxV - minV;
         stepV = rangeV/(Nsteps -1);
         probeV = [0 minV:stepV:maxV];
-        ParameterToBS = zeros(Nmed,Nsteps+1);
+        ParameterToBS.values = zeros(Nmed,Nsteps+1);
         % covariates
         if size(data.COV,2) > 0 
             % test the interaction, if it is significant then probe the
@@ -180,7 +184,7 @@ switch ModelNum
                 a(j) = S1.beta(2);
             end
             S2 = subfnregstats(data.Y,[data.M (data.V) Interaction data.X data.COV]);
-            ParameterToBS(:,1) = a.*(S2.beta(2:Nmed+1));
+            ParameterToBS.values(:,1) = a.*(S2.beta(2:Nmed+1));
             % Check to see if the interaction effect is significantly large
             if S2.tstat.pval(4) < 0.05
                 for k = 2:Nsteps + 1
@@ -191,7 +195,7 @@ switch ModelNum
                         a(j) = S1.beta(2);
                     end
                     S2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
-                    ParameterToBS(:,k) = a.*(S2.beta(2:Nmed+1));
+                    ParameterToBS.values(:,k) = a.*(S2.beta(2:Nmed+1));
                 end
             end
         else % no covariates
@@ -220,7 +224,7 @@ switch ModelNum
         end
         
         Parameters = {};
-        if PointEst
+        if PointEstFlag
             S1 = {};
             if size(data.COV,2) > 0 % covariates
                 Interaction = zeros(Ndata,Nmed);
@@ -282,7 +286,7 @@ switch ModelNum
                 Parameters.Int{i}.df = S2.tstat.dfe;
                 
                 for k = 1:length(probeV)
-                    Parameters.AB{k,i}.pointEst = ParameterToBS(i,k);
+                    Parameters.AB{k,i}.PointEstFlag = ParameterToBS(i,k);
                     Parameters.AB{k,i}.V = probeV(k);
                 end
             end

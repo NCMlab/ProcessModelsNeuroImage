@@ -1,5 +1,6 @@
 function Parameters = subfnVoxelWiseProcessBatch(InData)
-addpath /share/data/users/js2746_Jason/CogReserveAnalyses/FinalCode
+addpath /share/data/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
+
 % OpenPoolFlag = 1;
 % try
 %     NumOpen = matlabpool('size');
@@ -55,7 +56,7 @@ for i = 1:Nvoxels
         case '14'
             % Calculate the minimum critical t-value for use with the
             % Johnson-Neyman technique.
-            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
+            temp.tcrit = tinv(1 - max(Thresholds),Nsub - 4);
             M = data.M(:,:,i);
             V = data.V(:,:,i);
             if sum(isnan(M)) == 0; Mflag = 1;end
@@ -65,7 +66,7 @@ for i = 1:Nvoxels
         temp.M = M;
         temp.V = V;
 
-        [pointEst Parameters{i}] = subfnProcessModelFit(temp,ModelNum,1);
+        [pointEst Parameters{i}] = subfnProcessModelFit(temp,1);
         
         % have the option of turning the boot strapping off.
         % turn off boot strapping on the interaction effect if the
@@ -73,15 +74,19 @@ for i = 1:Nvoxels
         %
         if Nboot %& Parameters{i}.JohnsonNeyman ~= -99 
             % calculate the boot strap estimates
-            [bstat] = subfnBootStrp(temp,Nboot,ModelNum);
+            [bstat] = subfnBootStrp(temp,Nboot);
             [nboot Nmed NParameters] = size(bstat);
             % Find the number of non-zero bstat values
             if length(find(squeeze(bstat(1,1,:)))) == 1
                 NParameters = 1;
             end
             
-            % calculate the BCAlimits
-            [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst,ModelNum,Thresholds);
+            % calculate the Confidence intervals on the parameters that
+            % need to be bootstrapped.
+            [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst,Thresholds);
+            % Then fill in the appropriate Parameters with the confidence
+            % intervals.
+            
             for j = 1:Nmed
                 for k = 1:NParameters
                     % there is an issue here with the

@@ -1,8 +1,8 @@
-function [bstat] = subfnBootStrp(data,Nboot,ModelNum)
+function [bstat] = subfnBootStrp(data,Nboot)
 % run once to find our how many values get bootstrapped
-[ParameterToBS] = subfnProcessModelFit(data,ModelNum,0);
+[ParameterToBS] = subfnProcessModelFit(data,0);
 % find the size of the different variables
-[Nmed NParameters] = size(ParameterToBS);
+[Nmed NParameters] = size(ParameterToBS.values);
 
 N = length(data.Y);
 NCov = size(data.COV,2);
@@ -19,7 +19,7 @@ else
     NGr2 = [];
 end
 % start the bootstrap loop using parallel processing
-parfor i = 1:Nboot
+for i = 1:Nboot
     % this is needed for the parallel processing to work
     temp = data;
     % create the resamples
@@ -43,6 +43,7 @@ parfor i = 1:Nboot
     for j = 1:NCov
         temp.COV(:,j) = temp.COV(Samp,j);
     end
-    bstat(i,:,:) = subfnProcessModelFit(temp,ModelNum,0);
+    tParam = subfnProcessModelFit(temp,0);
+    bstat(i,:,:) = tParam.values;
 end
 

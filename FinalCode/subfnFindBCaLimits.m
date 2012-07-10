@@ -1,4 +1,4 @@
-function [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst,alpha,data,ModelNum)
+function [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst,alpha,data)
 [N Nmed] = size(data.M);
 NParameters = size(bstat,3);
 NCov = size(data.COV,2);
@@ -16,6 +16,10 @@ EMPTYtemp.W = [];
 EMPTYtemp.Q = [];
 EMPTYtemp.R = [];
 EMPTYtemp.COV = [];
+EMPTYtemp.ModelNum = data.ModelNum;
+if isfield(data,'ProbeMod')
+    EMPTYtemp.ProbeMod = data.ProbeMod;
+end
 Alpha1 = zeros(Nmed,NParameters);
 Alpha2 = zeros(Nmed,NParameters);
 for i = 1:N
@@ -35,13 +39,15 @@ for i = 1:N
     for j = 1:NCov
         temp.COV(:,j) = data.COV(logical(Values),j);
     end
-    theta(i,:,:) = subfnProcessModelFit(temp,ModelNum,0);
+    tParam = subfnProcessModelFit(temp,0);
+    theta(i,:,:) = tParam.values;
+    
 end
 
 % 
 for k = 1:NParameters
     for j = 1:Nmed
-        zh0 = norminv(length(find(bstat(:,j,k) < pointEst(j,k)))/nboot);
+        zh0 = norminv(length(find(bstat(:,j,k) < pointEst.values(j,k)))/nboot);
         zA = norminv(alpha/2);
         z1mA = norminv(1 - alpha/2);
         ThetaDiff = (sum(theta(:,j))/N) - theta(:,j);

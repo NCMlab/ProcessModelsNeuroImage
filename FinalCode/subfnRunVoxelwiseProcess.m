@@ -1,4 +1,5 @@
-function subfnRunVoxelwiseProcess(AllData,AnalysisParameters);
+function subfnRunVoxelwiseProcess(AllData,AnalysisParameters)
+addpath /share/data/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 
 BaseDir = AnalysisParameters.BaseDir;
 Nsub = AnalysisParameters.Nsub;
@@ -56,7 +57,7 @@ for i = 1:NJobSplit - 1
     fprintf(fid,'cd %s\n',BaseDir);
     fprintf(fid,'/usr/local/matlab/bin/matlab -nodisplay << EOF\n');
     fprintf(fid,'%s\n','addpath /share/data/data5/spm8');
-    fprintf(fid,'%s\n','addpath /share/data/users/js2746_Jason/CogReserveAnalyses/FinalCode');
+    fprintf(fid,'%s\n','addpath /share/data/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode');
     fprintf(fid,'%s\n',['subfnVoxelWiseProcessBatch(''' InDataPath ''');']);
     fprintf(fid,'exit\n');
     fprintf(fid,'EOF\n');
@@ -86,7 +87,7 @@ fprintf(fid,'#PBS -j oe\n');
 fprintf(fid,'cd %s\n',BaseDir);
 fprintf(fid,'/usr/local/matlab/bin/matlab -nodisplay << EOF\n');
 fprintf(fid,'%s\n','addpath /share/data/data5/spm8');
-fprintf(fid,'%s\n','addpath /share/data/users/js2746_Jason/CogReserveAnalyses/FinalCode');
+fprintf(fid,'%s\n','addpath /share/data/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode');
 fprintf(fid,'%s\n',['subfnVoxelWiseProcessBatch(''' InDataPath ''');']);
 fprintf(fid,'exit\n');
 fprintf(fid,'EOF\n');
