@@ -10,7 +10,7 @@ PERci = cell(Nmed,NParameters);
 
 
 for i = 1:length(Thresholds)
-    [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst,Thresholds(i),data);
+    [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst.values,Thresholds(i),data);
     temp = num2str(Thresholds(i));
     if ~isnan(Alpha1) | ~isnan(Alpha2)
         for k = 1:NParameters

@@ -34,11 +34,12 @@ elseif isstruct(InData)
 end
 
 for i = 1:Nvoxels
-    % check to make sure there is data for all subjects at this voxel
+    % check to make sure there is data for all subjects at this voxel. 
     Mflag = 0;
     Vflag = 0;
     switch ModelNum
         case '1'
+            % Set the probeMode flag to TRUE for the first call 
             temp.ProbeMod = 0;
             M = data.M(:,:,i);
             V = [];
@@ -62,12 +63,22 @@ for i = 1:Nvoxels
             if sum(isnan(M)) == 0; Mflag = 1;end
             if sum(isnan(V)) == 0; Vflag = 1;end
     end
+    
     if Mflag & Vflag
         temp.M = M;
         temp.V = V;
-
+        % it initially does not probe the moderator
         [pointEst Parameters{i}] = subfnProcessModelFit(temp,1);
-        
+        % here we check to see if the interaction is significant.
+        % if so then probe the mod for all bootstraps
+        if isfield(Parameters{i},'Int')
+            if Parameters{i}.Int{1}.p < max(data.Thresholds)
+                temp.ProbeMod = 1;
+                % since the interaction is significant then we want to probe
+                % the moderator by re-running the regression
+               [pointEst Parameters{i}] = subfnProcessModelFit(temp,1);
+            end
+        end
         % have the option of turning the boot strapping off.
         % turn off boot strapping on the interaction effect if the
         % Johnson-Neyman shows no range of significant interactions.
@@ -86,24 +97,45 @@ for i = 1:Nvoxels
             [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst,Thresholds);
             % Then fill in the appropriate Parameters with the confidence
             % intervals.
-            
+            str = [pointEst.names ' = {};'];
+            eval(str)
+
             for j = 1:Nmed
+                temp2 = {};
                 for k = 1:NParameters
-                    % there is an issue here with the
-                    %Parameters{i}.AB{k,j}.pointEst = pointEst(k);
-                    Parameters{i}.AB{k,j}.BCaci = BCaci{j,k};
-                    Parameters{i}.AB{k,j}.PERci = PERci{j,k};
-                    Parameters{i}.AB{k,j}.se = bootSE(bstat(:,j),Nsub);
+%                     str = sprintf('temp2 = Parameters{i}.%s{j};',pointEst.names);
+%                     eval(str);
+                    str = sprintf('temp2=setfield(temp2,''BCaci'',BCaci{%d,%d});',j,k);
+                    eval(str);
+                    str = sprintf('temp2=setfield(temp2,''PERci'',PERci{%d,%d});',j,k);
+                    eval(str);
+                    str = sprintf('temp2=setfield(temp2,''bootSE'',bootSE(bstat(:,%d,%d),Nsub));',j,k);
+                    eval(str);
+                    str = sprintf('temp2=setfield(temp2,''pointEst'',pointEst.values(k));');
+                    eval(str);
+                    if isfield(pointEst,'probeValues')
+                        str = sprintf('temp2=setfield(temp2,''probeValue'',pointEst.probeValues(k));');
+                        eval(str);
+                    end
+                    str = sprintf('%s{%d,%d}=temp2;',pointEst.names,k,j);
+                    eval(str);
                 end
-                Parameters{i}.Nboot = Nboot;
-                Parameters{i}.VoxelIndex = data.Indices(i);
+                   
+                str = sprintf('Parameters{i}.%s{j} = %s;',pointEst.names,pointEst.names);
+                eval(str);
             end
+            
         else
             for j = 1:size(pointEst,1);
                 for k = 1:size(pointEst,2);
-                    Parameters{i}.AB{k,j}.BCaci = [];
-                    Parameters{i}.AB{k,j}.PERci = [];
-                    Parameters{i}.AB{k,j}.se = [];
+                    str = sprintf('temp2=setfield(temp2,''BCaci'',[]);');
+                    eval(str);
+                    str = sprintf('temp2=setfield(temp2,''PERci'',[]);');
+                    eval(str);
+                    str = sprintf('temp2=setfield(temp2,''bootSE'',[]);');
+                    eval(str);
+                    str = sprintf('%s{%d,%d}=temp2;',pointEst.names,k,j);
+                    eval(str);
                 end
             end
         end

@@ -47,7 +47,7 @@ end
 % 
 for k = 1:NParameters
     for j = 1:Nmed
-        zh0 = norminv(length(find(bstat(:,j,k) < pointEst.values(j,k)))/nboot);
+        zh0 = norminv(length(find(bstat(:,j,k) < pointEst(j,k)))/nboot);
         zA = norminv(alpha/2);
         z1mA = norminv(1 - alpha/2);
         ThetaDiff = (sum(theta(:,j))/N) - theta(:,j);
