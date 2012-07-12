@@ -40,19 +40,25 @@ switch data.ModelNum
             stepM = rangeM/(Nsteps -1);
             probeM = [0 minM:stepM:maxM];
             for j = 2:Nsteps + 1
-                temp = regress(data.Y,[data.X (data.M-probeM(j))  (data.M-probeM(j)).*data.X data.COV ones(Ndata,1)]);
-                ParameterToBS.values(1,j) = temp(1);
+                temp = subfnregress(data.Y,[data.X (data.M-probeM(j))  (data.M-probeM(j)).*data.X data.COV]);
+                ParameterToBS.values(1,j) = temp(2);
                 ParameterToBS.probeValues(1,j) = probeM(j);
             end
-            
         else
             ParameterToBS.values = S.beta(2);
             ParameterToBS.probeValues = 0;
         end
         % Now all parameters of interest for the model are calculated.
         if PointEstFlag
+            % also fit the direct model without the modulator in it
+            S1 = subfnregstats(data.Y,[data.X data.M data.COV]);
+            % Find the R2 increase due to the interaction
+            diffS = subfnCalculateModelFitDiff(S,S1);
             % Use the values from the calculations above
             Parameters = {};
+            Paramaters.DirectEffconst = subfnSetParameters('DirectEffconst', S1, 1);
+            Paramaters.DirectEff = subfnSetParameters('DirectEff', S1, 2);
+            Parameters.DiffModel = subfnSetModelParameters(diffS);
             Parameters.const = subfnSetParameters('const', S, 1);
             Parameters.M = subfnSetParameters('M', S, 3);
             Parameters.X = subfnSetParameters('X', S, 2);
@@ -72,23 +78,23 @@ switch data.ModelNum
         if size(data.COV,2) > 0 
             for i = 1:Nmed
                 % A branch model
-                temp1 = regress(data.M(:,i),[data.X data.COV ones(Ndata,1)]);
-                a(i) = temp1(1);
+                temp1 = subfnregress(data.M(:,i),[data.X data.COV]);
+                a(i) = temp1(2);
             end
             % B branch model
-            temp2 = regress(data.Y,[data.M data.X data.COV ones(Ndata,1)]);
-            b = temp2(1:Nmed);
+            temp2 = subfnregress(data.Y,[data.M data.X data.COV]);
+            b = temp2(2:Nmed+1);
         % no covariates    
         else 
             
             for i = 1:Nmed
                 % A branch model
-                temp1 = regress(data.M(:,i),[data.X ones(Ndata,1)]);
-                a(i) = temp1(1);
+                temp1 = subfnregress(data.M(:,i),[data.X]);
+                a(i) = temp1(2);
             end
-            temp2 = regress(data.Y,[data.M data.X ones(Ndata,1)]);
+            temp2 = subfnregress(data.Y,[data.M data.X]);
              % B branch model
-            b = temp2(1:Nmed);
+            b = temp2(2:Nmed+1);
         end
         % the indirect effect which will be bootstrapped
         ab = a.*b;
@@ -150,113 +156,68 @@ switch data.ModelNum
         Nmed = size(data.M,2);
         Ndata = size(data.Y,1);
         a = zeros(Nmed,1);
-        % Find the values of the moderator for probing
-        % what needs to be bootstrapped here is the point estimate but also
-        % 20 values of the moderator and the J-N values.
-        
-        minV = min(data.V);
-        maxV = max(data.V);
-        rangeV = maxV - minV;
-        stepV = rangeV/(Nsteps -1);
-        probeV = [0 minV:stepV:maxV];
-        ParameterToBS.values = zeros(Nmed,Nsteps+1);
-        ParameterToBS.names = 'AB';
-        % covariates
-%         if size(data.COV,2) > 0 
-            % test the interaction, if it is significant then probe the
-            % interaction.
-            Interaction = zeros(Ndata,Nmed);
-            for j = 1:Nmed
-                Interaction(:,j) = data.M(:,j).*(data.V);
-                S1 = subfnregstats(data.M(:,j),[data.X data.COV]);
-                a(j) = S1.beta(2);
-            end
-            S2 = subfnregstats(data.Y,[data.M (data.V) Interaction data.X data.COV]);
-            ParameterToBS.values(:,1) = a.*(S2.beta(2:Nmed+1));
-            % Check to see if the interaction effect is significantly large
-            if S2.tstat.pval(4) < 0.05
-                for k = 2:Nsteps + 1
-                    Interaction = zeros(Ndata,Nmed);
-                    for j = 1:Nmed
-                        Interaction(:,j) = data.M(:,j).*(data.V - probeV(k));
-                        S1 = subfnregstats(data.M(:,j),[data.X data.COV]);
-                        a(j) = S1.beta(2);
-                    end
-                    S2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
-                    ParameterToBS.values(:,k) = a.*(S2.beta(2:Nmed+1));
-                end
-%             end
-%         else % no covariates
-%             Interaction = zeros(Ndata,Nmed);
-%             for j = 1:Nmed
-%                 Interaction(:,j) = data.M(:,j).*(data.V);
-%                 S1 = subfnregstats(data.M(:,j),[data.X]);
-%                 a(j) = S1.beta(2);
-%             end
-%             S2 = subfnregstats(data.Y,[data.M (data.V) Interaction data.X]);
-%             ParameterToBS.values(:,1) = a.*(S2.beta(2:Nmed+1));
-%             % Check to see if the interaction effect is significantly large
-%             
-%             if S2.tstat.pval(4) < 0.05
-%                 for k = 2:Nsteps + 1
-%                     Interaction = zeros(Ndata,Nmed);
-%                     for j = 1:Nmed
-%                         Interaction(:,j) = data.M(:,j).*(data.V - probeV(k));
-%                         S1 = subfnregstats(data.M(:,j),[data.X]);
-%                         a(j) = S1.beta(2);
-%                     end
-%                     S2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X]);
-%                     ParameterToBS.values(:,k) = a.*(S2.beta(2:Nmed+1));
-%                 end
-%             end
+        ParameterToBS = struct('names','CondAB','values',zeros(1,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1));
+        % First, check to see if the interaction effect is significant or
+        % not.
+        Interaction = zeros(Ndata,Nmed);
+        S1 = {};
+        for j = 1:Nmed
+            Interaction(:,j) = data.M(:,j).*(data.V);
+            S1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
+            a(j) = S1{j}.beta(2);
         end
-        
+        S = subfnregstats(data.Y,[data.M data.V  Interaction data.X data.COV]);
+        if data.ProbeMod
+            ParameterToBS.values(1,1) = a.*(S.beta(2:Nmed+1));
+            minV = min(data.V);
+            maxV = max(data.V);
+            rangeV = maxV - minV;
+            stepV = rangeV/(Nsteps -1);
+            probeV = [0 minV:stepV:maxV];
+            for k = 2:Nsteps + 1
+                Interaction = zeros(Ndata,Nmed);
+                for j = 1:Nmed
+                    Interaction(:,j) = data.M(:,j).*(data.V - probeV(k));
+                    S1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
+                    a(j) = S1{j}.beta(2);
+                end
+                 % B branch model
+                S2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
+                ParameterToBS.values(:,k) = a.*(S2.beta(2:Nmed+1));
+            end
+            ParameterToBS.probeValues = probeV;
+        else
+            ParameterToBS.values = a.*(S.beta(2:Nmed+1));
+            ParameterToBS.probeValues = 0;
+        end
         Parameters = {};
         if PointEstFlag
-            S1 = {};
-            if size(data.COV,2) > 0 % covariates
-                Interaction = zeros(Ndata,Nmed);
-                for j = 1:Nmed
-                    Interaction(:,j) = data.M(:,j).*(data.V);
-                    % A branch model
-                    S1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
-                end
-                % B branch model
-                S2 = subfnregstats(data.Y,[data.M (data.V) Interaction data.X data.COV]);
-                % C branch model
-                S3 = subfnregstats(data.Y,[data.X data.COV]);
-            else % no covariates
-                Interaction = zeros(Ndata,Nmed);
-                for j = 1:Nmed
-                    Interaction(:,j) = data.M(:,j).*(data.V);
-                    % A branch model
-                    S1{j} = subfnregstats(data.M(:,j),[data.X]);
-                end
-                % B branch model
-                S2 = subfnregstats(data.Y,[data.M (data.V) Interaction data.X]);
-                % C branch model
-                S3 = subfnregstats(data.Y,[data.X]);
-            end
+            S3 = subfnregstats(data.Y,[data.X data.COV]);
+            noIntS = subfnregstats(data.Y,[data.M data.V  data.X data.COV]);
+            diffS = subfnCalculateModelFitDiff(S,noIntS);
+            Parameters.EffOfInt = subfnSetModelParameters(diffS);
+            Parameters.CModel = subfnSetModelParameters(S3);
+            Parameters.BModel = subfnSetModelParameters(S);
             % calculate the Johnson-Neyman value
-            JNvalue = subfnJohnsonNeyman(S2.beta(2),S2.covb(2,2),S2.beta(4),S2.covb(4,4),S2.covb(2,4),data.tcrit);
-
+            JNvalue = subfnJohnsonNeyman(S.beta(2),S.covb(2,2),S.beta(4),S.covb(4,4),S.covb(2,4),data.tcrit);
             Parameters.JohnsonNeyman = JNvalue;
             for i = 1:Nmed
+                Parameters.AModel = subfnSetModelParameters(S1{i});
                 Parameters.A{i} = subfnSetParameters('A', S1{i},2);
                 Parameters.Aconst{i} = subfnSetParameters('Aconst', S1{i},1);
-                Parameters.B{i} = subfnSetParameters('Aconst', S2,i + 1);
-                Parameters.Int{i} = subfnSetParameters('Int',S2,1 + Nmed + 1 + i);
+                Parameters.B{i} = subfnSetParameters('B', S,i + 1);
+                Parameters.Int{i} = subfnSetParameters('Int',S,1 + Nmed + 1 + i);
                 
-                for k = 1:length(probeV)
-                    Parameters.AB{k,i}.PointEstFlag = ParameterToBS.values(i,k);
-                    Parameters.AB{k,i}.V = probeV(k);
-                end
+%                 for k = 1:length(probeV)
+%                     Parameters.AB{k,i}.PointEstFlag = ParameterToBS.values(i,k);
+%                     Parameters.AB{k,i}.V = probeV(k);
+%                 end
             end
-            Parameters.Bconst = subfnSetParameters('Bconst',S2,1);
-            Parameters.V = subfnSetParameters('V',S2,Nmed+2);
+            Parameters.Bconst = subfnSetParameters('Bconst',S,1);
+            Parameters.V = subfnSetParameters('V',S,Nmed+2);
             Parameters.C = subfnSetParameters('C',S3,2);
             Parameters.Cconst = subfnSetParameters('Cconst',S3,1);
-            Parameters.CP = subfnSetParameters('Cconst',S2,1+Nmed+1+Nmed+1);
+            Parameters.CP = subfnSetParameters('Cconst',S,1+Nmed+1+Nmed+1);
             
         end
             

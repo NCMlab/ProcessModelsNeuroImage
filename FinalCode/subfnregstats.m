@@ -43,6 +43,5 @@ S.fstat.dfr = p - 1;
 S.fstat.ssr = ssr;
 S.fstat.f = (ssr/S.fstat.dfr)/(sse/dfe);
 S.fstat.pval = fcdf(1/S.fstat.f, dfe, S.fstat.dfr);
-%fcdf(1./x,df2,df1)
-
+S.AIC =  nobs*log(sum(residuals.^2)/nobs) + 2*p*(p+1)/(dfe-1) + 2*p;
 

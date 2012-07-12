@@ -37,10 +37,11 @@ for i = 1:Nvoxels
     % check to make sure there is data for all subjects at this voxel. 
     Mflag = 0;
     Vflag = 0;
+    temp.ProbeMod = 0;
     switch ModelNum
         case '1'
             % Set the probeMode flag to TRUE for the first call 
-            temp.ProbeMod = 0;
+           
             M = data.M(:,:,i);
             V = [];
             if sum(isnan(M)) == 0
@@ -120,7 +121,6 @@ for i = 1:Nvoxels
                     str = sprintf('%s{%d,%d}=temp2;',pointEst.names,k,j);
                     eval(str);
                 end
-                   
                 str = sprintf('Parameters{i}.%s{j} = %s;',pointEst.names,pointEst.names);
                 eval(str);
             end
