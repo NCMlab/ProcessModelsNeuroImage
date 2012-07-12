@@ -16,6 +16,7 @@ EMPTYtemp.W = [];
 EMPTYtemp.Q = [];
 EMPTYtemp.R = [];
 EMPTYtemp.COV = [];
+EMPTYtemp.Thresholds = data.Thresholds;
 EMPTYtemp.ModelNum = data.ModelNum;
 if isfield(data,'ProbeMod')
     EMPTYtemp.ProbeMod = data.ProbeMod;

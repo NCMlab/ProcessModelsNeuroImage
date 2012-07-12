@@ -13,5 +13,7 @@ str = ['Model = setfield(Model,''df2'', ' num2str(statsStruct.fstat.dfe) ');'];
 eval(str)
 str = ['Model = setfield(Model,''p'', ' num2str(statsStruct.fstat.pval) ');'];
 eval(str)
+str = ['Model = setfield(Model,''AIC'', ' num2str(statsStruct.AIC) ');'];
+eval(str)
 
 
