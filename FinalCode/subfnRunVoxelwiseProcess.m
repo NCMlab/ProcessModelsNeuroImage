@@ -35,13 +35,12 @@ for i = 1:NJobSplit - 1
     
     VoxelForThisJob =[(i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob];
     data = AllData;
-    switch ModelNum
-        case '4'
-            data.M = AllData.M(:,:,VoxelForThisJob);
-        case '14'
-            data.M = AllData.M(:,:,VoxelForThisJob);
-            data.V = AllData.V(:,:,VoxelForThisJob);
-    end
+    data.ModelNum = ModelNum;
+    data.Thresholds = Thresholds;
+    if ~isempty(AllData.M);data.M = AllData.M(:,:,VoxelForThisJob);end
+    if ~isempty(AllData.V);data.V = AllData.V(:,:,VoxelForThisJob);end
+    if ~isempty(AllData.W);data.W = AllData.W(:,:,VoxelForThisJob);end
+    
     data.Indices = AllData.Indices(VoxelForThisJob);
     %Parameters = subfnVoxelWiseProcessBatch(temp,ModelNum,Nboot,Thresholds);
     InTag = sprintf('data_%04d',i);

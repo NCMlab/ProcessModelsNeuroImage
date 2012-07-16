@@ -10,8 +10,12 @@ Parameters = {};
 Nsteps = 11;
 switch data.ModelNum
     case '1'
-        ParameterToBS = struct('names','CondMod','values',zeros(1,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1));
-        Ndata = size(data.Y,1);
+        [Ndata Nmed] = size(data.M);
+        NameStruct = cell(Nmed,1);
+        for j = 1:Nmed 
+            NameStruct{j} = sprintf('CondMod%d',j);
+        end
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
         % the code below works if there is a covariate or not
         
         % whether or not to run the regression at multiple values of the moderator

@@ -9,7 +9,7 @@ addpath /share/data/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 %         Str = ['matlabpool open ' num2str(MaxPool - NumOpen)];
 %         eval(Str)
 %     end
-% catch 
+% catch
 %     OpenPoolFlag = 0;
 % end
 %
@@ -22,7 +22,7 @@ if ischar(InData)
     [Nsub Nmed Nvoxels] = size(data.M);
     temp = data;
     Parameters = cell(Nvoxels,1);
-% if a structure is passed then just operate on this one data structure
+    % if a structure is passed then just operate on this one data structure
 elseif isstruct(InData)
     temp = InData;
     data = temp;
@@ -34,17 +34,17 @@ elseif isstruct(InData)
 end
 
 for i = 1:Nvoxels
-    % check to make sure there is data for all subjects at this voxel. 
+    % check to make sure there is data for all subjects at this voxel.
     Mflag = 0;
     Vflag = 0;
     Wflag = 0;
-% added this flag so that the model check cases do the checking and then
-% they set this flag
+    % added this flag so that the model check cases do the checking and then
+    % they set this flag
     AllDataFlag = 0;
     temp.ProbeMod = 0;
     switch ModelNum
         case '1'
-            % Set the probeMode flag to TRUE for the first call 
+            % Set the probeMode flag to TRUE for the first call
             if size(data.M,2) ~= 1
                 errordlg('Only a single variable can be used as a moderator for Model 1');
             end
@@ -52,11 +52,11 @@ for i = 1:Nvoxels
             if sum(isnan(temp.M)) == 0
                 AllDataFlag = 1;
             end
-
+            
         case '4'
             
             temp.M = data.M(:,:,i);
-            if sum(isnan(temp.M)) == 0; 
+            if sum(isnan(temp.M)) == 0;
                 AllDataFlag = 1;
             end
             
@@ -68,7 +68,7 @@ for i = 1:Nvoxels
             temp.W = data.W(:,:,i);
             if sum(isnan(temp.M)) == 0; Mflag = 1;end
             if sum(isnan(temp.W)) == 0; Wflag = 1;end
-            if Mflag && Wflag 
+            if Mflag && Wflag
                 AllDataFlag = 1;
             end
         case '14'
@@ -82,7 +82,7 @@ for i = 1:Nvoxels
             temp.V = data.V(:,:,i);
             if sum(isnan(temp.M)) == 0; Mflag = 1;end
             if sum(isnan(temp.V)) == 0; Vflag = 1;end
-            if Mflag && Vflag 
+            if Mflag && Vflag
                 AllDataFlag = 1;
             end
     end
@@ -93,17 +93,17 @@ for i = 1:Nvoxels
         % here we check to see if the interaction is significant.
         % if so then probe the mod for all bootstraps
         if pointEst.probeMod
-                temp.ProbeMod = 1;
-                % since the interaction is significant then we want to probe
-                % the moderator by re-running the regression
-               [pointEst Parameters{i}] = subfnProcessModelFit(temp,1);
+            temp.ProbeMod = 1;
+            % since the interaction is significant then we want to probe
+            % the moderator by re-running the regression
+            [pointEst Parameters{i}] = subfnProcessModelFit(temp,1);
             
         end
         % have the option of turning the boot strapping off.
         % turn off boot strapping on the interaction effect if the
         % Johnson-Neyman shows no range of significant interactions.
         %
-        if Nboot %& Parameters{i}.JohnsonNeyman ~= -99 
+        if Nboot %& Parameters{i}.JohnsonNeyman ~= -99
             % calculate the boot strap estimates
             [bstat] = subfnBootStrp(temp,Nboot);
             [nboot Nmed NParameters] = size(bstat);
@@ -117,14 +117,14 @@ for i = 1:Nvoxels
             [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst,Thresholds);
             % Then fill in the appropriate Parameters with the confidence
             % intervals.
-%            str = [pointEst.names ' = {};'];
-%            eval(str)
-
+            %            str = [pointEst.names ' = {};'];
+            %            eval(str)
+            
             for j = 1:Nmed
                 temp2 = {};
                 for k = 1:NParameters
-%                     str = sprintf('temp2 = Parameters{i}.%s{j};',pointEst.names);
-%                     eval(str);
+                    %                     str = sprintf('temp2 = Parameters{i}.%s{j};',pointEst.names);
+                    %                     eval(str);
                     str = sprintf('temp2=setfield(temp2,''BCaci'',BCaci{%d,%d});',j,k);
                     eval(str);
                     str = sprintf('temp2=setfield(temp2,''PERci'',PERci{%d,%d});',j,k);
@@ -168,5 +168,5 @@ if ischar(InData)
     fprintf(1,'Done!')
 end
 % if OpenPoolFlag
-%     matlabpool close 
+%     matlabpool close
 % end
