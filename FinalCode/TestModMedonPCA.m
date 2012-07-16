@@ -1,3 +1,14 @@
+% How to do mediation tests using PCAs?
+% We have to test the following models:
+% C = c*A
+% C = c'*A + b*(b1*PC1 + b2*PC2 + b3*PC3 + ...) + err
+% C = c'*A + (b*b1)*PC1 + (b*b2)*PC2 + (b*b3)*PC3 + ...) + err
+% Bhat = b1*PC1 + b2*PC2 + b3*PC3 + ...
+% Bhat = a*A
+% but Bhat is calculate daccounting for A; therefore, a will be zero.
+
+
+
 BaseDir = '/share/data/users/js2746_Jason/CogReserveAnalyses'
 addpath /share/data/users/ch629/New_Code/
 addpath /share/data/users/ch629/OrT_Module/
@@ -23,12 +34,12 @@ NSub = size(vars.ssf,1);
 %SSF = sRET_SSF(:,1:N_PC);
 %SSF = sPRO_SSF(:,1:N_PC);
 %SSF = iSTM_SSF(:,1:N_PC);
-SSF = [iSTM_SSF(:,1:6) iRET_SSF(:,1:6)];%  sPRO_SSF(:,1:5)];
+SSF = [sRET_SSF(:,1:N_PC)];%  sPRO_SSF(:,1:5)];
 Gr = [zeros(75,1); ones(37,1)];
 
 Y = sRT;
 M = SSF(:,1:N_PC);
-V = SSF(:,1:N_PC);
+%V = SSF(:,1:N_PC);
 X = Gr;
 
 STRAT = Gr;
@@ -104,38 +115,62 @@ end
 disp(' ')
 
 %
-%MEDlist = find(power_set(pre_sort_index(1),:));
-MEDlist = 1:pre_sort_index_sequential_PCs(1);
-MEDlist = 1:12;
+MEDlist = find(power_set(pre_sort_index(1),:));
+%MEDlist = 1:pre_sort_index_sequential_PCs(1);
+%MEDlist = 1:12;
 temp = data;
 temp.Nboot = 5000;
 temp.M = temp.M(:,MEDlist);
 
-[ParameterToBS ] = subfnProcessModelFit(temp,'4',1);
+[ParameterToBS ] = subfnProcessModelFit(temp,1);
 
-MedSSF = temp.M*ParameterToBS;
+MedSSF = temp.M*ParameterToBS.values;
+
 temp.M = MedSSF;
 Parameters = subfnVoxelWiseProcessBatch(temp);
-
+%%
+if ~isfield(data,'Xname')
+    data.Xname = 'X';
+end
+if ~isfield(data,'Yname')
+    data.Yname = 'Y';
+end
+if ~isfield(data,'Mname')
+    data.Mname = 'M';
+end
+if ~isfield(data,'Vname')
+    data.Vname = 'V';
+end
 
 fprintf(1,'======================================================\n');
-fprintf(1,'Indirect effect of X on Y via M\n');
-fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n','PC#','Effect','Boot SE','BootLLCI','BootUPCI');
-for i = 1:length(Parameters{1}.AB)
-    fprintf(1,'%10d\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n',i,Parameters{1}.AB{i}.pointEst,Parameters{1}.AB{i}.se,Parameters{1}.AB{i}.BCaci.alpha05(1),Parameters{1}.AB{i}.BCaci.alpha05(2));
-end
+fprintf(1,'Model = %s\n',data.ModelNum);
+fprintf(1,'\tY = %s\n',data.Yname);
+fprintf(1,'\tX = %s\n',data.Xname);
+fprintf(1,'\tM = %s\n',data.Mname);
 
-fprintf(1,'Effect of X on M\n');
-fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n','PC#','coeff','SE','t','p');
-for i = 1:length(Parameters{1}.AB)
-    fprintf(1,'%10d\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n',i,Parameters{1}.A{i}.beta,Parameters{1}.A{i}.se,Parameters{1}.A{i}.t,Parameters{1}.A{i}.p);
+fprintf(1,'Sample size = %d\n\n',length(data.X));
+
+fprintf(1,'Indirect effect of %s on %s via %s (a*b pathway)\n',data.Xname,data.Yname,data.Mname);
+fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n','PC#','Effect','Boot SE','BootLLCI','BootUPCI');
+fprintf(1,'%10d\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n',i,Parameters{1}.AB1{1}.pointEst,Parameters{1}.AB1{1}.bootSE,Parameters{1}.AB1{1}.BCaci.alpha05(1),Parameters{1}.AB1{1}.BCaci.alpha05(2));
+
+fprintf(1,'Total effect of %s on %s (c pathway)\n',data.Xname,data.Yname);
+fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n','factor','beta','SE','t','p');
+fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','const',Parameters{1}.Cconst.beta,Parameters{1}.Cconst.se,Parameters{1}.Cconst.t,Parameters{1}.Cconst.p);
+fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n',data.Xname,Parameters{1}.C.beta,Parameters{1}.C.se,Parameters{1}.C.t,Parameters{1}.C.p);
+
+fprintf(1,'\nEffect of %s on %s (a pathway)\n',data.Xname,data.Mname);
+fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n','factor','coeff','SE','t','p');
+for i = 1:length(Parameters{1}.AB1)
+    fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','Const',Parameters{1}.Aconst{i}.beta,Parameters{1}.Aconst{i}.se,Parameters{1}.Aconst{i}.t,Parameters{1}.Aconst{i}.p);
+    fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n',data.Xname,Parameters{1}.A{i}.beta,Parameters{1}.A{i}.se,Parameters{1}.A{i}.t,Parameters{1}.A{i}.p);
 end
    
-fprintf(1,'Effect of M on Y\n');
-fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n','PC#','coeff','SE','t','p');
-for i = 1:length(Parameters{1}.AB)
-    fprintf(1,'%10d\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n',i,Parameters{1}.B{i}.beta,Parameters{1}.B{i}.se,Parameters{1}.B{i}.t,Parameters{1}.B{i}.p);
-end
+fprintf(1,'\nEffect of %s on %s (b and c-prime effects)\n',data.Mname,data.Yname);
+fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n','factor','coeff','SE','t','p');
+fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','Const',Parameters{1}.Bconst.beta,Parameters{1}.Bconst.se,Parameters{1}.Bconst.t,Parameters{1}.Bconst.p);
+fprintf(1,'%10s%d\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n',data.Mname,i,Parameters{1}.B{i}.beta,Parameters{1}.B{i}.se,Parameters{1}.B{i}.t,Parameters{1}.B{i}.p);
+fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n',data.Xname,Parameters{1}.CP.beta,Parameters{1}.CP.se,Parameters{1}.CP.t,Parameters{1}.CP.p);
 
 
 %% Now find the moderator

@@ -73,12 +73,13 @@ switch data.ModelNum
         end
 
     case '4'
+        % DEVELOPMENT BRANCH
         % This is the simple mediation case which can handle covariates on
         % M and Y and multiple mediators, M.
         
         Nmed = size(data.M,2);
         Ndata = size(data.Y,1);
-         NameStruct = cell(3,1);
+         NameStruct = cell(Nmed,1);
         for j = 1:Nmed 
             NameStruct{j} = sprintf('AB%d',j);
         end
