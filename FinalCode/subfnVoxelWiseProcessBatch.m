@@ -32,7 +32,24 @@ elseif isstruct(InData)
     Nboot = temp.Nboot;
     Thresholds = temp.Thresholds;
 end
+% Check to see if the variables are named
+% If not use default names
+if ~isfield(data,'Xname'); data.Xname = 'X'; end
+if ~isfield(data,'Mname'); data.Xname = 'M'; end
+if ~isfield(data,'Yname'); data.Xname = 'Y'; end
+if ~isfield(data,'Vname'); data.Xname = 'V'; end
+if ~isfield(data,'Wname'); data.Xname = 'W'; end
+if ~isfield(data,'COVname') && ~isempty(data.COV)
+    NCov = size(data.COV,2);
+    NameCovStruct = cell(NCov,1);
+        for j = 1:NCov 
+            NameCovStruct{j} = sprintf('Cov%d',j);
+        end
+    data.COVname = NameCovStruct;    
+    temp.COVname = NameCovStruct;
+end
 
+%
 for i = 1:Nvoxels
     % check to make sure there is data for all subjects at this voxel. 
     Mflag = 0;
