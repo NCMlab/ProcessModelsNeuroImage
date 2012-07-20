@@ -121,7 +121,7 @@ switch data.ModelNum
         % the indirect effect which will be bootstrapped
         ab = a.*b;
         ParameterToBS.values = ab;
-        
+        ParameterToBS.k2 = subfnCalculateKappa2(data.X, data.M, data.Y, a, b);
         % Now all parameters of interest for the model are calculated.
         if PointEstFlag 
             S1 = cell(Nmed,1);
@@ -181,7 +181,7 @@ switch data.ModelNum
             end
             Parameters.JohnsonNeyman = -99;
             Parameters.Model3.Outcome = data.Yname;
-            
+
         end
         
     case '7'

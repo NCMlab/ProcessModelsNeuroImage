@@ -1,20 +1,8 @@
 function Parameters = subfnVoxelWiseProcessBatch(InData)
 
-
-% DEVLOPEMENT%
 addpath /share/data/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 
-% OpenPoolFlag = 1;
-% try
-%     NumOpen = matlabpool('size');
-%     MaxPool = 8;
-%     if NumOpen < MaxPool
-%         Str = ['matlabpool open ' num2str(MaxPool - NumOpen)];
-%         eval(Str)
-%     end
-% catch 
-%     OpenPoolFlag = 0;
-% end
+OpenPoolFlag = 0;
 %
 % Check to see if a path to data is given. If so then load it up
 if ischar(InData)
@@ -23,25 +11,42 @@ if ischar(InData)
     [PathName FileName] = fileparts(InData);
     tag = InData(end-3:end);
     [Nsub Nmed Nvoxels] = size(data.M);
-    temp = data;
     Parameters = cell(Nvoxels,1);
+    data.Thresholds = Thresholds;
+    data.ModelNum = ModelNum;
+    % If this voxelwise data than try to run in parallel
+    
+%     try
+%         NumOpen = matlabpool('size');
+%         MaxPool = 8;
+%         if NumOpen < MaxPool
+%             Str = ['matlabpool open ' num2str(MaxPool - NumOpen)];
+%             eval(Str)
+%         end
+%         OpenPoolFlag = 1;
+%     catch
+%         OpenPoolFlag = 0;
+%     end
+    
+    
 % if a structure is passed then just operate on this one data structure
 elseif isstruct(InData)
-    temp = InData;
-    data = temp;
-    [Nsub Nmed Nvoxels] = size(temp.M);
+    data = InData;
+    [Nsub Nmed Nvoxels] = size(data.M);
     Parameters = cell(Nvoxels,1);
-    ModelNum = temp.ModelNum;
-    Nboot = temp.Nboot;
-    Thresholds = temp.Thresholds;
+    Nboot = data.Nboot;
+    
 end
+data.ProbeMod = 0;
+
 % Check to see if the variables are named
 % If not use default names
 if ~isfield(data,'Xname'); data.Xname = 'X'; end
-if ~isfield(data,'Mname'); data.Xname = 'M'; end
-if ~isfield(data,'Yname'); data.Xname = 'Y'; end
-if ~isfield(data,'Vname'); data.Xname = 'V'; end
-if ~isfield(data,'Wname'); data.Xname = 'W'; end
+if ~isfield(data,'Mname'); data.Mname = 'M'; end
+if ~isfield(data,'Yname'); data.Yname = 'Y'; end
+if ~isfield(data,'Vname'); data.Vname = 'V'; end
+if ~isfield(data,'Wname'); data.Wname = 'W'; end
+temp = data;
 if ~isfield(data,'COVname') && ~isempty(data.COV)
     NCov = size(data.COV,2);
     NameCovStruct = cell(NCov,1);
@@ -61,8 +66,8 @@ for i = 1:Nvoxels
 % added this flag so that the model check cases do the checking and then
 % they set this flag
     AllDataFlag = 0;
-    temp.ProbeMod = 0;
-    switch ModelNum
+    
+    switch data.ModelNum
         case '1'
             % Set the probeMode flag to TRUE for the first call 
             if size(data.M,2) ~= 1
@@ -125,7 +130,22 @@ for i = 1:Nvoxels
         %
         if Nboot %& Parameters{i}.JohnsonNeyman ~= -99 
             % calculate the boot strap estimates
-            [bstat] = subfnBootStrp(temp,Nboot);
+            [bstat k2stat] = subfnBootStrp(temp,Nboot);
+            if k2stat(1) ~= 0
+                Sk2stat = sort(k2stat);
+                k2 = {};
+                k2.pointEst = pointEst.k2;
+                PERci = cell(length(temp.Thresholds));
+                
+                for k = 1:length(temp.Thresholds)
+                    t = num2str(temp.Thresholds(k));
+                    PERci{k} = setfield(PERci{k},['alpha' t(3:end)],...
+                        [Sk2stat(ceil(temp.Thresholds(1)/2*Nboot)) Sk2stat(ceil((1-temp.Thresholds(1)/2)*Nboot))]);
+                end
+                k2.PERci = PERci;
+                Parameters{i}.k2 = k2;
+            end
+            
             [nboot Nmed NParameters] = size(bstat);
             % Find the number of non-zero bstat values
             if length(find(squeeze(bstat(1,1,:)))) == 1
@@ -134,7 +154,7 @@ for i = 1:Nvoxels
             
             % calculate the Confidence intervals on the parameters that
             % need to be bootstrapped.
-            [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst,Thresholds);
+            [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst);
             % Then fill in the appropriate Parameters with the confidence
             % intervals.
 %            str = [pointEst.names ' = {};'];
@@ -187,6 +207,6 @@ if ischar(InData)
     eval(Str);
     fprintf(1,'Done!')
 end
-% if OpenPoolFlag
-%     matlabpool close 
-% end
+if OpenPoolFlag
+    matlabpool close 
+end

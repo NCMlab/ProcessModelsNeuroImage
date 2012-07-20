@@ -9,15 +9,15 @@ BCaci = cell(Nmed,NParameters);
 PERci = cell(Nmed,NParameters);
 
 
-for i = 1:length(Thresholds)
-    [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst.values,Thresholds(i),data);
-    temp = num2str(Thresholds(i));
+for i = 1:length(data.Thresholds)
+    [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst.values,data.Thresholds(i),data);
+    temp = num2str(data.Thresholds(i));
     if ~isnan(Alpha1) | ~isnan(Alpha2)
         for k = 1:NParameters
             for j = 1:Nmed
                 % [Sbstat(ceil(Alpha1(j,k)*nboot),j,k) Sbstat(ceil(Alpha2(j,k)*nboot),j,k)]
                 BCaci{j,k} = setfield(BCaci{j,k},['alpha' temp(3:end)],[Sbstat(ceil(Alpha1(j,k)*nboot),j,k) Sbstat(ceil(Alpha2(j,k)*nboot),j,k)]);
-                PERci{j,k} = setfield(PERci{j,k},['alpha' temp(3:end)],[Sbstat(ceil(Thresholds(i)/2*nboot),j,k) Sbstat(ceil((1-Thresholds(i)/2)*nboot),j,k)]);
+                PERci{j,k} = setfield(PERci{j,k},['alpha' temp(3:end)],[Sbstat(ceil(data.Thresholds(i)/2*nboot),j,k) Sbstat(ceil((1-data.Thresholds(i)/2)*nboot),j,k)]);
             end
         end
     else
