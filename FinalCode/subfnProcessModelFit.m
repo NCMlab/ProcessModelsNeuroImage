@@ -19,7 +19,7 @@ switch data.ModelNum
         % First, check to see if the interaction effect is significant or
         % not.
         Model1 = subfnregstats(data.Y,[data.X data.M (data.M).*data.X data.COV]);
-        % When this program is called during boot strapping it needs to
+        % When this program is called duk2ring boot strapping it needs to
         % know whether or not to probe the interaction.
         % It should only check to see if the interaction is significant for
         % when the point estimate is being tested and not for any boot

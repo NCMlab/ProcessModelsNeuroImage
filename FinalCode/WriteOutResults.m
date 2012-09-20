@@ -28,3 +28,11 @@ else
 end
 
 
+
+
+for i = 1:length(AllParameters)
+    if ~isempty(AllParameters{i})
+        i
+        break
+    end
+end

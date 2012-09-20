@@ -12,8 +12,9 @@ switch ModelNum
             count = count + 1;
         end
         Nvoxels = length(AllParameters);
-        Nmed = size(AllParameters{count}.AB,2);
-        Thresholds = fieldnames(AllParameters{count}.AB{1}.BCaci);
+        Nmed = AnalysisParameters.Nmed
+
+        Thresholds = AnalysisParameters.Thresholds;
         Nthr = length(Thresholds);
         VoxelIndices = zeros(Nvoxels,1);
         ImageVoxelIndices = zeros(Nvoxels,1);
@@ -23,68 +24,95 @@ switch ModelNum
         for j = 1:Nmed
             OutData{index}.name = ['AeffMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['A{' num2str(j) '}.beta'];
+            %OutData{index}.field = ['A{' num2str(j) '}.beta'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X.beta'];
             index = index + 1;
+
             OutData{index}.name = ['AtMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['A{' num2str(j) '}.t'];
+            %OutData{index}.field = ['A{' num2str(j) '}.t'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X.t'];
             index = index + 1;
+            
             OutData{index}.name = ['ApMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['A{' num2str(j) '}.p'];
+            %OutData{index}.field = ['A{' num2str(j) '}.p'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X.p'];
             index = index + 1;
+            
             OutData{index}.name = ['BeffMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['B{' num2str(j) '}.beta'];
+            %OutData{index}.field = ['B{' num2str(j) '}.beta'];
+            OutData{index}.field = ['Model2.M' num2str(j) '.beta'];
             index = index + 1;
+            
             OutData{index}.name = ['BtMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['B{' num2str(j) '}.t'];
+            %OutData{index}.field = ['B{' num2str(j) '}.t'];
+            OutData{index}.field = ['Model2.M' num2str(j) '.t'];
             index = index + 1;
+            
             OutData{index}.name = ['BpMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['B{' num2str(j) '}.p'];
+            %OutData{index}.field = ['B{' num2str(j) '}.p'];
+            OutData{index}.field = ['Model2.M' num2str(j) '.p'];
             index = index + 1;
+            
             OutData{index}.name = ['ABeffMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['AB{' num2str(j) '}.pointEst'];
+            %OutData{index}.field = ['AB{' num2str(j) '}.pointEst'];
+            OutData{index}.field =  ['AB1{' num2str(j) '}.pointEst'];
             index = index + 1;
+            
             for i = 1:Nthr
-                OutData{index}.name = ['ABMed' num2str(j) 'sign_' Thresholds{i}];
+                OutData{index}.name = ['ABMed' num2str(j) 'sign_' num2str(Thresholds(i))];
                 OutData{index}.data = zeros(Nvoxels,1);
-                OutData{index}.field = ['AB{' num2str(j) '}.BCaci.' Thresholds{i}];
+                %OutData{index}.field = ['AB{' num2str(j) '}.BCaci.' num2str(Thresholds(i))];
+                thrStr = num2str(Thresholds(i));
+                OutData{index}.field = ['AB1{' num2str(j) '}.BCaci.alpha' thrStr(3:end)];
                 index = index + 1;
             end
         end
         OutData{index}.name = 'Ceff';
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['C.beta'];
+        %OutData{index}.field = ['C.beta'];
+        OutData{index}.field = ['Model3.X.beta'];
         index = index + 1;
+        
         OutData{index}.name = 'Ct';
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['C.t'];
+        %OutData{index}.field = ['C.t'];
+        OutData{index}.field = ['Model3.X.t'];
         index = index + 1;
+        
         OutData{index}.name = 'Cp';
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['C.p'];
+        %OutData{index}.field = ['C.p'];
+        OutData{index}.field = ['Model3.X.p'];
         index = index + 1;
+        
         OutData{index}.name = 'CPeff';
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['CP.beta'];
+        %OutData{index}.field = ['CP.beta'];
+        OutData{index}.field = ['Model2.X.beta'];
         index = index + 1;
+        
         OutData{index}.name = 'CPt';
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['CP.t'];
+        %OutData{index}.field = ['CP.t'];
+        OutData{index}.field = ['Model2.X.t'];
         index = index + 1;
+        
         OutData{index}.name = 'CPp';
         OutData{index}.data = zeros(Nvoxels,1);  
-        OutData{index}.field = ['CP.p'];
+        %OutData{index}.field = ['CP.p'];
+        OutData{index}.field = ['Model2.X.p'];
  
 
         for i = 1:Nvoxels
             if ~isempty(AllParameters{i})
                 VoxelIndices(i) = 1;
-                ImageVoxelIndices(i) = AllParameters{i}.VoxelIndex;
+                ImageVoxelIndices(i) = AnalysisParameters.Indices(i);
                 for j = 1:length(OutData)
                     % the confidence intervals need to be treated special
                     if strfind(OutData{j}.field,'alpha')
@@ -203,7 +231,12 @@ switch ModelNum
         OutData{index}.name = 'CPp';
         OutData{index}.data = zeros(Nvoxels,1);  
         OutData{index}.field = ['CP.p'];
- 
+        index = index + 1;
+        OutData{index}.name = 'k2';
+        OutData{index}.data = zeros(Nvoxels,1);  
+        OutData{index}.field = ['k2.pointEst'];
+        
+        
 
         for i = 1:Nvoxels
             if ~isempty(AllParameters{i})

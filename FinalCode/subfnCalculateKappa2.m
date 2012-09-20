@@ -1,28 +1,55 @@
-
 function k2 = subfnCalculateKappa2(X, M, Y, a, b)
-S = cov([X M Y]);
-%beta = subfnregress(C,[A B])
-%b = beta(3);
-%beta = subfnregress(B,[A])
-%a = beta(2);
-perm_a_1 = sqrt(S(2,3))*sqrt(S(1,3));
-perm_a_2 = sqrt(S(2,2)*S(3,3) - S(3,2));
-perm_a_3 = sqrt(S(1,1)*S(3,3) - S(3,1));
-perm_a_4 = S(1,1)*S(3,3);
-perm_a = [(perm_a_1 - perm_a_2*perm_a_3)/perm_a_4 (perm_a_1 + perm_a_2*perm_a_3)/perm_a_4];
-if sign(a) > 0
-    max_a = perm_a(2);
+% The following calculation of Kappa2 follows the description given in 
+% "Effect Size Measures for Mediation Models: Quantitative Strategies for
+% Communicating Indirect Effects"
+% by Preacher and Kelley, 2011, Psychological Methods
+% 
+% The code is a copy of the R code that accompanies the paper and found at
+% (9/20/2012) http://cran.r-project.org/web/packages/MBESS/index.html
+%
+% Find the covariance matrix of the variables
+COV = cov([X M Y]);
+s2 = {};
+s2.X = COV(1,1);
+s2.M = COV(2,2);
+s2.Y = COV(3,3);
+s = {};
+s.YX = COV(1,3);
+s.XM = COV(2,1);
+s.YM = COV(3,2);
+% Calculate the permissible values of a
+perm_a =[(s.YM * s.YX + sqrt(s2.M * s2.Y - s.YM^2) * sqrt(s2.X * s2.Y - s.YX^2))/(s2.X * s2.Y), ...
+                 (s.YM * s.YX - sqrt(s2.M * s2.Y - s.YM^2) * sqrt(s2.X * s2.Y - s.YX^2))/(s2.X * s2.Y)];
+% Calculate the permissible values of b
+perm_b = [sqrt(s2.X * s2.Y - s.YX^2)/sqrt(s2.X * s2.M - s.XM^2), ...
+                -sqrt(s2.X * s2.Y - s.YX^2)/sqrt(s2.X * s2.M - s.XM^2)];
+% Check the a values and find the one in teh same direction as the point estimate of a            
+if a > 0
+    temp = perm_a(find(perm_a>0));
+    max_a = max(temp);
+elseif a < 0
+    temp = perm_a(find(perm_a < 0));
+    max_a = min(temp);
 else
-    max_a = perm_a(1);
+    max_a = 0;
 end
-perm_b_1 = sqrt(S(1,1)*S(3,3) - S(3,1));
-perm_b_2 = sqrt(S(1,1)*S(2,2) - S(2,1));
-perm_b = [-perm_b_1/perm_b_2 perm_b_1/perm_b_2];
-if sign(b) > 0
-    max_b = perm_b(2);
+% Check the b values and find the one in teh same direction as the point
+% estimate of b
+if b > 0
+    temp = perm_b(find(perm_b>0));
+    max_b = max(temp);
+elseif b < 0
+    temp = perm_b(find(perm_b < 0));
+    max_b = min(temp);
 else
-    max_b = perm_b(1);
+    max_b = 0;
+end
+% calculate kappa
+%[a b max_a max_b]
+perm_ab = max_a*max_b;
+if isempty(perm_ab)
+    k2 = 0;
+else
+    k2 = (a*b)/perm_ab;          
 end
 
-perm_ab = max_a*max_b;
-k2 = (a*b)/perm_ab;
