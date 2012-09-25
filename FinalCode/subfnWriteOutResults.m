@@ -273,10 +273,6 @@ switch ModelNum
             Y(tImageVoxelIndices) = OutData{i}.data(tVoxelIndices);
             spm_write_vol(Vo,Y);
         end
-    
-        
-    
-        
 end
             
             

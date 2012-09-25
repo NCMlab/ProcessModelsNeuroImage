@@ -1,5 +1,6 @@
 function Parameters = subfnVoxelWiseProcessBatch(InData)
 
+warning off
 addpath /share/data/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 
 OpenPoolFlag = 0;
@@ -57,8 +58,11 @@ if ~isfield(data,'COVname') && ~isempty(data.COV)
     temp.COVname = NameCovStruct;
 end
 
-%
+tic 
 for i = 1:Nvoxels
+    t = toc;
+    fprintf(1,'%6d of %6d in %6.2f sec\n',i,Nvoxels,t);
+    tic;
     % check to make sure there is data for all subjects at this voxel. 
     Mflag = 0;
     Vflag = 0;

@@ -63,7 +63,7 @@ for i = 1:NJobSplit - 1
     fprintf(fid,'EOF\n');
     fclose(fid);
 %    Str = ['! qsub  ' jobPath];
-    Str = ['! qsub -q verylong.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=250M ' jobPath];
+    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=100M ' jobPath];
     unix(Str);
 end
 % now run the last chunk of data
@@ -92,7 +92,7 @@ fprintf(fid,'%s\n',['subfnVoxelWiseProcessBatch(''' InDataPath ''');']);
 fprintf(fid,'exit\n');
 fprintf(fid,'EOF\n');
 fclose(fid);
-Str = ['! qsub -q long.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=250M ' jobPath];
+Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=1G ' jobPath];
 unix(Str);
 % 
 % % Once it is all done put the data back together
