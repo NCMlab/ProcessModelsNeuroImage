@@ -10,25 +10,40 @@ Parameters = {};
 Nsteps = 11;
 switch data.ModelNum
     case '1'
+<<<<<<< HEAD
         [Ndata Nmed] = size(data.M);
         NameStruct = cell(Nmed,1);
         for j = 1:Nmed 
             NameStruct{j} = sprintf('CondMod%d',j);
         end
         ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
+=======
+        ParameterToBS = struct('names','CondMod','values',zeros(1,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
+       
+        Ndata = size(data.Y,1);
+>>>>>>> develop
         % the code below works if there is a covariate or not
         
         % whether or not to run the regression at multiple values of the moderator
         % First, check to see if the interaction effect is significant or
         % not.
+<<<<<<< HEAD
         S = subfnregstats(data.Y,[data.X data.M (data.M).*data.X data.COV]);
         % When this program is called during boot strapping it needs to
+=======
+        Model1 = subfnregstats(data.Y,[data.X data.M (data.M).*data.X data.COV]);
+        % When this program is called duk2ring boot strapping it needs to
+>>>>>>> develop
         % know whether or not to probe the interaction.
         % It should only check to see if the interaction is significant for
         % when the point estimate is being tested and not for any boot
         % strap re-estimates.
+<<<<<<< HEAD
         
         if S.tstat.pval(4) < max(data.Thresholds)
+=======
+        if Model1.tstat.pval(4) < max(data.Thresholds)
+>>>>>>> develop
             ParameterToBS.probeMod = 1;
         end
         %
@@ -40,7 +55,11 @@ switch data.ModelNum
             % check to see if the interaction is significant! This should
             % only be checked the first time through.
             % if S.tstat.pval(4) < max(data.Thresholds)
+<<<<<<< HEAD
             ParameterToBS.values(1,1) = S.beta(2);
+=======
+            ParameterToBS.values(1,1) = Model1.beta(2);
+>>>>>>> develop
             minM = min(data.M);
             maxM = max(data.M);
             rangeM = maxM - minM;
@@ -52,13 +71,18 @@ switch data.ModelNum
                 ParameterToBS.probeValues(1,j) = probeM(j);
             end
         else
+<<<<<<< HEAD
             ParameterToBS.values = S.beta(2);
+=======
+            ParameterToBS.values = Model1.beta(2);
+>>>>>>> develop
             ParameterToBS.probeValues = 0;
         end
         
         % Now all parameters of interest for the model are calculated.
         if PointEstFlag
             % also fit the direct model without the modulator in it
+<<<<<<< HEAD
             S1 = subfnregstats(data.Y,[data.X data.M data.COV]);
             % Find the R2 increase due to the interaction
             diffS = subfnCalculateModelFitDiff(S,S1);
@@ -74,6 +98,42 @@ switch data.ModelNum
             Parameters.Model = subfnSetModelParameters(S);
             tcrit = tinv(1 - max(data.Thresholds)/2,length(data.X) - (4 + size(data.COV,2)));
             Parameters.JNvalue = subfnJohnsonNeyman(S.beta(2),S.covb(2,2),S.beta(4),S.covb(4,4),S.covb(2,4),tcrit);
+=======
+            % Model with NO Interaction
+            Model2 = subfnregstats(data.Y,[data.X data.M data.COV]);
+            % Find the R2 increase due to the interaction
+            diffS = subfnCalculateModelFitDiff(Model1,Model2);
+            Parameters = {};
+            Parameters.Model1.const = subfnSetParameters('const', Model1, 1);
+            Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,2);',data.Xname,data.Xname);
+            eval(Str)
+            Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,3);',data.Mname,data.Mname);
+            eval(Str)
+            Str = sprintf('Parameters.Model1.%s_x_%s=subfnSetParameters(''%s_x%s'',Model1,4);',data.Xname,data.Mname,data.Xname,data.Mname);
+            eval(Str)
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,4+j);',data.COVname{j},data.COVname{j});
+                eval(Str)
+            end
+            Parameters.Model1.Outcome = data.Yname;
+            Parameters.Model1.Model = subfnSetModelParameters(Model1);
+            % Model 2, no interaction
+            Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,2);',data.Xname,data.Xname);
+            eval(Str)
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,3);',data.Mname,data.Mname);
+            eval(Str)
+            
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,3+j);',data.COVname{j},data.COVname{j});
+                eval(Str)
+            end
+            Parameters.Model2.Outcome = data.Yname;
+            Parameters.Model2.Model = subfnSetModelParameters(Model2);
+            Parameters.DiffModel = subfnSetModelParameters(diffS);
+            tcrit = tinv(1 - max(data.Thresholds)/2,length(data.X) - (4 + size(data.COV,2)));
+            Parameters.JNvalue = subfnJohnsonNeyman(Model1.beta(2),Model1.covb(2,2),Model1.beta(4),Model1.covb(4,4),Model1.covb(2,4),tcrit);
+>>>>>>> develop
         end
 
     case '4'
@@ -82,6 +142,7 @@ switch data.ModelNum
         
         Nmed = size(data.M,2);
         Ndata = size(data.Y,1);
+<<<<<<< HEAD
          NameStruct = cell(3,1);
         for j = 1:Nmed 
             NameStruct{j} = sprintf('AB%d',j);
@@ -142,6 +203,93 @@ switch data.ModelNum
             Parameters.CP = subfnSetParameters('CP', S2, length(S2.beta));
             Parameters.CModel = subfnSetModelParameters(S3);
             Parameters.JohnsonNeyman = -99;
+=======
+        NameStruct = cell(Nmed,1);
+        for j = 1:Nmed 
+            NameStruct{j} = sprintf('AB%d',j);
+        end
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,1),'probeMod',0);
+        % redo the setup so that results are organized based on models
+        % =================================================================
+        % Model1
+        a = zeros(Nmed,1);
+        for i = 1:Nmed
+            % A branch model
+            tempModel1 = subfnregress(data.M(:,i),[data.X data.COV]);
+            a(i) = tempModel1(2);
+        end
+        % =================================================================
+        % Model2
+        % B branch model
+        tempModel2 = subfnregress(data.Y,[data.M data.X data.COV]);
+        b = tempModel2(2:Nmed+1);
+        % =================================================================
+        % Bootstrap values
+        % the indirect effect which will be bootstrapped
+        ab = a.*b;
+        ParameterToBS.values = ab;
+        ParameterToBS.k2 = subfnCalculateKappa2(data.X, data.M, data.Y, a, b);
+        % Now all parameters of interest for the model are calculated.
+        if PointEstFlag 
+            S1 = cell(Nmed,1);
+            % B branch model
+            Model2 = subfnregstats(data.Y,[data.M data.X data.COV]);
+            for i = 1:Nmed
+                % A branch model
+                Model1{i} = subfnregstats(data.M(:,i),[data.X data.COV]);
+            end
+            % C branch model
+            Model3 = subfnregstats(data.Y,[data.X data.COV]);
+            % Fill in the Parameters structure with all results 
+            % from Model 1
+            Parameters = {};
+            for i = 1:Nmed
+                Parameters.Model1{i}.const = subfnSetParameters('const', Model1{i}, 1);
+                Str = sprintf('Parameters.Model1{i}.%s=subfnSetParameters(''%s'',Model1{i},2);',data.Xname,data.Xname);
+                eval(Str)
+                for j = 1:size(data.COV,2)
+                    Str = sprintf('Parameters.Model1{i}.%s=subfnSetParameters(''%s'',Model1{i},2+j);',data.COVname{j},data.COVname{j});
+                    eval(Str)
+                end
+                Parameters.Model1{i}.Model = subfnSetModelParameters(Model1{i});
+            end
+            Parameters.Model1{i}.Outcome = data.Mname;
+
+            % Fill in the Parameters structure with all results
+            % from Model 2
+            Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+            for j = 1:Nmed
+                Str = sprintf('Parameters.Model2.%s%d=subfnSetParameters(''%s'',Model2,1+j);',data.Mname,j,data.Mname);
+                eval(Str);
+            end
+            Str = sprintf('Parameters.Model2.%s = subfnSetParameters(''%s'', Model2, 1+Nmed+1);',data.Xname,data.Xname);
+            eval(Str);
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+j);',data.COVname{j},data.COVname{j});
+                eval(Str);
+            end
+            Parameters.Model2.Model = subfnSetModelParameters(Model2);
+            Parameters.Model2.Outcome = data.Yname;
+            % Fill in the Parameters structure with all results
+            % from Model 3            
+            Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
+            Str = sprintf('Parameters.Model3.%s = subfnSetParameters(''%s'', Model3, 2);',data.Xname,data.Xname);
+            eval(Str);
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+1+j);',data.COVname{j},data.COVname{j});
+                eval(Str);
+            end
+            Parameters.Model3.Model = subfnSetModelParameters(Model3);
+            % Fill in the Parameters structure with all results
+            % from the bootstrapped values
+            for i = 1:Nmed
+                Str = sprintf('Parameters.%s.pointEst = ParameterToBS.values(i);',ParameterToBS.names(i,:));
+                eval(Str);
+            end
+            Parameters.JohnsonNeyman = -99;
+            Parameters.Model3.Outcome = data.Yname;
+
+>>>>>>> develop
         end
         
     case '7'
@@ -302,5 +450,18 @@ switch data.ModelNum
             Parameters.CP = subfnSetParameters('Cconst',S,1+Nmed+1+Nmed+1);
             
         end
+<<<<<<< HEAD
             
+=======
+end
+
+if PointEstFlag
+    Parameters.Xname = data.Xname;
+    Parameters.Mname = data.Mname;
+    Parameters.Yname = data.Yname;
+    Parameters.Vname = data.Vname;
+    Parameters.Wname = data.Wname;
+    Parameters.ModelNum = data.ModelNum;
+    Parameters.SampleSize = length(data.X);
+>>>>>>> develop
 end

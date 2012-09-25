@@ -15,5 +15,10 @@ str = ['Model = setfield(Model,''p'', ' num2str(statsStruct.fstat.pval) ');'];
 eval(str)
 str = ['Model = setfield(Model,''AIC'', ' num2str(statsStruct.AIC) ');'];
 eval(str)
+<<<<<<< HEAD
+=======
+str = ['Model = setfield(Model,''LOOCV'', ' num2str(statsStruct.CV) ');'];
+eval(str)
+>>>>>>> develop
 
 

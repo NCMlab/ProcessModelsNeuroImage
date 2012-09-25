@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-function [error img] = vennX( data, resolution )
-=======
 function [error img] = vennX( data, resolution, names )
->>>>>>> develop
 %
 % function error = vennX( data, resolution )
 %
@@ -91,12 +87,8 @@ function [error img] = vennX( data, resolution, names )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
 
    figure;
-<<<<<<< HEAD
-   
-=======
        Values = [1 2 6];
        %Values = [0.3 1.8 5.8];
->>>>>>> develop
    if length( data ) == 3
       dist = venn2( data(1), data(2), data(3), resolution );
       error = plot_venn2( data(1), data(2), data(3), resolution, dist );
@@ -108,11 +100,7 @@ function [error img] = vennX( data, resolution, names )
        dist_A_C = venn2( data(1)+data(2), data(6)+data(7), data(4)+data(5), resolution );
 
         [error img] = plot_venn3( data(1), data(2), data(3), data(4), data(5), data(6), data(7), ...
-<<<<<<< HEAD
-           resolution, dist_A_B, dist_B_C, dist_A_C );
-=======
            resolution, dist_A_B, dist_B_C, dist_A_C , Values);
->>>>>>> develop
        error = data - error';
    else
        'vennX error, data vector must be of length 3 or 7'
@@ -120,14 +108,6 @@ function [error img] = vennX( data, resolution, names )
     
     %change the colormap so that the background is white    
     %colormap(gray);
-<<<<<<< HEAD
-    k = colormap;
-    k = [ 1 1 1; k ];
-    colormap(k)
-    axis off   
-   
-function [error img] = plot_venn3( a, b, c, d, e, f, g, resolution, dist_A_B, dist_B_C, dist_A_C )
-=======
     k1 = colormap(hsv);
     k = [ 1 1 1; k1 ];
     colormap(k)
@@ -149,7 +129,6 @@ function [error img] = plot_venn3( a, b, c, d, e, f, g, resolution, dist_A_B, di
     
     
 function [error img] = plot_venn3( a, b, c, d, e, f, g, resolution, dist_A_B, dist_B_C, dist_A_C ,Values)
->>>>>>> develop
     
     r1 = sqrt( (a+b+f+g)/pi );
     r2 = sqrt( (b+c+d+g)/pi );
@@ -177,16 +156,6 @@ function [error img] = plot_venn3( a, b, c, d, e, f, g, resolution, dist_A_B, di
     %draw the circles
     img = zeros( size(Y,1), size(Y,2) );
     
-<<<<<<< HEAD
-    img = img + 7 .* ( (X - center1_x).^2 + (Y - center1_y).^2 < r1^2 );
-    img = img + 4 .* ( (X - center2_x).^2 + (Y - center2_y).^2 < r2^2 );
-    img = img + 6 .* ( (X - center3_x).^2 + (Y - center3_y).^2 < r3^2 );
-    
-    clf
-    imagesc(img)
-    hold on
-    
-=======
     img = img + Values(1) .* ( (X - center1_x).^2 + (Y - center1_y).^2 < r1^2 );
     img = img + Values(2) .* ( (X - center2_x).^2 + (Y - center2_y).^2 < r2^2 );
     img = img + Values(3) .* ( (X - center3_x).^2 + (Y - center3_y).^2 < r3^2 );
@@ -195,7 +164,6 @@ function [error img] = plot_venn3( a, b, c, d, e, f, g, resolution, dist_A_B, di
     aImg = imagesc(img);
     hold on
 
->>>>>>> develop
     
     %add the numbers and compute the error for each partition
     error = [];
