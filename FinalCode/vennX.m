@@ -87,7 +87,7 @@ function [error img] = vennX( data, resolution, names )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
 
    figure;
-       Values = [1 2 6];
+       Values = [1 4 6];
        %Values = [0.3 1.8 5.8];
    if length( data ) == 3
       dist = venn2( data(1), data(2), data(3), resolution );

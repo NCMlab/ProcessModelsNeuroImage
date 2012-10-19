@@ -12,7 +12,7 @@ switch ModelNum
             count = count + 1;
         end
         Nvoxels = length(AllParameters);
-        Nmed = AnalysisParameters.Nmed
+        Nmed = AnalysisParameters.Nmed;
 
         Thresholds = AnalysisParameters.Thresholds;
         Nthr = length(Thresholds);
@@ -107,7 +107,10 @@ switch ModelNum
         OutData{index}.data = zeros(Nvoxels,1);  
         %OutData{index}.field = ['CP.p'];
         OutData{index}.field = ['Model2.X.p'];
- 
+        index = index + 1;
+        OutData{index}.name = 'k2';
+        OutData{index}.data = zeros(Nvoxels,1);  
+        OutData{index}.field = ['k2.pointEst'];
 
         for i = 1:Nvoxels
             if ~isempty(AllParameters{i})
