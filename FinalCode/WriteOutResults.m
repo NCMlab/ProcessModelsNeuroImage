@@ -27,12 +27,9 @@ else
     errordlg('This process has not finished')
 end
 
-
-
-
-for i = 1:length(AllParameters)
-    if ~isempty(AllParameters{i})
-        i
-        break
-    end
-end
+% for i = 1:length(AllParameters)
+%     if ~isempty(AllParameters{i})
+%         i
+%         break
+%     end
+% end
