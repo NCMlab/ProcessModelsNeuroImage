@@ -9,10 +9,13 @@ beta = R\(Q'*y);
 yhat = design*beta;
 residuals = y - yhat;
 nobs = length(y);
+<<<<<<< HEAD
+=======
 % create Hat matrix
 H = design*(R\Q');
 % calculate the leave one out cross validation statistic
 CV = ((residuals./(1-diag(H)))'*(residuals./(1-diag(H))))/nobs;
+>>>>>>> develop
 p = length(beta);
 dfe = nobs-p;
 dft = nobs-1;
@@ -48,5 +51,8 @@ S.fstat.ssr = ssr;
 S.fstat.f = (ssr/S.fstat.dfr)/(sse/dfe);
 S.fstat.pval = fcdf(1/S.fstat.f, dfe, S.fstat.dfr);
 S.AIC =  nobs*log(sum(residuals.^2)/nobs) + 2*p*(p+1)/(dfe-1) + 2*p;
+<<<<<<< HEAD
+=======
 S.CV = CV;
+>>>>>>> develop
 
