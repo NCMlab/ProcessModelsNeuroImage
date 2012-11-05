@@ -51,7 +51,7 @@ switch data.ModelNum
             ParameterToBS.values = Model1.beta(2);
             ParameterToBS.probeValues = 0;
         end
-        
+        ParameterToBS.k2 = 0;
         % Now all parameters of interest for the model are calculated.
         if PointEstFlag
             % also fit the direct model without the modulator in it
@@ -145,8 +145,9 @@ switch data.ModelNum
                     eval(Str)
                 end
                 Parameters.Model1{i}.Model = subfnSetModelParameters(Model1{i});
+                Parameters.Model1{i}.Outcome = data.Mname;
             end
-            Parameters.Model1{i}.Outcome = data.Mname;
+            
 
             % Fill in the Parameters structure with all results
             % from Model 2
@@ -236,6 +237,7 @@ switch data.ModelNum
             ParameterToBS.probeValues = 0;
         end
         Parameters = {};
+        ParameterToBS.k2 = 0;
         if PointEstFlag
             S2 = subfnregstats(data.Y,[data.M data.X data.COV]);
             S3 = subfnregstats(data.Y,[data.X data.COV]);
