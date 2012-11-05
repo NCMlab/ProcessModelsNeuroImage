@@ -1,29 +1,29 @@
-% functions
-% bootSE
-% subfnBootStrp
-% subfnFindConfidenceIntervals
-% subfnProcessModelFit
-
-
-clear
-% Test new mediation code
-N = 112;
-Gr = round(rand(N,1));
-Nmed = 3;
-M = randn(N,Nmed) + 10; 
-X = zeros(N,1);
-for i = 1:Nmed
-    X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
-end
-Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
-
-V = randn(N,1); 
-W = randn(N,1); 
-%corr([X M V W Y])
-%corr([X M Y])
-%regress(Y,[X ones(N,1)])
-%regress(M,[X ones(N,1)])
-%%
+% % functions
+% % bootSE
+% % subfnBootStrp
+% % subfnFindConfidenceIntervals
+% % subfnProcessModelFit
+% 
+% 
+% clear
+% % Test new mediation code
+% N = 112;
+% Gr = round(rand(N,1));
+% Nmed = 1;
+% M = randn(N,Nmed) + 10; 
+% X = zeros(N,1);
+% for i = 1:Nmed
+%     X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
+% end
+% Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
+% 
+% V = randn(N,1); 
+% W = randn(N,1); 
+% %corr([X M V W Y])
+% %corr([X M Y])
+% %regress(Y,[X ones(N,1)])
+% %regress(M,[X ones(N,1)])
+%
 clear
 load ModMeddata
 data = {};
@@ -41,10 +41,10 @@ data.V = V;
 data.W = V;
 data.Q = [];
 data.R = [];
-data.ModelNum = '4';
-data.Thresholds = [0.05 0.01 0.005];
+data.ModelNum = '7';
+data.Thresholds = [0.05];
 data.Indices = 1;
-data.Nboot = 5000;
+data.Nboot = 100;
 
 % Calculate the full stats of the model
 %[ParameterToBS Parameters] = subfnProcessModelFit(data,data.ModelNum,PointEst);
