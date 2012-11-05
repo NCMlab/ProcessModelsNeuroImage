@@ -10,16 +10,17 @@ Parameters = {};
 Nsteps = 11;
 switch data.ModelNum
     case '1'
+        % 
+        %     M
+        %     |
+        % X ----- Y
+        % 
         ParameterToBS = struct('names','CondMod','values',zeros(1,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
-       
         Ndata = size(data.Y,1);
-        % the code below works if there is a covariate or not
-        
-        % whether or not to run the regression at multiple values of the moderator
         % First, check to see if the interaction effect is significant or
         % not.
         Model1 = subfnregstats(data.Y,[data.X data.M (data.M).*data.X data.COV]);
-        % When this program is called duk2ring boot strapping it needs to
+        % When this program is called it needs to
         % know whether or not to probe the interaction.
         % It should only check to see if the interaction is significant for
         % when the point estimate is being tested and not for any boot
@@ -92,6 +93,12 @@ switch data.ModelNum
         end
 
     case '4'
+        % 
+        %     M 
+        %    / \
+        %   /   \
+        %  X     Y
+        % 
         % This is the simple mediation case which can handle covariates on
         % M and Y and multiple mediators, M.
         
@@ -186,7 +193,17 @@ switch data.ModelNum
         end
         
     case '7'
-        % this is the model where the branch from X to M is moderated
+        % 
+        %  W  M 
+        %   \/ \
+        %   /   \
+        %  X     Y
+        % 
+        % This is the model where the branch from X to M is moderated
+        % Model 1: X to M moderated by W
+        % Model 2: X and M to Y
+        % Model 3: X to Y
+        % Indirect effect:  
         [Ndata Nmed] = size(data.M);
         NameStruct = cell(Nmed,1);
         for j = 1:Nmed 
@@ -194,26 +211,27 @@ switch data.ModelNum
         end
         ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
 
-        a = zeros(Nmed,1);
+        % Model 1
         % create the interaction terms
         S1 = cell(Nmed,1);
+        Model1 = cell(Nmed);
         for j = 1:Nmed
-            Interaction = data.M(:,j).*(data.W);
-            S1{j} = subfnregstats(data.M(:,j),[data.X Interaction data.W data.COV]);
+            Model1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X(:,j).*(data.W) data.COV]);
             % check each interaction term and set the flag here for whether
             % to probe the interaction.
-            if S1{j}.tstat.pval(3) < max(data.Thresholds)
+            if Model1{j}.tstat.pval(4) < max(data.Thresholds)
                 ParameterToBS.probeMod = 1;
             end
         end
+        % Model 2
         % B branch model
-        S2 = subfnregress(data.Y,[data.M data.X data.COV]);
+        tempModel2 = subfnregress(data.Y,[data.M data.X data.COV]);
         if data.ProbeMod %
             % check to see if the interaction is significant! This should
             % only be checked the first time through.
             % if S.tstat.pval(4) < max(data.Thresholds)
             for j = 1:Nmed
-                ParameterToBS.values(j,1) = S1{j}.beta(2)*S2(2);
+                ParameterToBS.values(j,1) = Model1{j}.beta(2)*tempModel2(2);
             end
             minW = min(data.W);
             maxW = max(data.W);
@@ -222,16 +240,15 @@ switch data.ModelNum
             probeW = [0 minW:stepW:maxW];
             for k = 2:Nsteps + 1
                 for j = 1:Nmed
-                    Interaction = data.M(:,j).*(data.W - probeW(k));
-                    temp = subfnregress(data.M(:,j),[data.X Interaction (data.W-probeW(k)) data.COV]);
-                    ParameterToBS.values(j,k) = temp(2)*S2(2);
+                    temp = subfnregress(data.M(:,j),[data.X (data.W-probeW(k)) data.X(:,j).*(data.W - probeW(k)) data.COV]);
+                    ParameterToBS.values(j,k) = temp(2)*tempModel2(2);
                     ParameterToBS.probeValues(1,k) = probeW(k);
                 end
             end
         else
             temp = zeros(Nmed,1);
             for j = 1:Nmed
-                temp(j) = S1{j}.beta(2)*S2(2);
+                temp(j) = Model1{j}.beta(2)*tempModel2(2);
             end
             ParameterToBS.values = temp;
             ParameterToBS.probeValues = 0;
@@ -239,31 +256,63 @@ switch data.ModelNum
         Parameters = {};
         ParameterToBS.k2 = 0;
         if PointEstFlag
-            S2 = subfnregstats(data.Y,[data.M data.X data.COV]);
-            S3 = subfnregstats(data.Y,[data.X data.COV]);
+            Model2 = subfnregstats(data.Y,[data.M data.X data.COV]);
+            % Find the R2 increase due to the interaction
+            Model3 = subfnregstats(data.Y,[data.X data.COV]);
+
+            
+            for j = 1:Nmed
+                Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
+                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2);',data.Xname,data.Xname);
+                eval(Str)
+                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},3);',data.Wname,data.Wname);
+                eval(Str)
+                Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x%s'',Model1{j},4);',data.Xname,data.Wname,data.Xname,data.Wname);
+                eval(Str)
+                for k = 1:size(data.COV,2)
+                    Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},4+k);',data.COVname{k},data.COVname{k});
+                    eval(Str)
+                end
+                Parameters.Model1{j}.Model = subfnSetModelParameters(Model1{j});
+                Parameters.Model1{j}.Outcome = data.Mname;
+            end
+            
             %noIntS = subfnregstats(data.Y,[data.M data.V  data.X data.COV]);
             %diffS = subfnCalculateModelFitDiff(S,noIntS);
             %Parameters.EffOfInt = subfnSetModelParameters(diffS);
-            Parameters.CModel = subfnSetModelParameters(S3);
-            Parameters.BModel = subfnSetModelParameters(S2);
+            Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,2);',data.Xname,data.Xname);
+            eval(Str)
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,3);',data.Mname,data.Mname);
+            eval(Str)
+            Parameters.Model2.Model = subfnSetModelParameters(Model2);
+            Parameters.Model2.Outcome = data.Yname;
+            % from Model 3          
+            Parameters.Model3.Outcome = data.Yname;
+            Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
+            Str = sprintf('Parameters.Model3.%s = subfnSetParameters(''%s'', Model3, 2);',data.Xname,data.Xname);
+            eval(Str);
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+1+j);',data.COVname{j},data.COVname{j});
+                eval(Str);
+            end
+            Parameters.Model3.Model = subfnSetModelParameters(Model3);
+
             % calculate the Johnson-Neyman value
 %            JNvalue = subfnJohnsonNeyman(S.beta(2),S.covb(2,2),S.beta(4),S.covb(4,4),S.covb(2,4),data.tcrit);
 %             Parameters.JohnsonNeyman = JNvalue;
-            for j = 1:Nmed
-                str = sprintf('Parameters.A%dModel = subfnSetModelParameters(S1{j});',j); eval(str);
-               
-                str = sprintf('Parameters.A%d = subfnSetParameters(''A%d'',S1{j},2);',j,j);eval(str);
-                str = sprintf('Parameters.A%dconst = subfnSetParameters(''A%dconst'',S1{j},1);',j,j);eval(str);
-                str = sprintf('Parameters.Int%d = subfnSetParameters(''Int%d'',S1{j},3);',j,j);eval(str);
-                str = sprintf('Parameters.W%d = subfnSetParameters(''W%d'',S1{j},4);',j,j);eval(str);
-                str = sprintf('Parameters.B%d = subfnSetParameters(''V%d'',S2,1+j);',j,j);eval(str);
-            end
-             Parameters.Bconst = subfnSetParameters('Bconst',S2,1);
-             Parameters.CP = subfnSetParameters('CP',S2,Nmed+2);
-             Parameters.C = subfnSetParameters('C',S3,2);
-             Parameters.Cconst = subfnSetParameters('Cconst',S3,1);
+             Parameters.Bconst = subfnSetParameters('Bconst',Model2,1);
+             Parameters.CP = subfnSetParameters('CP',Model2,Nmed+2);
+             Parameters.C = subfnSetParameters('C',Model3,2);
+             Parameters.Cconst = subfnSetParameters('Cconst',Model3,1);
         end
     case '14'
+        % 
+        %     M  V
+        %    / \/
+        %   /   \
+        %  X     Y
+        % 
         % This is the moderated mediation model. The moderation (V) occurs
         % between the mediator(s) M and Y. The conditional effect of X on Y
         % via M is evaluated at multiple moderation values. The confidence

@@ -5,27 +5,29 @@
 % % subfnProcessModelFit
 % 
 % 
-% clear
-% % Test new mediation code
-% N = 112;
-% Gr = round(rand(N,1));
-% Nmed = 1;
-% M = randn(N,Nmed) + 10; 
-% X = zeros(N,1);
-% for i = 1:Nmed
-%     X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
-% end
-% Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
-% 
-% V = randn(N,1); 
-% W = randn(N,1); 
-% %corr([X M V W Y])
-% %corr([X M Y])
-% %regress(Y,[X ones(N,1)])
-% %regress(M,[X ones(N,1)])
-%
 clear
-load ModMeddata
+% Test new mediation code
+N = 112;
+Gr = round(rand(N,1));
+Nmed = 1;
+V = randn(N,1); 
+W = randn(N,1); 
+
+M = randn(N,Nmed) + 10; 
+X = zeros(N,1);
+for i = 1:Nmed
+    X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
+end
+M = M + W;
+Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
+
+%corr([X M V W Y])
+%corr([X M Y])
+%regress(Y,[X ones(N,1)])
+%regress(M,[X ones(N,1)])
+%
+%clear
+%load ../PracticeData/ModMeddata
 data = {};
 data.Xname = 'X';
 data.Yname = 'Y';
@@ -42,9 +44,9 @@ data.W = V;
 data.Q = [];
 data.R = [];
 data.ModelNum = '7';
-data.Thresholds = [0.05];
+data.Thresholds = [0.95];
 data.Indices = 1;
-data.Nboot = 100;
+data.Nboot = 1000;
 
 % Calculate the full stats of the model
 %[ParameterToBS Parameters] = subfnProcessModelFit(data,data.ModelNum,PointEst);
@@ -68,7 +70,7 @@ fprintf(1,'\tM = %s\n',data.Mname);
 fprintf(1,'Sample size = %d\n\n',length(data.X));
 
 fprintf(1,'Indirect effect of %s on %s via %s (a*b pathway)\n',data.Xname,data.Yname,data.Mname);
-fprintf(1,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootUPCI');
+fprintf(1,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootULCI');
 fprintf(1,'%8.4f\t%8.4f\t%8.4f\t%8.4f\n',Parameters{1}.AB1{1}.pointEst,Parameters{1}.AB1{1}.bootSE,Parameters{1}.AB1{1}.BCaci.alpha05(1),Parameters{1}.AB1{1}.BCaci.alpha05(2));
 
 % Print out Model 1

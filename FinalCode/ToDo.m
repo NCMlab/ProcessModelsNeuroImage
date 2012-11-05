@@ -12,7 +12,7 @@
 % 2) actually does all the stats = subfnVoxelWiseProcess
 %
 % Need to allow for voxelwise: X, M, Y, V, W, covariates
-% Add the number of mediators, subjects and voxels to the dat astructure so
+% Add the number of mediators, subjects and voxels to the data structure so
 % the program does not need to figure these out. 
 % For voxel the program needs to pull out the data for that voxel if that
 % variable is voxelwise data. This can be a series of if statements for
@@ -22,3 +22,4 @@
 % prepared there is just a boolean check is Xvoxelwise, then data.X +
 % data(:,:,i); else X=X.
 
+% Calculate the standard error in the kappa-squared
