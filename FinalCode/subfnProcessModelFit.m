@@ -241,6 +241,7 @@ switch data.ModelNum
             for k = 2:Nsteps + 1
                 for j = 1:Nmed
                     temp = subfnregress(data.M(:,j),[data.X (data.W-probeW(k)) data.X(:,j).*(data.W - probeW(k)) data.COV]);
+                    % this is the conditional parameter
                     ParameterToBS.values(j,k) = temp(2)*tempModel2(2);
                     ParameterToBS.probeValues(1,k) = probeW(k);
                 end
@@ -259,7 +260,7 @@ switch data.ModelNum
             Model2 = subfnregstats(data.Y,[data.M data.X data.COV]);
             % Find the R2 increase due to the interaction
             Model3 = subfnregstats(data.Y,[data.X data.COV]);
-
+            tcrit = tinv(1 - max(data.Thresholds)/2,length(data.X) - (4 + size(data.COV,2)));
             
             for j = 1:Nmed
                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
@@ -275,6 +276,8 @@ switch data.ModelNum
                 end
                 Parameters.Model1{j}.Model = subfnSetModelParameters(Model1{j});
                 Parameters.Model1{j}.Outcome = data.Mname;
+                Parameters.JNvalue = subfnJohnsonNeyman(Model1{j}.beta(2),Model1{j}.covb(2,2),Model1{j}.beta(4),Model1{j}.covb(4,4),Model1{j}.covb(2,4),tcrit);
+                %Parameters.JNvalue = Parameters.JNvalue.*Model2.beta(2);
             end
             
             %noIntS = subfnregstats(data.Y,[data.M data.V  data.X data.COV]);
@@ -301,10 +304,12 @@ switch data.ModelNum
             % calculate the Johnson-Neyman value
 %            JNvalue = subfnJohnsonNeyman(S.beta(2),S.covb(2,2),S.beta(4),S.covb(4,4),S.covb(2,4),data.tcrit);
 %             Parameters.JohnsonNeyman = JNvalue;
-             Parameters.Bconst = subfnSetParameters('Bconst',Model2,1);
-             Parameters.CP = subfnSetParameters('CP',Model2,Nmed+2);
-             Parameters.C = subfnSetParameters('C',Model3,2);
-             Parameters.Cconst = subfnSetParameters('Cconst',Model3,1);
+%              Parameters.Bconst = subfnSetParameters('Bconst',Model2,1);
+%              Parameters.CP = subfnSetParameters('CP',Model2,Nmed+2);
+%              Parameters.C = subfnSetParameters('C',Model3,2);
+%              Parameters.Cconst = subfnSetParameters('Cconst',Model3,1);
+             
+
         end
     case '14'
         % 

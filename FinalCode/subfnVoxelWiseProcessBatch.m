@@ -90,6 +90,9 @@ for i = 1:Nvoxels
             if isempty(data.W)
                 errordlg('The modulator variable is missing');
             end
+            if size(data.M,2) ~= 1
+                errordlg('Only a single variable can be used as a mediator for Model 7');
+            end
             temp.M = data.M(:,:,i);
             temp.W = data.W(:,:,i);
             if sum(isnan(temp.M)) == 0; Mflag = 1;end
