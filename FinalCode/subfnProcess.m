@@ -1,23 +1,24 @@
 function Parameters = subfnProcess(temp)
 
 % it initially does not probe the moderator
-[pointEst Parameters{i}] = subfnProcessModelFit(temp,1);
+[pointEst Parameters] = subfnProcessModelFit(temp,1);
 % here we check to see if the interaction is significant.
 % if so then probe the mod for all bootstraps
 if pointEst.probeMod
     temp.ProbeMod = 1;
     % since the interaction is significant then we want to probe
     % the moderator by re-running the regression
-    [pointEst Parameters{i}] = subfnProcessModelFit(temp,1);
-    
+    [pointEst Parameters] = subfnProcessModelFit(temp,1);
 end
+
+Nsub = size(temp.Y,1);
 % have the option of turning the boot strapping off.
 % turn off boot strapping on the interaction effect if the
 % Johnson-Neyman shows no range of significant interactions.
 %
-if Nboot %& Parameters{i}.JohnsonNeyman ~= -99
+if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
     % calculate the boot strap estimates
-    [bstat k2stat] = subfnBootStrp(temp,Nboot);
+    [bstat k2stat] = subfnBootStrp(temp,temp.Nboot);
     if k2stat(1) ~= 0
         Sk2stat = sort(k2stat);
         k2 = {};
@@ -27,10 +28,10 @@ if Nboot %& Parameters{i}.JohnsonNeyman ~= -99
         for k = 1:length(temp.Thresholds)
             t = num2str(temp.Thresholds(k));
             PERci{k} = setfield(PERci{k},['alpha' t(3:end)],...
-                [Sk2stat(ceil(temp.Thresholds(1)/2*Nboot)) Sk2stat(ceil((1-temp.Thresholds(1)/2)*Nboot))]);
+                [Sk2stat(ceil(temp.Thresholds(1)/2*temp.Nboot)) Sk2stat(ceil((1-temp.Thresholds(1)/2)*temp.Nboot))]);
         end
         k2.PERci = PERci;
-        Parameters{i}.k2 = k2;
+        Parameters.k2 = k2;
     end
     
     [nboot Nmed NParameters] = size(bstat);
@@ -68,7 +69,7 @@ if Nboot %& Parameters{i}.JohnsonNeyman ~= -99
             eval(str);
         end
         
-        str = sprintf('Parameters{i}.%s = %s;',pointEst.names(j,:),pointEst.names(j,:));
+        str = sprintf('Parameters.%s = %s;',pointEst.names(j,:),pointEst.names(j,:));
         eval(str);
     end
     

@@ -35,37 +35,39 @@ switch ModelNum
     case '4'
         % MODEL 4
         fprintf(1,'======================================================\n');
-        fprintf(1,'Model = %s\n',Parameters.ModelNum);
-        fprintf(1,'\tY = %s\n',Parameters.Yname);
-        fprintf(1,'\tX = %s\n',Parameters.Xname);
-        fprintf(1,'\tM = %s\n',Parameters.Mname);
-        
-        fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
+%         fprintf(1,'Model = %s\n',Parameters.ModelNum);
+%         fprintf(1,'\tY = %s\n',Parameters.Yname);
+%         fprintf(1,'\tX = %s\n',Parameters.Xname);
+%         fprintf(1,'\tM = %s\n',Parameters.Mname);
+%         fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
         
         
         fprintf(1,'Indirect effect of %s on %s via %s (a*b pathway)\n',Parameters.Xname,Parameters.Yname,Parameters.Mname);
         fprintf(1,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootUPCI');
         fprintf(1,'%8.4f\t%8.4f\t%8.4f\t%8.4f\n',Parameters.AB1{1}.pointEst,Parameters.AB1{1}.bootSE,Parameters.AB1{1}.BCaci.alpha05(1),Parameters.AB1{1}.BCaci.alpha05(2));
-        
-        % Print out Model 1
-        for i = 1:size(Parameters.Model1,2)
-            fprintf(fid,'******************************************************\n')
-            fprintf(1,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome)
-            subfnPrintModelSummary(Parameters.Model1{i}.Model,fid)
-            subfnPrintModelResults(Parameters.Model1{i},fid)
-        end
-        
-        % Print out Model 2
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model2.Outcome)
-        subfnPrintModelSummary(Parameters.Model2.Model,fid)
-        subfnPrintModelResults(Parameters.Model2,fid)
-        
-        % Print out Model 3
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model3.Outcome)
-        subfnPrintModelSummary(Parameters.Model3.Model,fid)
-        subfnPrintModelResults(Parameters.Model3,fid)
+% print out effect sizes
+        fprintf(1,'%8s\t%8s\t%8s\n','Kappa squared','BootLLCI','BootUPCI');
+        fprintf(1,'%8.4f\t%8.4f\t%8.4f\n',Parameters.k2.pointEst,Parameters.k2.PERci{1}.alpha05(1),Parameters.k2.PERci{1}.alpha05(2));
+        fprintf(1,'Model AIC: %0.4f\n',Parameters.Model2.Model.AIC);
+%         % Print out Model 1
+%         for i = 1:size(Parameters.Model1,2)
+%             fprintf(fid,'******************************************************\n')
+%             fprintf(1,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome)
+%             subfnPrintModelSummary(Parameters.Model1{i}.Model,fid)
+%             subfnPrintModelResults(Parameters.Model1{i},fid)
+%         end
+%         
+%         % Print out Model 2
+%         fprintf(fid,'******************************************************\n')
+%         fprintf(1,'Outcome: %s\n\n',Parameters.Model2.Outcome)
+%         subfnPrintModelSummary(Parameters.Model2.Model,fid)
+%         subfnPrintModelResults(Parameters.Model2,fid)
+%         
+%         % Print out Model 3
+%         fprintf(fid,'******************************************************\n')
+%         fprintf(1,'Outcome: %s\n\n',Parameters.Model3.Outcome)
+%         subfnPrintModelSummary(Parameters.Model3.Model,fid)
+%         subfnPrintModelResults(Parameters.Model3,fid)
         
         
 end

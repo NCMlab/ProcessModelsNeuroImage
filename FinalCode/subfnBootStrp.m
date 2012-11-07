@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-function [bstat] = subfnBootStrp(data,Nboot)
-=======
 function [bstat k2stat] = subfnBootStrp(data,Nboot)
->>>>>>> develop
 % run once to find our how many values get bootstrapped
 [ParameterToBS] = subfnProcessModelFit(data,0);
 % find the size of the different variables
@@ -12,10 +8,7 @@ N = length(data.Y);
 NCov = size(data.COV,2);
 % initialize the output values
 bstat = zeros(Nboot,Nmed,NParameters);
-<<<<<<< HEAD
-=======
 k2stat = zeros(Nboot,1);
->>>>>>> develop
 % find the number of groups if stratified resampling will be done
 if ~isempty(data.STRAT)
     Gr1 = find(data.STRAT == 0);
@@ -53,9 +46,8 @@ for i = 1:Nboot
     end
     tParam = subfnProcessModelFit(temp,0);
     bstat(i,:,:) = tParam.values;
-<<<<<<< HEAD
-=======
+
     k2stat(i) = tParam.k2;
->>>>>>> develop
+
 end
 

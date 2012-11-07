@@ -8,33 +8,26 @@
 clear
 % Test new mediation code
 N = 112;
-Gr = round(rand(N,1));
-Nmed = 3;
-M = randn(N,Nmed) + 10; 
-X = zeros(N,1);
-for i = 1:Nmed
-    X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
-end
-Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
+AonB = 0.35;
+BonC = 0.35;
+AonC = 0.5;
+sC = 0.5;
+sB = 0.5;
+
+A = round(rand(N,1));
+B = A.*AonB + randn(N,1).*sB;
+C = A.*AonC + B.*BonC + randn(N,1).*sC;
+corr([A B C])
+
+%Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
 
 V = randn(N,1); 
 W = randn(N,1); 
-%corr([X M V W Y])
-%corr([X M Y])
-%regress(Y,[X ones(N,1)])
-%regress(M,[X ones(N,1)])
-%%
-clear
-load ModMeddata
+
+
 data = {};
-data.Xname = 'X';
-data.Yname = 'Y';
-data.Mname = 'M';
 data.Vname = 'V';
 data.Wname = 'W';
-data.X = X;
-data.Y = Y;
-data.M = M;
 data.STRAT = [];
 data.COV = [];%randn(N,2);
 data.V = V;
@@ -44,18 +37,62 @@ data.R = [];
 data.ModelNum = '4';
 data.Thresholds = [0.05 0.01 0.005];
 data.Indices = 1;
-data.Nboot = 5000;
+data.Nboot = 2000;
 
-% Calculate the full stats of the model
-%[ParameterToBS Parameters] = subfnProcessModelFit(data,data.ModelNum,PointEst);
-
-%tic
+% Model of interest
+data.Xname = 'A';
+data.Yname = 'C';
+data.Mname = 'B';
+data.X = A;
+data.Y = C;
+data.M = B;
 Parameters = subfnVoxelWiseProcessBatch(data);
-%toc
-
-%Parameters{1}
 subfnPrintResults(Parameters{1})
-
+% % alternate model 1
+data.Xname = 'A';
+data.Yname = 'B';
+data.Mname = 'C';
+data.X = A;
+data.Y = B;
+data.M = C;
+Parameters = subfnVoxelWiseProcessBatch(data);
+subfnPrintResults(Parameters{1})
+% % alternate model 2
+data.Xname = 'B';
+data.Yname = 'C';
+data.Mname = 'A';
+data.X = B;
+data.Y = C;
+data.M = A;
+Parameters = subfnVoxelWiseProcessBatch(data);
+subfnPrintResults(Parameters{1})
+% % alternate model 3
+data.Xname = 'C';
+data.Yname = 'A';
+data.Mname = 'B';
+data.X = C;
+data.Y = A;
+data.M = B;
+Parameters = subfnVoxelWiseProcessBatch(data);
+subfnPrintResults(Parameters{1})
+% % alternate model 4
+data.Xname = 'C';
+data.Yname = 'B';
+data.Mname = 'A';
+data.X = C;
+data.Y = B;
+data.M = A;
+Parameters = subfnVoxelWiseProcessBatch(data);
+subfnPrintResults(Parameters{1})
+% % alternate model 5
+data.Xname = 'B';
+data.Yname = 'A';
+data.Mname = 'C';
+data.X = B;
+data.Y = A;
+data.M = C;
+Parameters = subfnVoxelWiseProcessBatch(data);
+subfnPrintResults(Parameters{1})
 %%
 % MODEL 4
 fid = 1;

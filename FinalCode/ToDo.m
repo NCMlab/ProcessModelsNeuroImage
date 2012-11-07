@@ -12,7 +12,7 @@
 % 2) actually does all the stats = subfnVoxelWiseProcess
 %
 % Need to allow for voxelwise: X, M, Y, V, W, covariates
-% Add the number of mediators, subjects and voxels to the dat astructure so
+% Add the number of mediators, subjects and voxels to the data structure so
 % the program does not need to figure these out. 
 % For voxel the program needs to pull out the data for that voxel if that
 % variable is voxelwise data. This can be a series of if statements for
@@ -22,3 +22,18 @@
 % prepared there is just a boolean check is Xvoxelwise, then data.X +
 % data(:,:,i); else X=X.
 
+% 
+% subfnVoxelWiseProcessBatch
+%  This program decides whether the input is a structure or a file path.
+%  If it is a structure then the data from this single point is processed.
+%  If it is a file path then it is assumed that this is a "chunk" of data from a full image.
+%  This program cycles over voxels, if needed, and formats the data for statistical analysis 
+%      by the program:
+%      subfnProcess
+%      
+%      
+% subfnRunVoxelwiseProcess
+%  This program takes analysis parameters and data and prepares it to be analyzed 
+%  by the cluster computer. Therefore, it splits the data into chunks and saves the data chunks. 
+%  Then each chunk is sent to the program: subfnVoxelWiseProcessBatch and processed by 
+%  the cluster.
