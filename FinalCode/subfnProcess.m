@@ -1,14 +1,15 @@
 function Parameters = subfnProcess(temp)
 
 % it initially does not probe the moderator
-[pointEst Parameters] = subfnProcessModelFit(temp,1);
+
+[pointEst Parameters{1}] = subfnProcessModelFit(temp,1);
 % here we check to see if the interaction is significant.
 % if so then probe the mod for all bootstraps
 if pointEst.probeMod
     temp.ProbeMod = 1;
     % since the interaction is significant then we want to probe
     % the moderator by re-running the regression
-    [pointEst Parameters] = subfnProcessModelFit(temp,1);
+    [pointEst Parameters{1}] = subfnProcessModelFit(temp,1);
 end
 
 Nsub = size(temp.Y,1);
@@ -31,9 +32,9 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
                 [Sk2stat(ceil(temp.Thresholds(1)/2*temp.Nboot)) Sk2stat(ceil((1-temp.Thresholds(1)/2)*temp.Nboot))]);
         end
         k2.PERci = PERci;
-        Parameters.k2 = k2;
+        Parameters{1}.k2 = k2;
     end
-    
+    Nsub = size(temp.X,1);
     [nboot Nmed NParameters] = size(bstat);
     % Find the number of non-zero bstat values
     if length(find(squeeze(bstat(1,1,:)))) == 1
@@ -69,7 +70,7 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
             eval(str);
         end
         
-        str = sprintf('Parameters.%s = %s;',pointEst.names(j,:),pointEst.names(j,:));
+        str = sprintf('Parameters{1}.%s = %s;',pointEst.names(j,:),pointEst.names(j,:));
         eval(str);
     end
     
