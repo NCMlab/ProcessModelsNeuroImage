@@ -1,4 +1,4 @@
-function [beta, se, covb] = subfnLogisticRegress(Y,design)
+function [beta, se, covb, fit] = subfnLogisticRegress(Y,design)
 % Perform logistic regression using the Newton-Raphson method
 % Design needs a constant column
 [N, Ncoef] = size(design);
@@ -27,4 +27,5 @@ end
 
 covb = inv(X'*V*(X));
 se = sqrt(diag(abs(covb)));
+fit = p;
 

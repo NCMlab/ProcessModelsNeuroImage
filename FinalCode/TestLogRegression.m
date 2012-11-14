@@ -1,9 +1,10 @@
 clear
-N = 100;
+N = 200;
 M = randn(N,1);
 X = sign(M);
-a = 0.5;
+a = 1;
 M = M + a.*randn(N,1);
+M = [M  randn(N,1)];
 X = (X+1)./2;
  
 % b = 0.01;
@@ -11,13 +12,18 @@ X = (X+1)./2;
 % Y = c.*X + b.*M;
 Nboot = 2000;
 output = zeros(2,2,Nboot);
-[b_logregPE se covb] = subfnLogisticRegress(X,M);
+[b_logregPE se covb fit] = subfnLogisticRegress(X,M);
+
+LOGpropCorClass = length(find(X == round(fit)))/N
+
 LOGt = b_logregPE./se
 %b_regPE = subfnregress(X,M);
 regSTATS = subfnregstats(X,M);
 b_regPE = regSTATS.beta;
-LRt = regSTATS.tstat.t
-
+REGt = regSTATS.tstat.t
+REGfit = [ones(N,1) M]*b_regPE;
+REGpropCorClass = length(find(X == round(REGfit)))/N
+%%
 
 %corr([X M])
 b_logreg = [0;0];
