@@ -5,29 +5,29 @@
 % % subfnProcessModelFit
 % 
 % 
-% clear
-% % Test new mediation code
-% N = 112;
-% Gr = round(rand(N,1));
-% Nmed = 3;
-% V = randn(N,1); 
-% W = randn(N,1); 
-% 
-% M = randn(N,Nmed) + 10; 
-% X = zeros(N,1);
-% for i = 1:Nmed
-%     X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
-% end
-% 
-% Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
+clear
+% Test new mediation code
+N = 112;
+Gr = round(rand(N,1));
+Nmed = 3;
+V = randn(N,1); 
+W = randn(N,1); 
+
+M = randn(N,Nmed) + 10; 
+X = zeros(N,1);
+for i = 1:Nmed
+    X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
+end
+
+Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
 
 %corr([X M V W Y])
 %corr([X M Y])
 %regress(Y,[X ones(N,1)])
 %regress(M,[X ones(N,1)])
 %
-clear
-load ../PracticeData/ModMeddata
+% clear
+% load ../PracticeData/ModMeddata
 data = {};
 data.Xname = 'X';
 data.Yname = 'Y';
