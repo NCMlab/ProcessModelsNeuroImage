@@ -1,7 +1,16 @@
-function [beta, se, covb, fit] = subfnLogisticRegress(Y,design)
+function beta = subfnLogisticRegress(Y,design)
 % Perform logistic regression using the Newton-Raphson method
-% Design needs a constant column
-[N, Ncoef] = size(design);
+% A column of ones is added to the design.
+% Only the beta values are estimated here.
+% This function is written to just estimate the beta values for it is used
+% with bootstrapping. For all stats use the subfnLogisticRegressStats
+% function.
+% 
+% Written: 11/14/20012
+% Written by: Jason Steffener
+%
+[~, Ncoef] = size(design);
+N = length(Y);
 X = [ones(N,1) design];
 Ncoef = Ncoef + 1;
 % Stopping criteria
@@ -11,7 +20,6 @@ sse = 10000 ;% using the sum of square errors for the stopping criteria
 b0 = zeros(Ncoef,1);
 p = ones(N,1).*0.5;
 V = diag(0.5);
-Niter = 0;
 while sse > tol
     s = X'*(Y-p);
     m = (X'*V*X);
@@ -22,10 +30,5 @@ while sse > tol
     err = (beta - b0);
     sse = err'*err;
     b0 = beta;
-    Niter = Niter + 1;
 end
-
-covb = inv(X'*V*(X));
-se = sqrt(diag(abs(covb)));
-fit = p;
 
