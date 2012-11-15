@@ -22,6 +22,7 @@
 % prepared there is just a boolean check is Xvoxelwise, then data.X +
 % data(:,:,i); else X=X.
 
+<<<<<<< HEAD
 % 
 % subfnVoxelWiseProcessBatch
 %  This program decides whether the input is a structure or a file path.
@@ -37,3 +38,6 @@
 %  by the cluster computer. Therefore, it splits the data into chunks and saves the data chunks. 
 %  Then each chunk is sent to the program: subfnVoxelWiseProcessBatch and processed by 
 %  the cluster.
+=======
+% Calculate the standard error in the kappa-squared
+>>>>>>> develop
