@@ -1,8 +1,8 @@
-function [bstat k2stat] = subfnBootStrp(data,Nboot)
+function [bstat, k2stat] = subfnBootStrp(data,Nboot)
 % run once to find our how many values get bootstrapped
 [ParameterToBS] = subfnProcessModelFit(data,0);
 % find the size of the different variables
-[Nmed NParameters] = size(ParameterToBS.values);
+[Nmed, NParameters] = size(ParameterToBS.values);
 
 N = length(data.Y);
 NCov = size(data.COV,2);
