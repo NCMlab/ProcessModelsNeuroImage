@@ -16,12 +16,16 @@ cPIn = 0.2;
 Vin = 0;
 InterIn = 0;
 ConstIn = 10;
+% model 7
 Win = [MeffectOnY; Vin; InterIn; ConstIn; cPIn];
+% model 4
+Win = [MeffectOnY; ConstIn; cPIn];
 data.Y = data.M*MeffectOnY + data.X*cPIn + data.V*Vin + (InterIn*(data.M*MeffectOnY.*data.V)) + ones(N,1)*ConstIn;
 data.Y = data.Y + 0.2.*randn(N,1);
 data.STRAT = [];
 data.COV = [];
 data.Thresholds = [0.05];
+data.ModelNum = '4';
 %corr([data.X data.M data.V data.Y])
 
 % get data sizes
@@ -29,8 +33,8 @@ N = length(data.Y);
 NMed = size(data.M,2);
 NMod = size(data.V,2);
 % initialized parameter vector
-W = zeros(NMed + NMod + 3,1);
-options = optimset('TolX',1e-10);
+W = zeros(size(Win));
+options = optimset('TolX',1e-8);
 options = optimset(options,'MaxIter',15000);
 options = optimset(options,'MaxFunEvals',15000);
 options = optimset(options,'Algorithm','levenberg-marquardt');
@@ -41,6 +45,7 @@ options = optimset(options,'GradObj','on');
 [Wout ,FVAL,EXITFLAG,OUTPUT] = fminsearch('subfnRegressPCs',W,options,data);
 
 [Win Wout]
+
 % coefficients for the mediator
 b = Wout(1:NMed);
 % coefficient(s) for the moderator
@@ -51,7 +56,6 @@ w = Wout(NMed+NMod+1);
 const = Wout(NMed+NMod+2);
 % coefficient for the x effect
 cP = Wout(NMed+NMod+3);
-
 fit = data.M*b + data.X*cP + data.V*v + ((data.M*b).*(data.V*v))*w + ones(N,1)*const;
 resid = data.Y - fit;
 NParam = length(Win);
@@ -61,7 +65,8 @@ AIC = NSub * log(resid'*resid / NSub )  + ...
     2*(NParam)*(NParam+1)/(NSub-NParam-1) + 2*(NParam);
 
 
- Nboot = 500;
+
+ Nboot = 1000;
  Wboot = zeros(length(W),Nboot);
  for i = 1:Nboot
      Wboot(:,i) = fminsearch('subfnRegressPCs',W,options,subfnReturnBootStrapData(data));
