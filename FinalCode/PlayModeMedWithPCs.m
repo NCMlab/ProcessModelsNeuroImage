@@ -1,6 +1,6 @@
 clear
 N = 100;
-Nmed = 4;
+Nmed = 3;
 data = {};
 data.X = round(rand(N,1));
 AgeEffectsOnM = rand(Nmed,1);
@@ -11,17 +11,17 @@ data.M = zeros(N,Nmed);
 for i = 1:Nmed
     data.M(:,i) = data.X*AgeEffectsOnM(i) + 0.1.*randn(N,1);
 end
-MeffectOnY = [0.8 0 0 3]';
-cPIn = 0.2;
-Vin = 0;
-InterIn = 0;
+MeffectOnY = [0.8 1 1.5]';
+cPIn = 1.2;
+Vin = 1;
+InterIn = 0.03;
 ConstIn = 10;
 % model 7
 Win = [MeffectOnY; Vin; InterIn; ConstIn; cPIn];
 % model 4
 Win = [MeffectOnY; ConstIn; cPIn];
-data.Y = data.M*MeffectOnY + data.X*cPIn + data.V*Vin + (InterIn*(data.M*MeffectOnY.*data.V)) + ones(N,1)*ConstIn;
-data.Y = data.Y + 0.2.*randn(N,1);
+data.Y = data.M*MeffectOnY + data.X*cPIn + data.V*Vin + (InterIn*(data.M*MeffectOnY).*data.V) + ones(N,1)*ConstIn;
+data.Y = data.Y + 0.002.*randn(N,1);
 data.STRAT = [];
 data.COV = [];
 data.Thresholds = [0.05];
@@ -43,9 +43,9 @@ options = optimset(options,'GradObj','on');
 
 
 [Wout ,FVAL,EXITFLAG,OUTPUT] = fminsearch('subfnRegressPCs',W,options,data);
-
-[Win Wout]
-
+W2 = subfnregress(data.Y,[data.M data.X]);
+[Win Wout W2]
+%%
 % coefficients for the mediator
 b = Wout(1:NMed);
 % coefficient(s) for the moderator
@@ -65,7 +65,7 @@ AIC = NSub * log(resid'*resid / NSub )  + ...
     2*(NParam)*(NParam+1)/(NSub-NParam-1) + 2*(NParam);
 
 
-
+%%
  Nboot = 1000;
  Wboot = zeros(length(W),Nboot);
  for i = 1:Nboot
