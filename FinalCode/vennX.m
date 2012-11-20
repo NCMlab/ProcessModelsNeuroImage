@@ -123,7 +123,7 @@ function [error img] = vennX( data, resolution, names )
         set(a,'Color',k(round(Values(i)/MaxValue*Ncolor),:));
         set(a,'LineWidth',5);
     end
-    Str = sprintf('legend(''%s'',''%s'',''%s'')',names{3},names{1},names{2});
+    Str = sprintf('legend(''%s'',''%s'',''%s'')',names{1},names{2},names{3});
     eval(Str)
     %%
     
