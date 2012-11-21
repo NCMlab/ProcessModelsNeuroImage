@@ -373,7 +373,9 @@ switch data.ModelNum
             ParameterToBS.values = a.*(S.beta(2:Nmed+1));
             ParameterToBS.probeValues = 0;
         end
+        ParameterToBS.k2 = 0;
         Parameters = {};
+        
         if PointEstFlag
             S3 = subfnregstats(data.Y,[data.X data.COV]);
             noIntS = subfnregstats(data.Y,[data.M data.V  data.X data.COV]);

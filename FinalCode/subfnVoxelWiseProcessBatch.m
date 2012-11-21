@@ -106,7 +106,7 @@ for i = 1:Nvoxels
             end
             % Calculate the minimum critical t-value for use with the
             % Johnson-Neyman technique.
-            temp.tcrit = tinv(1 - max(Thresholds),Nsub - 4);
+            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
             temp.M = data.M(:,:,i);
             temp.V = data.V(:,:,i);
             if sum(isnan(temp.M)) == 0; Mflag = 1;end
