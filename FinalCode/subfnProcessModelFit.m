@@ -204,7 +204,7 @@ switch data.ModelNum
         % Model 2: X and M to Y
         % Model 3: X to Y
         % Indirect effect:  
-        [Ndata Nmed] = size(data.M);
+        [Ndata, Nmed] = size(data.M);
         NameStruct = cell(Nmed,1);
         for j = 1:Nmed 
             NameStruct{j} = sprintf('CondAB%d',j);
@@ -213,7 +213,6 @@ switch data.ModelNum
 
         % Model 1
         % create the interaction terms
-        S1 = cell(Nmed,1);
         Model1 = cell(Nmed);
         for j = 1:Nmed
             Model1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X(:,j).*(data.W) data.COV]);
@@ -225,13 +224,15 @@ switch data.ModelNum
         end
         % Model 2
         % B branch model
-        tempModel2 = subfnregress(data.Y,[data.M data.X data.COV]);
+        Model2 = subfnregress(data.Y,[data.M data.X data.COV]);
+        
         if data.ProbeMod %
+            
             % check to see if the interaction is significant! This should
             % only be checked the first time through.
             % if S.tstat.pval(4) < max(data.Thresholds)
             for j = 1:Nmed
-                ParameterToBS.values(j,1) = Model1{j}.beta(2)*tempModel2(2);
+                ParameterToBS.values(j,1) = Model1{j}.beta(2)*Model2(2);
             end
             minW = min(data.W);
             maxW = max(data.W);
@@ -242,14 +243,14 @@ switch data.ModelNum
                 for j = 1:Nmed
                     temp = subfnregress(data.M(:,j),[data.X (data.W-probeW(k)) data.X(:,j).*(data.W - probeW(k)) data.COV]);
                     % this is the conditional parameter
-                    ParameterToBS.values(j,k) = temp(2)*tempModel2(2);
+                    ParameterToBS.values(j,k) = temp(2)*Model2(2);
                     ParameterToBS.probeValues(1,k) = probeW(k);
                 end
             end
         else
             temp = zeros(Nmed,1);
             for j = 1:Nmed
-                temp(j) = Model1{j}.beta(2)*tempModel2(2);
+                temp(j) = Model1{j}.beta(2)*Model2(2);
             end
             ParameterToBS.values = temp;
             ParameterToBS.probeValues = 0;
@@ -257,11 +258,9 @@ switch data.ModelNum
         Parameters = {};
         ParameterToBS.k2 = 0;
         if PointEstFlag
-            Model2 = subfnregstats(data.Y,[data.M data.X data.COV]);
             % Find the R2 increase due to the interaction
             Model3 = subfnregstats(data.Y,[data.X data.COV]);
             tcrit = tinv(1 - max(data.Thresholds)/2,length(data.X) - (4 + size(data.COV,2)));
-            
             for j = 1:Nmed
                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
                 Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2);',data.Xname,data.Xname);
@@ -300,7 +299,6 @@ switch data.ModelNum
                 eval(Str);
             end
             Parameters.Model3.Model = subfnSetModelParameters(Model3);
-
             % calculate the Johnson-Neyman value
 %            JNvalue = subfnJohnsonNeyman(S.beta(2),S.covb(2,2),S.beta(4),S.covb(4,4),S.covb(2,4),data.tcrit);
 %             Parameters.JohnsonNeyman = JNvalue;
@@ -336,17 +334,19 @@ switch data.ModelNum
         % First, check to see if the interaction effect is significant or
         % not.
         Interaction = zeros(Ndata,Nmed);
-        S1 = {};
+        Model1 = cell(Nmed);
         for j = 1:Nmed
+            % Use this for loop to create the interaction term for use in
+            % Model2
             Interaction(:,j) = data.M(:,j).*(data.V);
-            S1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
-            a(j) = S1{j}.beta(2);
+            Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
+            a(j) = Model1{j}.beta(2);
         end
-        S = subfnregstats(data.Y,[data.M data.V  Interaction data.X data.COV]);
+        Model2 = subfnregstats(data.Y,[data.M data.V  Interaction data.X data.COV]);
         % check to see if the interaction is significant
         
         for j = 1:Nmed
-            if S.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
+            if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
                 ParameterToBS.probeMod = 1;
             end
         end
@@ -361,11 +361,11 @@ switch data.ModelNum
                 Interaction = zeros(Ndata,Nmed);
                 for j = 1:Nmed
                     Interaction(:,j) = data.M(:,j).*(data.V - probeV(k));
-                    S1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
-                    a(j) = S1{j}.beta(2);
+                    Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
+                    a(j) = Model1{j}.beta(2);
                 end
                  % B branch model
-                S2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
+                Model2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
                 ParameterToBS.values(:,k) = a.*(S2.beta(2:Nmed+1));
             end
             ParameterToBS.probeValues = probeV;
@@ -377,17 +377,17 @@ switch data.ModelNum
         Parameters = {};
         
         if PointEstFlag
-            S3 = subfnregstats(data.Y,[data.X data.COV]);
-            noIntS = subfnregstats(data.Y,[data.M data.V  data.X data.COV]);
-            diffS = subfnCalculateModelFitDiff(S,noIntS);
-            Parameters.EffOfInt = subfnSetModelParameters(diffS);
-            Parameters.CModel = subfnSetModelParameters(S3);
-            Parameters.BModel = subfnSetModelParameters(S);
+            Model3 = subfnregstats(data.Y,[data.X data.COV]);
+            noInt3 = subfnregstats(data.Y,[data.M data.V  data.X data.COV]);
+            diff3 = subfnCalculateModelFitDiff(Model3,noInt3);
+            Parameters.EffOfInt = subfnSetModelParameters(diff3);
+            Parameters.Model3 = subfnSetModelParameters(Model3);
+            Parameters.Model2 = subfnSetModelParameters(Model2);
             % calculate the Johnson-Neyman value
             JNvalue = subfnJohnsonNeyman(S.beta(2),S.covb(2,2),S.beta(4),S.covb(4,4),S.covb(2,4),data.tcrit);
             Parameters.JohnsonNeyman = JNvalue;
             for i = 1:Nmed
-                Parameters.AModel = subfnSetModelParameters(S1{i});
+                Parameters.Model1.Model = subfnSetModelParameters(S1{i});
                 Parameters.A{i} = subfnSetParameters('A', S1{i},2);
                 Parameters.Aconst{i} = subfnSetParameters('Aconst', S1{i},1);
                 Parameters.B{i} = subfnSetParameters('B', S,i + 1);
