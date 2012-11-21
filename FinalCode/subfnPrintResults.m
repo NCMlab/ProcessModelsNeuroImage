@@ -107,8 +107,6 @@ switch ModelNum
                  ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
                 ThresholdField = ThresholdField{1};           
             for k = 2:length(Parameters.CondAB1)
-
-
                 limits = getfield(Parameters.CondAB1{k}.BCaci,ThresholdField);
                 fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',...
                     Parameters.CondAB1{k}.probeValue,...
@@ -118,5 +116,4 @@ switch ModelNum
                     limits(2));
             end
         end
-        
-end
+end % switch ModelNum

@@ -259,6 +259,7 @@ switch data.ModelNum
         ParameterToBS.k2 = 0;
         if PointEstFlag
             % Find the R2 increase due to the interaction
+            Model2 = subfnregstats(data.Y,[data.M data.X data.COV]);
             Model3 = subfnregstats(data.Y,[data.X data.COV]);
             tcrit = tinv(1 - max(data.Thresholds)/2,length(data.X) - (4 + size(data.COV,2)));
             for j = 1:Nmed
@@ -366,11 +367,11 @@ switch data.ModelNum
                 end
                  % B branch model
                 Model2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
-                ParameterToBS.values(:,k) = a.*(S2.beta(2:Nmed+1));
+                ParameterToBS.values(:,k) = a.*(Model2.beta(2:Nmed+1));
             end
             ParameterToBS.probeValues = probeV;
         else
-            ParameterToBS.values = a.*(S.beta(2:Nmed+1));
+            ParameterToBS.values = a.*(Model2.beta(2:Nmed+1));
             ParameterToBS.probeValues = 0;
         end
         ParameterToBS.k2 = 0;
@@ -384,20 +385,43 @@ switch data.ModelNum
             Parameters.Model3 = subfnSetModelParameters(Model3);
             Parameters.Model2 = subfnSetModelParameters(Model2);
             % calculate the Johnson-Neyman value
-            JNvalue = subfnJohnsonNeyman(S.beta(2),S.covb(2,2),S.beta(4),S.covb(4,4),S.covb(2,4),data.tcrit);
+            JNvalue = subfnJohnsonNeyman(Model2.beta(2),Model2.covb(2,2),Model2.beta(4),Model2.covb(4,4),Model2.covb(2,4),data.tcrit);
             Parameters.JohnsonNeyman = JNvalue;
-            for i = 1:Nmed
-                Parameters.Model1.Model = subfnSetModelParameters(S1{i});
-                Parameters.A{i} = subfnSetParameters('A', S1{i},2);
-                Parameters.Aconst{i} = subfnSetParameters('Aconst', S1{i},1);
-                Parameters.B{i} = subfnSetParameters('B', S,i + 1);
-                Parameters.Int{i} = subfnSetParameters('Int',S,1 + Nmed + 1 + i);
+            for j = 1:Nmed
+                Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
+                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2);',data.Xname,data.Xname);
+                eval(Str)
+                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,j+1);',[data.Mname '_' num2str(j)],[data.Mname '_' num2str(j)]);
+                eval(Str)
+%                Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x%s'',Model1{j},4);',data.Xname,data.Wname,data.Xname,data.Wname);
+%                eval(Str)
+                for k = 1:size(data.COV,2)
+                    Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},4+k);',data.COVname{k},data.COVname{k});
+                    eval(Str)
+                end
+                Parameters.Model1{j}.Model = subfnSetModelParameters(Model1{j});
+                Parameters.Model1{j}.Outcome = data.Mname;
+%                Parameters.JNvalue = subfnJohnsonNeyman(Model1{j}.beta(2),Model1{j}.covb(2,2),Model1{j}.beta(4),Model1{j}.covb(4,4),Model1{j}.covb(2,4),tcrit);
+%        
+%                 Parameters.Model1.Model = subfnSetModelParameters(Model1{i});
+%                 Parameters.A{i} = subfnSetParameters('A', Model1{i},2);
+%                 Parameters.Aconst{i} = subfnSetParameters('Aconst', Model1{i},1);
+%                 Parameters.B{i} = subfnSetParameters('B', Model2,i + 1);
+%                 Parameters.Int{i} = subfnSetParameters('Int',Model2,1 + Nmed + 1 + i);
             end
-            Parameters.Bconst = subfnSetParameters('Bconst',S,1);
-            Parameters.V = subfnSetParameters('V',S,Nmed+2);
-            Parameters.C = subfnSetParameters('C',S3,2);
-            Parameters.Cconst = subfnSetParameters('Cconst',S3,1);
-            Parameters.CP = subfnSetParameters('Cconst',S,1+Nmed+1+Nmed+1);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,Nmed+2);',data.Vname,data.Vname);
+            eval(Str)
+
+                Str = sprintf('Parameters.Model2{j}.%s=subfnSetParameters(''%s'',Model2{j},2);',data.Vname,data.Vname);
+                eval(Str)
+                Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x%s'',Model1{j},4);',data.Xname,data.Wname,data.Xname,data.Wname);
+                eval(Str)
+            
+            Parameters.Bconst = subfnSetParameters('Bconst',Model2,1);
+            Parameters.V = subfnSetParameters('V',Model2,Nmed+2);
+            Parameters.C = subfnSetParameters('C',Model3,2);
+            Parameters.Cconst = subfnSetParameters('Cconst',Model3,1);
+            Parameters.CP = subfnSetParameters('Cconst',Model2,1+Nmed+1+Nmed+1);
             
         end
 end
