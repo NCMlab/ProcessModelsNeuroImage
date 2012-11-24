@@ -284,9 +284,9 @@ switch data.ModelNum
             %diffS = subfnCalculateModelFitDiff(S,noIntS);
             %Parameters.EffOfInt = subfnSetModelParameters(diffS);
             Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
-            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,2);',data.Xname,data.Xname);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,2);',data.Mname,data.Mname);
             eval(Str)
-            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,3);',data.Mname,data.Mname);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,3);',data.Xname,data.Xname);
             eval(Str)
             Parameters.Model2.Model = subfnSetModelParameters(Model2);
             Parameters.Model2.Outcome = data.Yname;
@@ -296,7 +296,9 @@ switch data.ModelNum
             Str = sprintf('Parameters.Model3.%s = subfnSetParameters(''%s'', Model3, 2);',data.Xname,data.Xname);
             eval(Str);
             for j = 1:size(data.COV,2)
-                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+1+j);',data.COVname{j},data.COVname{j});
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model2,3+j);',data.COVname{j},data.COVname{j});
+                eval(Str);
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2+j);',data.COVname{j},data.COVname{j});
                 eval(Str);
             end
             Parameters.Model3.Model = subfnSetModelParameters(Model3);
@@ -343,16 +345,16 @@ switch data.ModelNum
             Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
             a(j) = Model1{j}.beta(2);
         end
-        Model2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
+        tempModel2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
         % check to see if the interaction is significant
         
         for j = 1:Nmed
-            if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
+            if tempModel2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
                 ParameterToBS.probeMod = 1;
             end
         end
         if data.ProbeMod
-            ParameterToBS.values(1,1) = a.*(S.beta(2:Nmed+1));
+            ParameterToBS.values(1,1) = a.*(tempModel2.beta(2:Nmed+1));
             minV = min(data.V);
             maxV = max(data.V);
             rangeV = maxV - minV;
@@ -366,20 +368,21 @@ switch data.ModelNum
                     a(j) = Model1{j}.beta(2);
                 end
                 % B branch model
-                Model2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
-                ParameterToBS.values(:,k) = a.*(Model2.beta(2:Nmed+1));
+                tempModel2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
+                ParameterToBS.values(:,k) = a.*(tempModel2.beta(2:Nmed+1));
             end
             ParameterToBS.probeValues = probeV;
         else
-            ParameterToBS.values = a.*(Model2.beta(2:Nmed+1));
+            ParameterToBS.values = a.*(tempModel2.beta(2:Nmed+1));
             ParameterToBS.probeValues = 0;
         end
         ParameterToBS.k2 = 0;
         Parameters = {};
         
         if PointEstFlag
+            Model2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
             Model3 = subfnregstats(data.Y,[data.X data.COV]);
-            noInt3 = subfnregstats(data.Y,[data.M data.V  data.X data.COV]);
+            noInt3 = subfnregstats(data.Y,[data.M data.V data.X data.COV]);
             diff3 = subfnCalculateModelFitDiff(Model3,noInt3);
             Parameters.EffOfInt = subfnSetModelParameters(diff3);
             Parameters.Model3.Model = subfnSetModelParameters(Model3);
@@ -421,7 +424,9 @@ switch data.ModelNum
                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
             end
             Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+            Parameters.Model2.Outcome = data.Yname;
             Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
+            Parameters.Model3.Outcome = data.Yname;
             Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2);',data.Xname,data.Xname);
             eval(Str)
 
@@ -437,7 +442,6 @@ switch data.ModelNum
             
         end
 end
-
 if PointEstFlag
     Parameters.Xname = data.Xname;
     Parameters.Mname = data.Mname;
@@ -446,4 +450,7 @@ if PointEstFlag
     Parameters.Wname = data.Wname;
     Parameters.ModelNum = data.ModelNum;
     Parameters.SampleSize = length(data.X);
+% else
+%     Parameters.Thresholds = data.Thresholds;
+%     Parameters.Nboot = data.Nboot;
 end

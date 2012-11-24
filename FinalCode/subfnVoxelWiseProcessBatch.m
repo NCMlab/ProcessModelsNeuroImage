@@ -36,7 +36,6 @@ elseif isstruct(InData)
     [Nsub Nmed Nvoxels] = size(data.M);
     Parameters = cell(Nvoxels,1);
     Nboot = data.Nboot;
-    
 end
 data.ProbeMod = 0;
 
@@ -118,8 +117,11 @@ for i = 1:Nvoxels
     
     if AllDataFlag
         Parameters = subfnProcess(temp);
+        Parameters{i}.Nboot = data.Nboot;
+        Parameters{i}.Thresholds = data.Thresholds;
     end
 end
+
 if ischar(InData)
     % save the results to a mat file so that the main program can load them up
     Str = ['save ' fullfile(PathName,['Results_' tag]) ' Parameters'];
