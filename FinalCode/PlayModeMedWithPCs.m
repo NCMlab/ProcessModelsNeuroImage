@@ -1,3 +1,6 @@
+% this i sthe code I am working on for performing moderated mediation using
+% PCA maps.
+% 
 clear
 N = 100;
 Nmed = 1;
