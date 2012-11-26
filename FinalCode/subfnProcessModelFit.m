@@ -345,6 +345,7 @@ switch data.ModelNum
             Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
             a(j) = Model1{j}.beta(2);
         end
+        clear tempModel2
         tempModel2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
         % check to see if the interaction is significant
         
@@ -380,6 +381,15 @@ switch data.ModelNum
         Parameters = {};
         
         if PointEstFlag
+            Interaction = zeros(Ndata,Nmed);
+            Model1 = cell(Nmed);
+            for j = 1:Nmed
+                % Use this for loop to create the interaction term for use in
+                % Model2
+                Interaction(:,j) = data.M(:,j).*(data.V);
+                Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
+                a(j) = Model1{j}.beta(2);
+            end
             Model2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
             Model3 = subfnregstats(data.Y,[data.X data.COV]);
             noInt3 = subfnregstats(data.Y,[data.M data.V data.X data.COV]);
