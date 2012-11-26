@@ -466,6 +466,11 @@ switch data.ModelNum
         %   /\ /\
         %  /  W  \
         % X       Y
+        % This is a moderated mediation model. The moderator (W) affects 
+        % the relationship between X and M and between M and Y. The 
+        % conditional effect of X on Y via M is evaluated at multiple 
+        % moderation values. The confidence intervals for each of these 
+        % moderating values are calculated via bootstrapping. 
       
 end
 if PointEstFlag
