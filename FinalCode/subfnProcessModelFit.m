@@ -461,17 +461,76 @@ switch data.ModelNum
         end
     case '58'
         %
-        %     M 
+        %     M
         %    / \
         %   /\ /\
         %  /  W  \
         % X       Y
-        % This is a moderated mediation model. The moderator (W) affects 
-        % the relationship between X and M and between M and Y. The 
-        % conditional effect of X on Y via M is evaluated at multiple 
-        % moderation values. The confidence intervals for each of these 
-        % moderating values are calculated via bootstrapping. 
-      
+        % This is a moderated mediation model. The moderator (W) affects
+        % the relationship between X and M and between M and Y. The
+        % conditional effect of X on Y via M is evaluated at multiple
+        % moderation values. The confidence intervals for each of these
+        % moderating values are calculated via bootstrapping.
+        [Ndata, Nmed] = size(data.M);
+        NameStruct = cell(Nmed,1);
+        for j = 1:Nmed
+            NameStruct{j} = sprintf('CondAB%d',j);
+        end
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
+        
+        
+        Model1 = cell(Nmed);
+        Interaction = zeros(Ndata,Nmed);
+        a = zeros(Nmed,1);
+        for j = 1:Nmed
+            Model1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X.*(data.W) data.COV]);
+            % check each interaction term and set the flag here for whether
+            % to probe the interaction for BRANCH A.
+            if Model1{j}.tstat.pval(4) < max(data.Thresholds)
+                ParameterToBS.probeMod = 1;
+            end
+            % Use this for loop to create the interaction term for use in
+            % Model2
+            Interaction(:,j) = data.M(:,j).*(data.W);
+            a(j) = Model1{j}.beta(2);
+        end
+        clear tempModel2
+        Model2 = subfnregstats(data.Y,[data.M data.W Interaction data.X data.COV]);
+        % check to see if the BRANCH B interaction is significant
+        for j = 1:Nmed
+            if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
+                ParameterToBS.probeMod = 1;
+            end
+        end
+        % If either of the interactions are significant then probe them
+         if data.ProbeMod
+            % calculate the condition effect when the moderator equals zero
+            ParameterToBS.values(1,1) = (tempModel2.beta(2:Nmed+1));
+            minW = min(data.W);
+            maxW = max(data.W);
+            rangeW = maxW - minW;
+            stepW = rangeW/(Nsteps -1);
+            probeW = [0 minW:stepW:maxW];
+            for k = 2:Nsteps + 1
+                Interaction = zeros(Ndata,Nmed);
+                for j = 1:Nmed
+                    Interaction(:,j) = data.M(:,j).*(data.W - probeW(k));
+                    tempModel1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X.*(data.W - probeW(k)) data.COV]);
+                    ABranchEffect(j) = tempModel1{j}.beta(2) + tempModel1{j}.beta(4).*probeW(k);
+                    BBranchEffect(j) = tempModel2.beta(1+j) + tempModel2.beta(1+Nmed+1+j).*probeW(k);
+                end
+                % B branch model
+                tempModel2 = subfnregstats(data.Y,[data.M (data.W-probeW(k)) Interaction data.X data.COV]);      
+                for j = 1:Nmed
+                     BBranchEffect(j) = tempModel2.beta(1+j) + tempModel2.beta(1+Nmed+1+j).*probeW(k);
+                end
+                ParameterToBS.values(:,k) = ABranchEffect.*BBranchEffect;
+            end
+            ParameterToBS.probeValues = probeW;
+         else
+            ParameterToBS.values = a.*Model2.beta(2:Nmed+1);
+            ParameterToBS.probeValues = 0;
+        end
 end
 if PointEstFlag
     Parameters.Xname = data.Xname;
