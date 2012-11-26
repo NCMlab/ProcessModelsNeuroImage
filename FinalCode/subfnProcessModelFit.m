@@ -459,6 +459,14 @@ switch data.ModelNum
 %             Parameters.CP = subfnSetParameters('Cconst',Model2,1+Nmed+1+Nmed+1);
             
         end
+    case '58'
+        %
+        %     M 
+        %    / \
+        %   /\ /\
+        %  /  W  \
+        % X       Y
+      
 end
 if PointEstFlag
     Parameters.Xname = data.Xname;
