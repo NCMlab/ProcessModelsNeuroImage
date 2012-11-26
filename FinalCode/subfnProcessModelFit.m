@@ -10,34 +10,17 @@ Parameters = {};
 Nsteps = 11;
 switch data.ModelNum
     case '1'
-<<<<<<< HEAD
-
-=======
         % 
         %     M
         %     |
         % X ----- Y
         % 
->>>>>>> develop
         ParameterToBS = struct('names','CondMod','values',zeros(1,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
         Ndata = size(data.Y,1);
-<<<<<<< HEAD
-
-        % the code below works if there is a covariate or not
-        
-        % whether or not to run the regression at multiple values of the moderator
-=======
->>>>>>> develop
         % First, check to see if the interaction effect is significant or
         % not.
-
         Model1 = subfnregstats(data.Y,[data.X data.M (data.M).*data.X data.COV]);
-<<<<<<< HEAD
-        % When this program is called duk2ring boot strapping it needs to
-
-=======
         % When this program is called it needs to
->>>>>>> develop
         % know whether or not to probe the interaction.
         % It should only check to see if the interaction is significant for
         % when the point estimate is being tested and not for any boot
