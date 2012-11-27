@@ -53,7 +53,6 @@ for k = 1:NParameters
         z1mA = norminv(1 - alpha/2);
         ThetaDiff = (sum(theta(:,j))/N) - theta(:,j);
         acc = (sum(ThetaDiff.^3))/(6*(sum(ThetaDiff.^2))^(3/2));
-        
         Alpha1(j,k) = normcdf(zh0 + (zh0+zA)/(1 - acc*(zh0 + zA)));
         Alpha2(j,k) = normcdf(zh0 + (zh0+z1mA)/(1 - acc*(zh0 + z1mA)));
     end

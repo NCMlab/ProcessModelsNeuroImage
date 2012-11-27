@@ -1,0 +1,5 @@
+For this model many of the steps will work in conjunction with Dr, Chris Habekc's package. But some of the steps need to be modified or replaced when working with moderated-mediation models. In particular the model fitting which is perfored using the code: minAIC_fit_f.m which is called by the routine behav_fir_bootstrap_module_f.m at line #257. The calculation of the parameter estimates needs to be replaced in some models with a fminsearch operation at line #54.
+
+Looking at Chris's code the permutation testing can take place on the cluster fairly easily because the key image is the variance image. And this image is calculated via summation over each permutation. Therefore the jobs can be split then put back together not problem.
+
+
