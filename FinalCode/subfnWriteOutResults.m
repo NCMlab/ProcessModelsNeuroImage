@@ -1,4 +1,4 @@
-function [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters)
+function [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,OutputFolder)
 
 V = AnalysisParameters.V;
 ModelNum = AnalysisParameters.ModelNum;
@@ -139,7 +139,8 @@ switch ModelNum
 
         for i = 1:length(OutData)
             Vo = V;
-            Vo.fname = fullfile(Vo.fname,[OutName OutData{i}.name '.nii']);
+            
+            Vo.fname = fullfile(OutputFolder,[OutName OutData{i}.name '.nii']);
             Vo.descrip = '';
             Vo.n = [1 1];
             Y = zeros(Vo.dim);
