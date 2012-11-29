@@ -93,8 +93,7 @@ fprintf(fid,'%s\n',['subfnVoxelWiseProcessBatch(''' InDataPath ''');']);
 fprintf(fid,'exit\n');
 fprintf(fid,'EOF\n');
 fclose(fid);
-
-Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=1G ' jobPath];
+Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=100M ' jobPath];
 unix(Str);
 % 
 % % Once it is all done put the data back together
