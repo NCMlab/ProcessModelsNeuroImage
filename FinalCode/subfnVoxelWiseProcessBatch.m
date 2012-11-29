@@ -116,7 +116,8 @@ for i = 1:Nvoxels
     end
     
     if AllDataFlag
-        Parameters = subfnProcess(temp);
+        tempParameters = subfnProcess(temp);
+        Parameters{i} = tempParameters{1};
         Parameters{i}.Nboot = data.Nboot;
         Parameters{i}.Thresholds = data.Thresholds;
     end
