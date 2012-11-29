@@ -117,7 +117,17 @@ for i = 1:Nvoxels
             if sum(isnan(temp.V)) == 0; Vflag = 1;end
 
             if Mflag && Vflag 
-
+                AllDataFlag = 1;
+            end
+        case '58'
+            if isempty(data.W)
+                errordlg('The modulator variable is missing');
+            end
+            temp.M = data.M(:,:,i);
+            temp.W = data.W(:,:,i);
+            if sum(isnan(temp.M)) == 0; Mflag = 1;end
+            if sum(isnan(temp.W)) == 0; Wflag = 1;end
+            if Mflag && Wflag
                 AllDataFlag = 1;
             end
     end
