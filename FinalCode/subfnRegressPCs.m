@@ -11,12 +11,12 @@ switch ModelNum
         const = coef(NMed+1);
         % coefficient for the x effect
         cP = coef(NMed+2);
-        
         % weighted sum of mediator PCs + X effect + weighted sum of moderator PCs +
         % interaction effect
         fit = data.M*b + data.X*cP + ones(N,1)*const;
         err = (data.Y - fit);
         F = err'*err;
+        
     case '14'
         % get data sizes
         N = length(data.Y);
