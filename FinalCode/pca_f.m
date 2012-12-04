@@ -77,5 +77,5 @@ if ( (remove_row_means == 1) & (nOfPCs ~= size(target_images, 2) - 1) ) ...
    | ...
    ( (remove_row_means == 0) & (nOfPCs ~= size(target_images, 2)) )
 
-   disp(['     Note: The number of non-zero eigenvalues is ', num2str(nOfPCs), '.'])
+   %disp(['     Note: The number of non-zero eigenvalues is ', num2str(nOfPCs), '.'])
 end

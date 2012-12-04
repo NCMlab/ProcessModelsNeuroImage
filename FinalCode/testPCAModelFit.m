@@ -1,7 +1,7 @@
 clear
 N = 100;
 Nmed = 1;
-NVox = 1000;
+NVox = 100000;
 data = {};
 data.X = round(rand(N,1));
 AgeEffectsOnM = rand(Nmed,1);

@@ -1,4 +1,5 @@
-function subfnPCAModelFit(data)
+%function subfnPCAModelFit(data)
+tic
 % This program needs to receive the entire data set, all voxels because it
 % is doing the PCA.
 
@@ -13,6 +14,32 @@ combo_matrix = boolean_enumeration_f(NPCs);
 NCombos = size(combo_matrix,1);
 remove_row_means = 1;
 LOOerrorMatrix = zeros(NSub,NCombos);
+% Create bootstrap resamples
+Nboot = 1000;
+BootStrapResamples = zeros(NSub,Nboot,'uint16');
+if ~isempty(data.STRAT)
+    Gr1 = find(data.STRAT == 0);
+    NGr1 = length(Gr1);
+    Gr2 = find(data.STRAT == 1);
+    NGr2 = length(Gr2);
+else
+    NGr1 = [];
+    NGr2 = [];
+end
+for i = 1:Nboot
+    if isempty(data.STRAT)
+        Samp =  floor(N*rand(N,1))+1;
+    else
+        Samp1 = floor(NGr1*rand(NGr1,1))+1;
+        Samp2 = floor(NGr2*rand(NGr2,1))+1+NGr1;
+        Samp = [Samp1; Samp2];
+    end
+    BootStrapResamples(:,i) = Samp;
+end
+% Create the array that will contain all the bootstrap resample IMAGES
+BootStrapResampleImages = zeros(NVox,Nboot,'single');
+
+    
 for i = 1:NSub
     % Create leave one out matrix
     CurrentSubjects = [1:NSub];
@@ -34,10 +61,10 @@ for i = 1:NSub
             % used instead of an iterative model fit.
             % Used the selected combination of SSFs for this
             selected_PCs = find(combo_matrix(j,:));
-            behav_fit_coef = subfnregress(tempdata.Y,[ssfSubset(:,selected_PCs)]);
+            behav_fit_coef = subfnregress(tempdata.Y, [ssfSubset(:,selected_PCs) tempdata.X]);
             % create the SSF image
             temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
-            behav_fit_composite_PC_image              = zeros(NVox, 1);
+            behav_fit_composite_PC_image = zeros(NVox, 1);
             behav_fit_composite_PC_image = temp / norm(temp);
             clear temp;
             %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
@@ -50,11 +77,57 @@ for i = 1:NSub
     end
 end
 sLOOerrorMatrix = sum(LOOerrorMatrix);
-best_set = combo_matrix(find(sLOOerrorMatrix == min(sLOOerrorMatrix)),:);
+selected_PCs = find(combo_matrix(find(sLOOerrorMatrix == min(sLOOerrorMatrix)),:));
+fprintf(1,'The optimale PCs were selected\n');
 
-% Now use this best set of PCs 
+% Create the point estimate image
+% perform the PCA on the original full data set
+[lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(data.M)', remove_row_means);
+ssf = squeeze(data.M) * eigenimages_noZeroes;
+ssfSubset = ssf(:,1:NPCs);
+
+PE_behav_fit_coef = subfnregress(data.Y,[ssfSubset(:,selected_PCs) data.X]);
+% create the SSF image
+temp = eigenimages_noZeroes(:, selected_PCs) * PE_behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
+PE_behav_fit_composite_PC_image = zeros(NVox, 1);
+PE_behav_fit_composite_PC_image = temp / norm(temp);
+clear temp;
+%%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
+PE_behav_fit_composite_PC_image_ssfs = squeeze(data.M) * PE_behav_fit_composite_PC_image;
+
+% Now use this best set of PCs for bootstrapping
 for i = 1:Nboot
+    clear tempdata
+    tempdata.X = data.X(BootStrapResamples(:,i));
+    tempdata.M = data.M(BootStrapResamples(:,i),:,:);
+    tempdata.Y = data.Y(BootStrapResamples(:,i));
+    tempdata.ModelNum = data.ModelNum;
+    % Apply PCA
+    [lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(tempdata.M)', remove_row_means);
+    % calculate the subject scaling factors
+    ssf = squeeze(tempdata.M) * eigenimages_noZeroes;
+    ssfSubset = ssf(:,1:NPCs);
+    behav_fit_coef = subfnregress(tempdata.Y, [ssfSubset(:,selected_PCs) tempdata.X]);
+    % create the SSF image
+    temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
+    behav_fit_composite_PC_image = zeros(NVox, 1);
+    behav_fit_composite_PC_image = temp / norm(temp);
+    clear temp;
+    BootStrapResampleImages(:,i) = behav_fit_composite_PC_image;
 end
+clear eigenimages_noZeroes tempdata
+% create variance map
+Vmap = var(BootStrapResampleImages,0,2);
+% create standard deviation map
+SDmap = std(BootStrapResampleImages,0,2);
+% Create Z-map
+Zmap = PE_behav_fit_composite_PC_image./SDmap;
+% create BCaci confidence intervals for each voxel
+
+% create percentile based confidecne intervals for each voxel
+toc
+
+
 
 % for i = 1:Nsub
 %   Leave one out matrix=(Nsub-x-Ncombinations_of_PCs)
@@ -90,6 +163,8 @@ end
 % conditional indirect effect
 % save to file:
 %   parameter maps
+
+
 %   conditional indirect effect maps at the probe values
 %   confidence interval maps for the parameter maps
 %   p-value maps for the parameter maps
