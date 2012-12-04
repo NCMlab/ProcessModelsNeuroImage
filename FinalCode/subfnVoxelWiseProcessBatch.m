@@ -82,10 +82,10 @@ for i = 1:Nvoxels
             end
 
         case '4'
-            temp.X = data.X(:,:,i);
+            temp.X = data.X;
             temp.M = data.M(:,:,i);
-            temp.Y = data.Y(:,:,i);
-            temp.COV = data.COV(:,:,i);
+            temp.Y = data.Y;
+            temp.COV = data.COV;
             if sum(isnan(temp.M)) == 0; 
                 AllDataFlag = 1;
             end

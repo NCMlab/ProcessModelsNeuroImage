@@ -35,6 +35,7 @@ for i = 1:NJobSplit - 1
     
     VoxelForThisJob =[(i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob];
     data = AllData;
+    data.Nboot = Nboot;
 
     switch ModelNum
         case '4'
