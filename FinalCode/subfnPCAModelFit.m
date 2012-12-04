@@ -39,8 +39,20 @@ end
 % Create the array that will contain all the bootstrap resample IMAGES
 BootStrapResampleImages = zeros(NVox,Nboot,'single');
 
-    
+%% Leave one out model selection
+fprintf(1,'** Starting the leave one out process **\n');    
 for i = 1:NSub
+    tic
+    % everything in this loop should be made into a job for cluster
+    % submission and the only thing returned is the LOO values. Each call
+    % creates its own combo_matrix
+    % 
+    % Inputs: 
+    %   data
+    %   left out subject
+    %   NPCs
+    % Outputs: LOO vector
+    fprintf(1,' working on subject %4d of %4d: ',i,NSub);
     % Create leave one out matrix
     CurrentSubjects = [1:NSub];
     CurrentSubjects(i) = 0;
@@ -48,15 +60,16 @@ for i = 1:NSub
     tempdata.X = data.X(CurrentSubjects);
     tempdata.M = data.M(CurrentSubjects,:,:);
     tempdata.Y = data.Y(CurrentSubjects); 
-    tempdata.ModelNum = data.ModelNum;
+    tempdata.ModelNum = AnalysisParameters.ModelNum;
     % apply PCA
     % but squeeze out the multiple mediator dimension
     [lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(tempdata.M)', remove_row_means);
     ssf = squeeze(tempdata.M) * eigenimages_noZeroes;
     ssfSubset = ssf(:,1:NPCs);
+    
     for j = 1:NCombos
             % Select the current combination os PCs
-        if tempdata.ModelNum == '4'
+        if AnalysisParameters.ModelNum == '4'
             % This is the easy case where simple linear regression can be
             % used instead of an iterative model fit.
             % Used the selected combination of SSFs for this
@@ -66,7 +79,6 @@ for i = 1:NSub
             temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
             behav_fit_composite_PC_image = zeros(NVox, 1);
             behav_fit_composite_PC_image = temp / norm(temp);
-            clear temp;
             %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
             behav_fit_composite_PC_image_ssfs = squeeze(tempdata.M) * behav_fit_composite_PC_image;
             % forward apply this SSF to the left out subjects raw data
@@ -75,12 +87,13 @@ for i = 1:NSub
             LOOerrorMatrix(i,j) = [predictedValue + behav_fit_coef(1) - data.Y(i)]^2;
         end
     end
+    t = toc;
+    fprintf(1,'%0.2f sec\n',t);
 end
 sLOOerrorMatrix = sum(LOOerrorMatrix);
 selected_PCs = find(combo_matrix(find(sLOOerrorMatrix == min(sLOOerrorMatrix)),:));
-fprintf(1,'The optimale PCs were selected\n');
-
-% Create the point estimate image
+fprintf(1,'The optimal PCs were selected\n');
+%% Create the point estimate image
 % perform the PCA on the original full data set
 [lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(data.M)', remove_row_means);
 ssf = squeeze(data.M) * eigenimages_noZeroes;
@@ -95,7 +108,7 @@ clear temp;
 %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
 PE_behav_fit_composite_PC_image_ssfs = squeeze(data.M) * PE_behav_fit_composite_PC_image;
 
-% Now use this best set of PCs for bootstrapping
+%% Now use this best set of PCs for bootstrapping
 for i = 1:Nboot
     clear tempdata
     tempdata.X = data.X(BootStrapResamples(:,i));
