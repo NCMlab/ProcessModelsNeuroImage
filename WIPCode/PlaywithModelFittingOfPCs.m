@@ -13,7 +13,10 @@ Age = scores1(:,4) + randn(NSub,1)*0.25 + Y;
 Y = scores1(:,[1 3 5 7])*[1 0.4 0.3 0.2]'+randn(NSub,1).*0.25 + Age.*0.25;
 corr([Age Y scores1(:,1:7)])
     
-fullmodel_beta = regress(Y,[ones(NSub,1) scores1(:,1:NPCs)]);
+fullmodel_beta = regress(Y,[ones(NSub,1) scores1(:,1:NPCs) Age])
+partialmodel_beta = regress(Y,[ones(NSub,1) scores1(:,[1 3 5]) Age ])
+
+
 
 combo_matrix = boolean_enumeration_f(NPCs);
 % how many combos are there?
