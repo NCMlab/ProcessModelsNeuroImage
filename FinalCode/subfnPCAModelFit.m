@@ -2,7 +2,8 @@
 tic
 % This program needs to receive the entire data set, all voxels because it
 % is doing the PCA.
-
+ModelNum = AnalysisParameters.ModelNum;
+ModelNum = '4';
 [NSub NMed NVox] = size(data.M);
 if NMed > 1
     error('This doesn''t work with multiple mediators yet!');
@@ -60,7 +61,7 @@ for i = 1:NSub
     tempdata.X = data.X(CurrentSubjects);
     tempdata.M = data.M(CurrentSubjects,:,:);
     tempdata.Y = data.Y(CurrentSubjects); 
-    tempdata.ModelNum = AnalysisParameters.ModelNum;
+    tempdata.ModelNum = ModelNum;
     % apply PCA
     % but squeeze out the multiple mediator dimension
     [lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(tempdata.M)', remove_row_means);

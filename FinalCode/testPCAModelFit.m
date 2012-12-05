@@ -1,7 +1,7 @@
 clear
 N = 100;
 Nmed = 1;
-NVox = 100000;
+NVox = 10000;
 data = {};
 data.X = round(rand(N,1));
 AgeEffectsOnM = rand(Nmed,1);
@@ -25,15 +25,22 @@ ConstIn = 10;
 % model 4
 Win = [MeffectOnY; ConstIn; cPIn];
 data.Y = data.M(:,1,1)*MeffectOnY + data.X*cPIn + ones(N,1)*ConstIn;
-
 data.Y = data.Y + 0.000002.*randn(N,1);
+
+data.V = randn(N,5);
+
 data.STRAT = [];
 data.COV = [];
 data.Thresholds = [0.05];
-data.ModelNum = '4';
 
+NPCs = 5;
+[c1 scores1 latent1] = pca(squeeze(data.M),'NumComponents',NPCs);
 
+data.ModelNum = '14';
+tempdata = data;
+tempdata.M = scores1(:,1:NPCs);
 
+beta = subfnCallRegressPCs(tempdata,data.ModelNum);
 
 %corr([data.X data.M data.V data.Y])
 
