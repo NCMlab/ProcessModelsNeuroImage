@@ -11,8 +11,7 @@ if ischar(InData)
     tag = InData(end-3:end);
     [Nsub Nmed Nvoxels] = size(data.M);
     Parameters = cell(Nvoxels,1);
-    data.Thresholds = Thresholds;
-    data.ModelNum = ModelNum;
+
     % If this voxelwise data than try to run in parallel
     
 %     try
@@ -123,7 +122,8 @@ for i = 1:Nvoxels
     end
     
     if AllDataFlag
-        Parameters = subfnProcess(temp);
+        tempParameters = subfnProcess(temp);
+        Parameters{i} = tempParameters{:};
         Parameters{i}.Nboot = data.Nboot;
         Parameters{i}.Thresholds = data.Thresholds;
     end
