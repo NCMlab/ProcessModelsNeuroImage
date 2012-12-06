@@ -65,7 +65,7 @@ for i = 1:NJobSplit - 1
     fprintf(fid,'EOF\n');
     fclose(fid);
 %    Str = ['! qsub  ' jobPath];
-    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=100M ' jobPath];
+    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M -l h_vmem=500M' jobPath];
     unix(Str);
 end
 % now run the last chunk of data
@@ -95,7 +95,7 @@ fprintf(fid,'exit\n');
 fprintf(fid,'EOF\n');
 fclose(fid);
 
-Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=100M ' jobPath];
+Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M -l h_vmem=500M' jobPath];
 unix(Str);
 % 
 % % Once it is all done put the data back together

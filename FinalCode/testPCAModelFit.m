@@ -34,7 +34,12 @@ data.COV = [];
 data.Thresholds = [0.05];
 
 NPCs = 5;
-[c1 scores1 latent1] = pca(squeeze(data.M),'NumComponents',NPCs);
+
+remove_row_means=1;
+[lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(data.M)', remove_row_means);
+
+
+
 
 data.ModelNum = '14';
 tempdata = data;
