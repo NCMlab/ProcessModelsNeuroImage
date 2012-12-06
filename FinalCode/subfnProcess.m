@@ -44,6 +44,8 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
     % calculate the Confidence intervals on the parameters that
     % need to be bootstrapped.
     [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst);
+    pValue = length(find(pointEst.values>bstat))/temp.Nboot;
+    pointEst.pValue = pValue;
     % Then fill in the appropriate Parameters with the confidence
     % intervals.
     %            str = [pointEst.names ' = {};'];
@@ -62,6 +64,8 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
             eval(str);
             str = sprintf('temp2=setfield(temp2,''pointEst'',pointEst.values(j,k));');
             eval(str);
+            str = sprintf('temp2=setfield(temp2,''pValue'',pointEst.pValue);');
+            eval(str);
             if isfield(pointEst,'probeValues')
                 str = sprintf('temp2=setfield(temp2,''probeValue'',pointEst.probeValues(k));');
                 eval(str);
@@ -69,7 +73,6 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
             str = sprintf('%s{%d}=temp2;',pointEst.names(j,:),k);
             eval(str);
         end
-        
         str = sprintf('Parameters{1}.%s = %s;',pointEst.names(j,:),pointEst.names(j,:));
         eval(str);
     end
