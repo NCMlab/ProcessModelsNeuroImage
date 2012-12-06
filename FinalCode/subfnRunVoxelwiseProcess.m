@@ -34,7 +34,7 @@ for i = 1:NJobSplit - 1
     
     VoxelForThisJob =[(i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob];
     data = AllData;
-    data.Nboot = Nboot;
+    data.Nboot = data.Nboot;
     switch ModelNum
         case '4'
             data.M = AllData.M(:,:,VoxelForThisJob);
@@ -63,7 +63,7 @@ for i = 1:NJobSplit - 1
     fprintf(fid,'EOF\n');
     fclose(fid);
 %    Str = ['! qsub  ' jobPath];
-    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M -l h_vmem=500M ' jobPath];
+    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M -l h_vmem=1G ' jobPath];
     unix(Str);
 end
 % now run the last chunk of data
@@ -92,7 +92,7 @@ fprintf(fid,'%s\n',['subfnVoxelWiseProcessBatch(''' InDataPath ''');']);
 fprintf(fid,'exit\n');
 fprintf(fid,'EOF\n');
 fclose(fid);
-Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M -l h_vmem=500M ' jobPath];
+Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M -l h_vmem=1G ' jobPath];
 unix(Str);
 % 
 % % Once it is all done put the data back together
