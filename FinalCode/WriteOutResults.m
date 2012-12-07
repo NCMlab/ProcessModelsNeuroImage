@@ -23,7 +23,6 @@ if AnalysisParameters.NJobSplit == length(F)
     load(F(i+1).name)
     AllParameters(i*NvoxelsPerJob+1:end) = Parameters;
     [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
-;
 else
     errordlg('This process has not finished')
 end

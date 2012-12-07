@@ -16,7 +16,9 @@ if ischar(InData)
     % find out the tag for this batch of data
     [PathName FileName] = fileparts(InData);
     tag = InData(end-3:end);
-    [Nsub Nmed Nvoxels] = size(data.M);
+    [Nsub] = size(data.M,1);
+    Nmed = size(data.M,2);
+    Nvoxels = length(data.Indices);
     Parameters = cell(Nvoxels,1);
 
     % If this voxelwise data than try to run in parallel

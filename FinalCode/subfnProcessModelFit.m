@@ -160,7 +160,7 @@ switch data.ModelNum
                     eval(Str)
                 end
                 Parameters.Model1{i}.Model = subfnSetModelParameters(Model1{i});
-                Parameters.Model1{i}.Outcome = data.names.M;
+                Parameters.Model1{i}.Outcome = data.names.M{1};
             end
             
             
@@ -421,7 +421,7 @@ switch data.ModelNum
                     eval(Str)
                 end
                 Parameters.Model1{j}.Model = subfnSetModelParameters(Model1{j});
-                Parameters.Model1{j}.Outcome = data.Mname;
+                Parameters.Model1{j}.Outcome = data.Mname{1};
                 %                Parameters.JNvalue = subfnJohnsonNeyman(Model1{j}.beta(2),Model1{j}.covb(2,2),Model1{j}.beta(4),Model1{j}.covb(4,4),Model1{j}.covb(2,4),tcrit);
                 %
                 %                 Parameters.Model1.Model = subfnSetModelParameters(Model1{i});
@@ -461,11 +461,11 @@ switch data.ModelNum
         end
 end
 if PointEstFlag
-    Parameters.Xname = data.Xname;
-    Parameters.Mname = data.Mname;
-    Parameters.Yname = data.Yname;
-    Parameters.Vname = data.Vname;
-    Parameters.Wname = data.Wname;
+    Parameters.Xname = data.names.X;
+    Parameters.Mname = data.names.M{1};
+    Parameters.Yname = data.names.Y;
+    Parameters.Vname = data.names.V;
+    Parameters.Wname = data.names.W;
     Parameters.ModelNum = data.ModelNum;
     Parameters.SampleSize = length(data.X);
 % else

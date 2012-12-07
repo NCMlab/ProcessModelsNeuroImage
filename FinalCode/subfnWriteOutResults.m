@@ -23,6 +23,7 @@ switch ModelNum
         OutData = {};
 
         for j = 1:Nmed
+            %get A model variable name
             OutData{index}.name = ['AeffMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
             %OutData{index}.field = ['A{' num2str(j) '}.beta'];
@@ -131,7 +132,6 @@ switch ModelNum
                             OutData{j}.data(i) = 1;
                         end
                     else
-
                       % fprintf(1,'%s\n', ['AllParameters{' num2str(i) '}.' OutData{j}.field]);
                         OutData{j}.data(i) = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
                     end

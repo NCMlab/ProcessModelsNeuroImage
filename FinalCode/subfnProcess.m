@@ -76,7 +76,8 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
         str = sprintf('Parameters{1}.%s = %s;',pointEst.names(j,:),pointEst.names(j,:));
         eval(str);
     end
-    
+    Parameters{1}.Nboot = temp.Nboot;
+    Parameters{1}.Thresholds = temp.Thresholds;
 else
     for j = 1:size(pointEst,1);
         for k = 1:size(pointEst,2);
