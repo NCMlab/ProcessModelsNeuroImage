@@ -130,11 +130,10 @@ data.Mname = 'C';
 data.X = B;
 data.Y = A;
 data.M = C;
-=======
+
 data.Nboot = 100;
-=======
-data.Nboot = 1000;
->>>>>>> develop
+
+
 
 % Calculate the full stats of the model
 %[ParameterToBS Parameters] = subfnProcessModelFit(data,data.ModelNum,PointEst);
@@ -143,45 +142,6 @@ data.Nboot = 1000;
 >>>>>>> 6b66aa81ba5272e82df9b685933e24244a7e1f4a
 Parameters = subfnVoxelWiseProcessBatch(data);
 subfnPrintResults(Parameters{1})
-<<<<<<< HEAD
-%%
-% MODEL 4
-fid = 1;
-fprintf(1,'======================================================\n');
-fprintf(1,'Model = %s\n',Parameters.ModelNum);
-fprintf(1,'\tY = %s\n',data.Yname);
-fprintf(1,'\tX = %s\n',data.Xname);
-fprintf(1,'\tM = %s\n',data.Mname);
-
-fprintf(1,'Sample size = %d\n\n',length(data.X));
-
-fprintf(1,'Indirect effect of %s on %s via %s (a*b pathway)\n',data.Xname,data.Yname,data.Mname);
-fprintf(1,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootUPCI');
-fprintf(1,'%8.4f\t%8.4f\t%8.4f\t%8.4f\n',Parameters{1}.AB1{1}.pointEst,Parameters{1}.AB1{1}.bootSE,Parameters{1}.AB1{1}.BCaci.alpha05(1),Parameters{1}.AB1{1}.BCaci.alpha05(2));
-
-% Print out Model 1
-for i = 1:size(data.M,2)
-    fprintf(fid,'******************************************************\n')
-    fprintf(1,'Outcome: %s\n\n',Parameters{1}.Model1{i}.Outcome)
-    subfnPrintModelSummary(Parameters{1}.Model1{i}.Model,fid)
-    subfnPrintModelResults(Parameters{1}.Model1{i},fid)
-end
-
-% Print out Model 2
-fprintf(fid,'******************************************************\n')
-fprintf(1,'Outcome: %s\n\n',Parameters{1}.Model2.Outcome)
-subfnPrintModelSummary(Parameters{1}.Model2.Model,fid)
-subfnPrintModelResults(Parameters{1}.Model2,fid)
-
-% Print out Model 3
-fprintf(fid,'******************************************************\n')
-fprintf(1,'Outcome: %s\n\n',Parameters{1}.Model3.Outcome)
-subfnPrintModelSummary(Parameters{1}.Model3.Model,fid)
-subfnPrintModelResults(Parameters{1}.Model3,fid)
-=======
->>>>>>> develop
-
-
 
 %%
 % plot probe

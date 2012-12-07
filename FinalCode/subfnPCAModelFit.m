@@ -10,7 +10,7 @@ if NMed > 1
 end
 NCOV = size(data.COV,2);
 
-NPCs = 12;
+NPCs = 3;
 % Create matrix of all possible cominations of PCs
 combo_matrix = boolean_enumeration_f(NPCs);
 % how many combos are there?
@@ -70,8 +70,14 @@ for i = 1:NSub
         tempdata.COV = data.COV(CurrentSubjects);
     else
         tempdata.COV = [];
-        endf
+    end
     tempdata.ModelNum = ModelNum;
+    
+    
+    LOOerrorMatrix = subfnCalcLOOAllModels(tempdata,data,NPCs,1)
+    
+    
+    
     % apply PCA
     % but squeeze out the multiple mediator dimension
     [lambdas, eigenimages_noZeroes, w] = pca_f(tempdata.M', remove_row_means);
@@ -81,29 +87,7 @@ for i = 1:NSub
     tempdata2 = tempdata;
     tempdata2.M = tempssfSubset;
     FullModelbehav_fit_coef = subfnCallRegressPCs(tempdata2,ModelNum);
-    % now for all possible combinations of the PCs calculate the LOOCV
-%     tic
-%     for j = 1:NCombos
-%         % Select the current combination os PCs
-%         % This is the easy case where simple linear regression can be
-%         % used instead of an iterative model fit.
-%         % Used the selected combination of SSFs for this
-%         selected_PCs = find(combo_matrix(j,:));
-%         tempdata2 = tempdata;
-%         tempdata2.M = tempssfSubset(:,selected_PCs);
-%         behav_fit_coef = subfnCallRegressPCs(tempdata2,ModelNum);
-%         % create the SSF image
-%         temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
-%         behav_fit_composite_PC_image = temp / norm(temp);
-%         %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
-%         behav_fit_composite_PC_image_ssfs = tempdata.M * behav_fit_composite_PC_image;
-%         % forward apply this SSF to the left out subjects raw data
-%         % predict the left out subject
-%         predictedM = squeeze(data.M(i,:,:))'*behav_fit_composite_PC_image;
-%         predictedY = subfnLOOPredictPCs(data,behav_fit_coef,ModelNum,predictedM,length(selected_PCs),i);
-%         LOOerrorMatrix(i,j) = [predictedY - data.Y(i)]^2;
-%     end
-%     t1 = toc;
+ 
     % now redo it without the regression call
     for j = 1:NCombos
         selected_PCs = find(combo_matrix(j,:));
@@ -120,12 +104,12 @@ for i = 1:NSub
         predictedY = subfnLOOPredictPCs(data,behav_fit_coef,ModelNum,predictedM,length(selected_PCs),i);
         LOOerrorMatrix2(i,j) = (predictedY - data.Y(i))^2;
     end
-%     t2 = toc;
-%     fprintf(1,'%0.2f/%0.2f/%0.4f sec\n',t1,t2,t2-t1);
+    %     t2 = toc;
+    %     fprintf(1,'%0.2f/%0.2f/%0.4f sec\n',t1,t2,t2-t1);
 end
 
 %sLOOerrorMatrix1 = sum(LOOerrorMatrix);
-%sLOOerrorMatrix2 = sum(LOOerrorMatrix2);
+sLOOerrorMatrix2 = sum(LOOerrorMatrix2);
 %corr([sLOOerrorMatrix1' sLOOerrorMatrix2'])
 %%
 selected_PCs = find(combo_matrix(find(sLOOerrorMatrix2 == min(sLOOerrorMatrix2)),:));

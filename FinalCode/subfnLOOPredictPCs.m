@@ -15,9 +15,9 @@ switch ModelNum
         % Y: [NSub x 1]
         % COV: [NSub x 0 or more]
         if NCOV
-            predictedY = 1*beta(1) + predictedM + [data.X(SubjectIndex,:) data.COV(SubjectIndex,:)]*beta(NselPCs+2:end);
+            predictedY = 1*beta(1) + predictedM*beta(2) + [data.X(SubjectIndex,:) data.COV(SubjectIndex,:)]*beta(3:end);
         else
-            predictedY = 1*beta(1) + predictedM + [data.X(SubjectIndex,:)]*beta(NselPCs+2:end);
+            predictedY = 1*beta(1) + predictedM*beta(2) + [data.X(SubjectIndex,:)]*beta(3:end);
         end
 end
         

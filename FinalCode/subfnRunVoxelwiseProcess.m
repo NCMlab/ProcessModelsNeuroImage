@@ -37,7 +37,29 @@ for i = 1:NJobSplit - 1
 
     switch ModelNum
         case '4'
-            data.M = AllData.M(:,:,VoxelForThisJob);
+             if size(AllData.X,3) > 1
+                data.X = AllData.X(:,:,VoxelForThisJob);
+            else
+                data.X = AllData.X;
+            end
+            % Check the M variable
+            if size(AllData.M,3) > 1
+                data.M = AllData.M(:,:,VoxelForThisJob);
+            else
+                data.M = AllData.M;
+            end
+            % Check the Y variable
+            if size(AllData.Y,3) > 1
+                data.Y = AllData.Y(:,:,VoxelForThisJob);
+            else
+                data.Y = AllData.Y;
+            end
+            % Check the covariates
+            if size(AllData.COV,3) > 1
+                data.COV = AllData.COV(:,VoxelForThisJob);
+            else
+                data.COV = AllData.COV;
+            end
         case '14'
             data.M = AllData.M(:,:,VoxelForThisJob);
             data.V = AllData.V(:,:,VoxelForThisJob);
@@ -63,7 +85,7 @@ for i = 1:NJobSplit - 1
     fprintf(fid,'EOF\n');
     fclose(fid);
 %    Str = ['! qsub  ' jobPath];
-    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M -l h_vmem=500M ' jobPath];
+    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
     unix(Str);
 end
 % now run the last chunk of data
@@ -93,7 +115,7 @@ fprintf(fid,'exit\n');
 fprintf(fid,'EOF\n');
 fclose(fid);
 
-Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M -l h_vmem=500M ' jobPath];
+Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
 unix(Str);
 % 
 % % Once it is all done put the data back together
