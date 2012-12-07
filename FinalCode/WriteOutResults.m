@@ -1,7 +1,8 @@
 function WriteOutResults
-OutputFolder = spm_select(1,'dir');
 
-cd(OutputFolder)
+SelectedPath = spm_select(1,'dir');
+cd(SelectedPath)
+
 if exist('AnalysisParameters.mat')
     load AnalysisParameters
 else
@@ -23,7 +24,9 @@ if AnalysisParameters.NJobSplit == length(F)
     clear Parameters
     load(F(i+1).name)
     AllParameters(i*NvoxelsPerJob+1:end) = Parameters;
-    [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,OutputFolder);
+
+    [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
+
 else
     errordlg('This process has not finished')
 end

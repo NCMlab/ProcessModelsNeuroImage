@@ -11,7 +11,7 @@ if NMed > 1
 end
 NCOV = size(data.COV,2);
 
-NPCs = 6;
+NPCs = 3;
 % Create matrix of all possible cominations of PCs
 combo_matrix = boolean_enumeration_f(NPCs);
 % how many combos are there?
@@ -44,36 +44,41 @@ for i = 1:Nboot
 end
 % Create the array that will contain all the bootstrap resample IMAGES
 BootStrapResampleImages = zeros(NVox,Nboot,'single');
+%% AIC Model selection
 
 
 %% Leave one out model selection
-
-fprintf(1,'** Starting the leave one out process **\n');    
+fprintf(1,'** Starting the leave one out process **\n');
 for i = 1:NSub
-    tic
     % everything in this loop should be made into a job for cluster
     % submission and the only thing returned is the LOO values. Each call
     % creates its own combo_matrix
-    % 
-    % Inputs: 
+    %
+    % Inputs:
     %   data
     %   left out subject
     %   NPCs
     % Outputs: LOO vector
-    fprintf(1,' working on subject %4d of %4d: ',i,NSub);
+    fprintf(1,' working on subject %4d of %4d\n',i,NSub);
     % Create leave one out matrix
     CurrentSubjects = [1:NSub];
     CurrentSubjects(i) = 0;
     CurrentSubjects = find(CurrentSubjects);
     tempdata.X = data.X(CurrentSubjects);
     tempdata.M = squeeze(data.M(CurrentSubjects,:,:));
-    tempdata.Y = data.Y(CurrentSubjects); 
+    tempdata.Y = data.Y(CurrentSubjects);
     if NCOV
         tempdata.COV = data.COV(CurrentSubjects);
     else
         tempdata.COV = [];
     end
     tempdata.ModelNum = ModelNum;
+    
+    
+    LOOerrorMatrix = subfnCalcLOOAllModels(tempdata,data,NPCs,1)
+    
+    
+    
     % apply PCA
     % but squeeze out the multiple mediator dimension
     [lambdas, eigenimages_noZeroes, w] = pca_f(tempdata.M', remove_row_means);
@@ -83,53 +88,32 @@ for i = 1:NSub
     tempdata2 = tempdata;
     tempdata2.M = tempssfSubset;
     FullModelbehav_fit_coef = subfnCallRegressPCs(tempdata2,ModelNum);
-    % now for all possible combinations of the PCs calculate the LOOCV
-    for j = 1:NCombos
-            % Select the current combination os PCs
-            % This is the easy case where simple linear regression can be
-            % used instead of an iterative model fit.
-            % Used the selected combination of SSFs for this
-            selected_PCs = find(combo_matrix(j,:));
-            tempdata2 = tempdata;
-            tempdata2.M = tempssfSubset(:,selected_PCs);
-            behav_fit_coef = subfnCallRegressPCs(tempdata2,ModelNum);
-            % create the SSF image
-            temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
-            behav_fit_composite_PC_image = zeros(NVox, 1);
-            behav_fit_composite_PC_image = temp / norm(temp);
-            %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
-            behav_fit_composite_PC_image_ssfs = tempdata.M * behav_fit_composite_PC_image;
-            % forward apply this SSF to the left out subjects raw data
-            % predict the left out subject
-            predictedValue = squeeze(data.M(i,:,:))'*behav_fit_composite_PC_image;
-            LOOerrorMatrix(i,j) = [predictedValue + behav_fit_coef(1) - data.Y(i)]^2;
-    end
-    t1 = toc;
+ 
     % now redo it without the regression call
     for j = 1:NCombos
         selected_PCs = find(combo_matrix(j,:));
-        
-        behav_fit_coef = FullModelbehav_fit_coef([1 selected_PCs+1 NPCs +1:end]);
-                % create the SSF image
-            temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
-            behav_fit_composite_PC_image = zeros(NVox, 1);
-            behav_fit_composite_PC_image = temp / norm(temp);
-            %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
-            behav_fit_composite_PC_image_ssfs = squeeze(tempdata.M) * behav_fit_composite_PC_image;
-            % forward apply this SSF to the left out subjects raw data
-            % predict the left out subject
-            predictedValue = squeeze(data.M(i,:,:))'*behav_fit_composite_PC_image;
-            LOOerrorMatrix2(i,j) = [predictedValue + behav_fit_coef(1) - data.Y(i)]^2;
+        behav_fit_coef = FullModelbehav_fit_coef([1 selected_PCs+1 NPCs+2:end]);
+        % create the SSF image
+        temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
+        behav_fit_composite_PC_image = temp / norm(temp);
+        %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
+        behav_fit_composite_PC_image_ssfs = squeeze(tempdata.M) * behav_fit_composite_PC_image;
+        % forward apply this SSF to the left out subjects raw data
+        % predict the left out subject
+        predictedM = squeeze(data.M(i,:,:))'*behav_fit_composite_PC_image;
+        % predict the left out subject
+        predictedY = subfnLOOPredictPCs(data,behav_fit_coef,ModelNum,predictedM,length(selected_PCs),i);
+        LOOerrorMatrix2(i,j) = (predictedY - data.Y(i))^2;
     end
-    t2 = toc;
-    fprintf(1,'%0.2f/%0.2f/%0.4f sec\n',t1,t2,t2-t1);
+    %     t2 = toc;
+    %     fprintf(1,'%0.2f/%0.2f/%0.4f sec\n',t1,t2,t2-t1);
 end
 
-sLOOerrorMatrix1 = sum(LOOerrorMatrix);
+%sLOOerrorMatrix1 = sum(LOOerrorMatrix);
 sLOOerrorMatrix2 = sum(LOOerrorMatrix2);
-corr([sLOOerrorMatrix1' sLOOerrorMatrix2'])
+%corr([sLOOerrorMatrix1' sLOOerrorMatrix2'])
 %%
-selected_PCs = find(combo_matrix(find(sLOOerrorMatrix == min(sLOOerrorMatrix)),:));
+selected_PCs = find(combo_matrix(find(sLOOerrorMatrix2 == min(sLOOerrorMatrix2)),:));
 fprintf(1,'The optimal PCs were selected\n');
 %% Create the point estimate image
 % perform the PCA on the original full data set
@@ -140,7 +124,7 @@ ssfSubset = ssf(:,1:NPCs);
 PE_behav_fit_coef = subfnregress(data.Y,[ssfSubset(:,selected_PCs) data.X]);
 % create the SSF image
 temp = eigenimages_noZeroes(:, selected_PCs) * PE_behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
-PE_behav_fit_composite_PC_image = zeros(NVox, 1);
+
 PE_behav_fit_composite_PC_image = temp / norm(temp);
 clear temp;
 %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
@@ -148,24 +132,30 @@ PE_behav_fit_composite_PC_image_ssfs = squeeze(data.M) * PE_behav_fit_composite_
 
 %% Now use this best set of PCs for bootstrapping
 for i = 1:Nboot
+    tic
     clear tempdata
     tempdata.X = data.X(BootStrapResamples(:,i));
     tempdata.M = data.M(BootStrapResamples(:,i),:,:);
     tempdata.Y = data.Y(BootStrapResamples(:,i));
-    tempdata.ModelNum = data.ModelNum;
+    tempdata.ModelNum = ModelNum;
     % Apply PCA
     [lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(tempdata.M)', remove_row_means);
+    toc
     % calculate the subject scaling factors
     ssf = squeeze(tempdata.M) * eigenimages_noZeroes;
     ssfSubset = ssf(:,1:NPCs);
     behav_fit_coef = subfnregress(tempdata.Y, [ssfSubset(:,selected_PCs) tempdata.X]);
     % create the SSF image
     temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
-    behav_fit_composite_PC_image = zeros(NVox, 1);
     behav_fit_composite_PC_image = temp / norm(temp);
     clear temp;
     BootStrapResampleImages(:,i) = behav_fit_composite_PC_image;
+    toc
+    if ~mod(i,100)
+        fprintf(1,'Bootstrap resample: %5d\n',i);
+    end
 end
+%%
 clear eigenimages_noZeroes tempdata
 % create variance map
 Vmap = var(BootStrapResampleImages,0,2);
@@ -187,20 +177,15 @@ toc
 %   for j = 1:all combinations of PCs
 %       fit the regression (linear/iteratively)
 %       predict left out subject
-%       find squared error (one number) 
+%       find squared error (one number)
 %   end
 % end
 % sum over all subjects
-
-% find the comboination of PCs that has the lowest error
-%
-% pre-specify the boot-strap resamples
-
 % for i = 1:Nboot
 %   resample
 %   Apply PCA
 %   pick combo of PCs as calculated in the leave one out procedure
-%   create the combo Image 
+%   create the combo Image
 %   save this image to the bootstrap (HUGE) resample array
 %           matrix=(Nboot-x-Nvoxels)
 %   fit the regression (linear/iteratively)
@@ -211,7 +196,7 @@ toc
 %   end
 %   save parameter estimates
 % end
-% 
+%
 % calculate the Z-map combo image using the bootstrap standard error
 % calculate the confidence intervals for each voxel of the combo image
 % calculate the confidence intervals for each regression parameter and the

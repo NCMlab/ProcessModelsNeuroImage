@@ -1,7 +1,14 @@
 function Parameters = subfnVoxelWiseProcessBatch(InData)
-
+% This program takes the data or the pointer to the data file and prepares
+% the data for processing. It is here that multiple voxels are looped over.
+% Therfore, it is in this program that one voxel at a time is extracted to
+% create a temporary data array which is preocessed and the
+% Parameters/results are returned. Therefore, if the voxelwise data is not
+% the mediator then this program decides where the voxelwise data is and
+% pulls out one voxel.
+%
 warning off
-addpath /share/data/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
+addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 %
 % Check to see if a path to data is given. If so then load it up
 if ischar(InData)
@@ -81,11 +88,36 @@ for i = 1:Nvoxels
             end
 
         case '4'
-            temp.X = data.X;
-            temp.M = data.M(:,:,i);
-            temp.Y = data.Y;
-            temp.COV = data.COV;
-            if sum(isnan(temp.M)) == 0; 
+            % Check each variable and if it is a voxel-wise measure then
+            % pull out one voxel. It is also possible to have all varaibles
+            % be voxelwise and to have voxelwise covariates.
+            % Check the X variable
+            if size(data.X,3) > 1
+                temp.X = data.X(:,:,i);
+            else
+                temp.X = data.X;
+            end
+            % Check the M variable
+            if size(data.M,3) > 1
+                temp.M = data.M(:,:,i);
+            else
+                temp.M = data.M;
+            end
+            % Check the Y variable
+            if size(data.Y,3) > 1
+                temp.Y = data.Y(:,:,i);
+            else
+                temp.Y = data.Y;
+            end
+            % Check the covariates
+            if size(data.COV,3) > 1
+                temp.COV = data.COV(:,i);
+            else
+                temp.COV = data.COV;
+            end
+            % If there are no not-a-number variables then the data is ready
+            % to be processed.
+            if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
                 AllDataFlag = 1;
             end
         case '7'

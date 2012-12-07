@@ -1,6 +1,7 @@
-function [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,OutputFolder)
+function [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,OutputPath)
 
 V = AnalysisParameters.V;
+V.fname = OutputPath;
 ModelNum = AnalysisParameters.ModelNum;
 Tag = AnalysisParameters.Tag;
 
@@ -62,6 +63,11 @@ switch ModelNum
             OutData{index}.data = zeros(Nvoxels,1);
             %OutData{index}.field = ['AB{' num2str(j) '}.pointEst'];
             OutData{index}.field =  ['AB1{' num2str(j) '}.pointEst'];
+            index = index + 1;
+            
+            OutData{index}.name = ['ABpValue' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['AB{' num2str(j) '}.pValue'];
             index = index + 1;
             
             for i = 1:Nthr
@@ -205,6 +211,11 @@ switch ModelNum
             OutData{index}.data = zeros(Nvoxels,1);
             OutData{index}.field = ['AB{' num2str(j) '}.pointEst'];
             index = index + 1;
+            OutData{index}.name = ['ABpValue' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['AB{' num2str(j) '}.pValue'];
+            index = index + 1;
+            
             for i = 1:Nthr
                 OutData{index}.name = ['ABMed' num2str(j) 'sign_' Thresholds{i}];
                 OutData{index}.data = zeros(Nvoxels,1);
