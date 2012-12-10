@@ -133,7 +133,6 @@ for i = 1:Nvoxels
             temp.W = data.W(:,:,i);
             if sum(isnan(temp.M)) == 0; Mflag = 1;end
             if sum(isnan(temp.W)) == 0; Wflag = 1;end
-
             if Mflag && Wflag 
                 AllDataFlag = 1;
             end
@@ -148,9 +147,7 @@ for i = 1:Nvoxels
             temp.V = data.V(:,:,i);
             if sum(isnan(temp.M)) == 0; Mflag = 1;end
             if sum(isnan(temp.V)) == 0; Vflag = 1;end
-
             if Mflag && Vflag 
-
                 AllDataFlag = 1;
             end
     end

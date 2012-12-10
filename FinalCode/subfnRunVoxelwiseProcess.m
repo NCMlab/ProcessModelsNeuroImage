@@ -60,9 +60,57 @@ for i = 1:NJobSplit - 1
             else
                 data.COV = AllData.COV;
             end
+            
+        case '7'
+            if size(AllData.X,3) > 1
+                data.X = AllData.X(:,:,VoxelForThisJob);
+            else
+                data.X = AllData.X;
+            end
+            % Check the M variable
+            if size(AllData.M,3) > 1
+                data.M = AllData.M(:,:,VoxelForThisJob);
+            else
+                data.M = AllData.M;
+            end
+            % Check the Y variable
+            if size(AllData.Y,3) > 1
+                data.Y = AllData.Y(:,:,VoxelForThisJob);
+            else
+                data.Y = AllData.Y;
+            end
+            % Check the covariates
+            if size(AllData.COV,3) > 1
+                data.COV = AllData.COV(:,VoxelForThisJob);
+            else
+                data.COV = AllData.COV;
+            end
+            
         case '14'
-            data.M = AllData.M(:,:,VoxelForThisJob);
-            data.V = AllData.V(:,:,VoxelForThisJob);
+            if size(AllData.X,3) > 1
+                data.X = AllData.X(:,:,VoxelForThisJob);
+            else
+                data.X = AllData.X;
+            end
+            % Check the M variable
+            if size(AllData.M,3) > 1
+                data.M = AllData.M(:,:,VoxelForThisJob);
+            else
+                data.M = AllData.M;
+            end
+            % Check the Y variable
+            if size(AllData.Y,3) > 1
+                data.Y = AllData.Y(:,:,VoxelForThisJob);
+            else
+                data.Y = AllData.Y;
+            end
+            % Check the covariates
+            if size(AllData.COV,3) > 1
+                data.COV = AllData.COV(:,VoxelForThisJob);
+            else
+                data.COV = AllData.COV;
+            end
+            
     end
     data.Indices = AllData.Indices(VoxelForThisJob);
     %Parameters = subfnVoxelWiseProcessBatch(temp,ModelNum,Nboot,Thresholds);
@@ -117,9 +165,56 @@ switch ModelNum
         else
             data.COV = AllData.COV;
         end
+    case '7'
+        if size(AllData.X,3) > 1
+            data.X = AllData.X(:,:,VoxelForThisJob);
+        else
+            data.X = AllData.X;
+        end
+        % Check the M variable
+        if size(AllData.M,3) > 1
+            data.M = AllData.M(:,:,VoxelForThisJob);
+        else
+            data.M = AllData.M;
+        end
+        % Check the Y variable
+        if size(AllData.Y,3) > 1
+            data.Y = AllData.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = AllData.Y;
+        end
+        % Check the covariates
+        if size(AllData.COV,3) > 1
+            data.COV = AllData.COV(:,VoxelForThisJob);
+        else
+            data.COV = AllData.COV;
+        end
+        
     case '14'
-        data.M = AllData.M(:,:,VoxelForThisJob);
-        data.V = AllData.V(:,:,VoxelForThisJob);
+        if size(AllData.X,3) > 1
+            data.X = AllData.X(:,:,VoxelForThisJob);
+        else
+            data.X = AllData.X;
+        end
+        % Check the M variable
+        if size(AllData.M,3) > 1
+            data.M = AllData.M(:,:,VoxelForThisJob);
+        else
+            data.M = AllData.M;
+        end
+        % Check the Y variable
+        if size(AllData.Y,3) > 1
+            data.Y = AllData.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = AllData.Y;
+        end
+        % Check the covariates
+        if size(AllData.COV,3) > 1
+            data.COV = AllData.COV(:,VoxelForThisJob);
+        else
+            data.COV = AllData.COV;
+        end
+        
 end
 % keep track of which voxels are being processed
 data.Indices = AllData.Indices(VoxelForThisJob);
