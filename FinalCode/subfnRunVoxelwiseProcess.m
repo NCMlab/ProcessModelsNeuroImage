@@ -24,7 +24,7 @@ if ~exist(JobFolder)
     mkdir(JobFolder);
 end
 
-% save the analysis parameters 
+% save the analysis parameters
 Str = ['save ' fullfile(OutFolder,'AnalysisParameters') ' AnalysisParameters'];
 eval(Str);
 
@@ -35,9 +35,10 @@ for i = 1:NJobSplit - 1
     VoxelForThisJob =[(i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob];
     data = AllData;
     data.Nboot = data.Nboot;
+
     switch ModelNum
         case '4'
-             if size(AllData.X,3) > 1
+            if size(AllData.X,3) > 1
                 data.X = AllData.X(:,:,VoxelForThisJob);
             else
                 data.X = AllData.X;
@@ -60,9 +61,57 @@ for i = 1:NJobSplit - 1
             else
                 data.COV = AllData.COV;
             end
+            
+        case '7'
+            if size(AllData.X,3) > 1
+                data.X = AllData.X(:,:,VoxelForThisJob);
+            else
+                data.X = AllData.X;
+            end
+            % Check the M variable
+            if size(AllData.M,3) > 1
+                data.M = AllData.M(:,:,VoxelForThisJob);
+            else
+                data.M = AllData.M;
+            end
+            % Check the Y variable
+            if size(AllData.Y,3) > 1
+                data.Y = AllData.Y(:,:,VoxelForThisJob);
+            else
+                data.Y = AllData.Y;
+            end
+            % Check the covariates
+            if size(AllData.COV,3) > 1
+                data.COV = AllData.COV(:,VoxelForThisJob);
+            else
+                data.COV = AllData.COV;
+            end
+            
         case '14'
-            data.M = AllData.M(:,:,VoxelForThisJob);
-            data.V = AllData.V(:,:,VoxelForThisJob);
+            if size(AllData.X,3) > 1
+                data.X = AllData.X(:,:,VoxelForThisJob);
+            else
+                data.X = AllData.X;
+            end
+            % Check the M variable
+            if size(AllData.M,3) > 1
+                data.M = AllData.M(:,:,VoxelForThisJob);
+            else
+                data.M = AllData.M;
+            end
+            % Check the Y variable
+            if size(AllData.Y,3) > 1
+                data.Y = AllData.Y(:,:,VoxelForThisJob);
+            else
+                data.Y = AllData.Y;
+            end
+            % Check the covariates
+            if size(AllData.COV,3) > 1
+                data.COV = AllData.COV(:,VoxelForThisJob);
+            else
+                data.COV = AllData.COV;
+            end
+            
     end
     data.Indices = AllData.Indices(VoxelForThisJob);
     %Parameters = subfnVoxelWiseProcessBatch(temp,ModelNum,Nboot,Thresholds);
@@ -84,15 +133,91 @@ for i = 1:NJobSplit - 1
     fprintf(fid,'exit\n');
     fprintf(fid,'EOF\n');
     fclose(fid);
-%    Str = ['! qsub  ' jobPath];
-    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=1G  ' jobPath];
+    %    Str = ['! qsub  ' jobPath];
+    Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
     unix(Str);
 end
 % now run the last chunk of data
 VoxelForThisJob =[(i)*NvoxelsPerJob + 1:Nvoxels];
 data = AllData;
-data.M = AllData.M(:,:,VoxelForThisJob);
-% keep track of which voxels are being processed 
+
+switch ModelNum
+    case '4'
+        if size(AllData.X,3) > 1
+            data.X = AllData.X(:,:,VoxelForThisJob);
+        else
+            data.X = AllData.X;
+        end
+        % Check the M variable
+        if size(AllData.M,3) > 1
+            data.M = AllData.M(:,:,VoxelForThisJob);
+        else
+            data.M = AllData.M;
+        end
+        % Check the Y variable
+        if size(AllData.Y,3) > 1
+            data.Y = AllData.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = AllData.Y;
+        end
+        % Check the covariates
+        if size(AllData.COV,3) > 1
+            data.COV = AllData.COV(:,VoxelForThisJob);
+        else
+            data.COV = AllData.COV;
+        end
+    case '7'
+        if size(AllData.X,3) > 1
+            data.X = AllData.X(:,:,VoxelForThisJob);
+        else
+            data.X = AllData.X;
+        end
+        % Check the M variable
+        if size(AllData.M,3) > 1
+            data.M = AllData.M(:,:,VoxelForThisJob);
+        else
+            data.M = AllData.M;
+        end
+        % Check the Y variable
+        if size(AllData.Y,3) > 1
+            data.Y = AllData.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = AllData.Y;
+        end
+        % Check the covariates
+        if size(AllData.COV,3) > 1
+            data.COV = AllData.COV(:,VoxelForThisJob);
+        else
+            data.COV = AllData.COV;
+        end
+        
+    case '14'
+        if size(AllData.X,3) > 1
+            data.X = AllData.X(:,:,VoxelForThisJob);
+        else
+            data.X = AllData.X;
+        end
+        % Check the M variable
+        if size(AllData.M,3) > 1
+            data.M = AllData.M(:,:,VoxelForThisJob);
+        else
+            data.M = AllData.M;
+        end
+        % Check the Y variable
+        if size(AllData.Y,3) > 1
+            data.Y = AllData.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = AllData.Y;
+        end
+        % Check the covariates
+        if size(AllData.COV,3) > 1
+            data.COV = AllData.COV(:,VoxelForThisJob);
+        else
+            data.COV = AllData.COV;
+        end
+        
+end
+% keep track of which voxels are being processed
 data.Indices = AllData.Indices(VoxelForThisJob);
 %Parameters = subfnVoxelWiseProcessBatch(temp,ModelNum,Nboot,Thresholds);
 InTag = sprintf('data_%04d',i+1);
@@ -116,7 +241,7 @@ fprintf(fid,'EOF\n');
 fclose(fid);
 Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
 unix(Str);
-% 
+%
 % % Once it is all done put the data back together
 % AllDoneFlag = 0;
 % if ~length(dir('Results_*.mat'))<NJobSplit

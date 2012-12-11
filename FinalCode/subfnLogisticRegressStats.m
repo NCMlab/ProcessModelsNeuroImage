@@ -33,8 +33,8 @@ end
 covb = inv(X'*V*(X));
 se = sqrt(diag(abs(covb)));
 Z = beta./se;
-dfe = N - Ncoef + 1
-pval = 2*(tcdf(-abs(Z), 100000))
+dfe = N - Ncoef + 1;
+pval = 2*(tcdf(-abs(Z), 100000));
 odds = exp(beta);
 fit = X*beta;
 % Classification
@@ -57,10 +57,11 @@ Nagelkrk = (1 - (exp(LL0)/exp(LL))^(2/N) ) / (1 - exp(LL0)^(2/N));
 S = {};
 S.beta = beta;
 S.covb = covb;
-S.Zstat = {};
-S.Zstat.Z = Z;
-S.Zstat.se = se;
-S.Zstat.odds = odds;
+S.tstat = {};
+S.tstat.t = Z;
+S.tstat.se = se;
+S.tstat.odds = odds;
+S.tstat.pval = pval;
 S.modelLL = LR;
 S.modelLLdf = LRdf;
 S.modelLLp = LRp;

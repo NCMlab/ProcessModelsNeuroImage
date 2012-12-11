@@ -26,7 +26,10 @@ if AnalysisParameters.NJobSplit == length(F)
     AllParameters(i*NvoxelsPerJob+1:end) = Parameters;
 
     [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
+<<<<<<< HEAD
 
+=======
+>>>>>>> modmedPCA
 else
     errordlg('This process has not finished')
 end
