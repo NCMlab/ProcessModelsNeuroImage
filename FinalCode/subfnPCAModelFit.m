@@ -10,7 +10,7 @@ if NMed > 1
 end
 NCOV = size(data.COV,2);
 
-NPCs = 3;
+NPCs = 12;
 % Create matrix of all possible cominations of PCs
 combo_matrix = boolean_enumeration_f(NPCs);
 % how many combos are there?
@@ -43,11 +43,15 @@ for i = 1:Nboot
 end
 % Create the array that will contain all the bootstrap resample IMAGES
 BootStrapResampleImages = zeros(NVox,Nboot,'single');
-%% AIC Model selection
 
 
 %% Leave one out model selection
+LOOerrorMatrix = zeros(NSub, 2^NPCs-1);
 fprintf(1,'** Starting the leave one out process **\n');
+
+% This is the SLOWEST method that performs the PCA for every LOO and fits
+% the regression model for every combination. Therefore, NO shortcuts are
+% taken.
 for i = 1:NSub
     % everything in this loop should be made into a job for cluster
     % submission and the only thing returned is the LOO values. Each call
@@ -72,48 +76,39 @@ for i = 1:NSub
         tempdata.COV = [];
     end
     tempdata.ModelNum = ModelNum;
-    
-    
-    LOOerrorMatrix = subfnCalcLOOAllModels(tempdata,data,NPCs,1)
-    
-    
-    
-    % apply PCA
-    % but squeeze out the multiple mediator dimension
-    [lambdas, eigenimages_noZeroes, w] = pca_f(tempdata.M', remove_row_means);
-    tempssf = squeeze(tempdata.M) * eigenimages_noZeroes;
-    tempssfSubset = tempssf(:,1:NPCs);
-    % Fit the regression model with all PCs
-    tempdata2 = tempdata;
-    tempdata2.M = tempssfSubset;
-    FullModelbehav_fit_coef = subfnCallRegressPCs(tempdata2,ModelNum);
- 
-    % now redo it without the regression call
-    for j = 1:NCombos
-        selected_PCs = find(combo_matrix(j,:));
-        behav_fit_coef = FullModelbehav_fit_coef([1 selected_PCs+1 NPCs+2:end]);
-        % create the SSF image
-        temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
-        behav_fit_composite_PC_image = temp / norm(temp);
-        %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
-        behav_fit_composite_PC_image_ssfs = squeeze(tempdata.M) * behav_fit_composite_PC_image;
-        % forward apply this SSF to the left out subjects raw data
-        % predict the left out subject
-        predictedM = squeeze(data.M(i,:,:))'*behav_fit_composite_PC_image;
-        % predict the left out subject
-        predictedY = subfnLOOPredictPCs(data,behav_fit_coef,ModelNum,predictedM,length(selected_PCs),i);
-        LOOerrorMatrix2(i,j) = (predictedY - data.Y(i))^2;
-    end
-    %     t2 = toc;
-    %     fprintf(1,'%0.2f/%0.2f/%0.4f sec\n',t1,t2,t2-t1);
+    LOOerrorMatrix(i,:) = subfnCalcLOOAllModels(tempdata,data,NPCs,1);
 end
+ 
 
 %sLOOerrorMatrix1 = sum(LOOerrorMatrix);
-sLOOerrorMatrix2 = sum(LOOerrorMatrix2);
-%corr([sLOOerrorMatrix1' sLOOerrorMatrix2'])
-%%
-selected_PCs = find(combo_matrix(find(sLOOerrorMatrix2 == min(sLOOerrorMatrix2)),:));
-fprintf(1,'The optimal PCs were selected\n');
+sLOOerrorMatrix = sum(LOOerrorMatrix);
+selected_PCs_LOO = find(combo_matrix(find(sLOOerrorMatrix == min(sLOOerrorMatrix)),:));
+selected_PCs_LOO_MAX = find(combo_matrix(find(sLOOerrorMatrix == max(sLOOerrorMatrix)),:));
+
+% AIC Model selection
+% do the AIC model selection approach
+combo_matrix = boolean_enumeration_f(NPCs);
+NCombos = size(combo_matrix,1);
+AICmatrix = zeros(NCombos,1);
+LOOCVmatrix = zeros(NCombos,1);
+[lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(data.M)', remove_row_means);
+ssf = squeeze(data.M) * eigenimages_noZeroes;
+ssfSubset = ssf(:,1:NPCs);
+
+for j = 1:NCombos
+    selected_PCs = find(combo_matrix(j,:));
+
+    tempdata = ssfSubset(:,selected_PCs);
+    %behav_fit_coef = FullModelbehav_fit_coef([1 selected_PCs+1 NPCs+2:end]);
+    S = subfnregstats(data.Y,[tempdata data.X]);
+    AICmatrix(j) = S.AIC;
+    LOOCVmatrix(j) = S.CV;
+end
+selected_PCs_AIC = find(combo_matrix(find(AICmatrix == min(AICmatrix)),:));
+selected_PCs_LOOCV = find(combo_matrix(find(LOOCVmatrix == min(LOOCVmatrix)),:));
+[sLOOerrorMatrix' AICmatrix LOOCVmatrix]
+
+
 %% Create the point estimate image
 % perform the PCA on the original full data set
 [lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(data.M)', remove_row_means);
