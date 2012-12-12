@@ -123,17 +123,43 @@ for i = 1:Nvoxels
                 AllDataFlag = 1;
             end
         case '7'
-            if isempty(data.W)
-                errordlg('The modulator variable is missing');
+            % Check each variable and if it is a voxel-wise measure then
+            % pull out one voxel. It is also possible to have all varaibles
+            % be voxelwise and to have voxelwise covariates.
+            % Check the X variable
+            if size(data.X,3) > 1
+                temp.X = data.X(:,:,i);
+            else
+                temp.X = data.X;
             end
-            if size(data.M,2) ~= 1
-                errordlg('Only a single variable can be used as a mediator for Model 7');
+            % Check the M variable
+            if size(data.M,3) > 1
+                temp.M = data.M(:,:,i);
+            else
+                temp.M = data.M;
             end
-            temp.M = data.M(:,:,i);
-            temp.W = data.W(:,:,i);
-            if sum(isnan(temp.M)) == 0; Mflag = 1;end
-            if sum(isnan(temp.W)) == 0; Wflag = 1;end
-            if Mflag && Wflag 
+            % Check the Y variable
+            if size(data.Y,3) > 1
+                temp.Y = data.Y(:,:,i);
+            else
+                temp.Y = data.Y;
+            end
+                        % Check the W variable
+            if size(data.W,3) > 1
+                temp.W = data.W(:,:,i);
+            else
+                temp.W = data.W;
+            end
+            % Check the covariates
+            if size(data.COV,3) > 1
+                temp.COV = data.COV(:,i);
+            else
+                temp.COV = data.COV;
+            end
+            % If there are no not-a-number variables then the data is ready
+            % to be processed.
+            if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)...
+                    &(sum(isnan(temp.Y)) == 0)&(sum(isnan(temp.W)) == 0)
                 AllDataFlag = 1;
             end
         case '14'

@@ -44,7 +44,12 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
     % calculate the Confidence intervals on the parameters that
     % need to be bootstrapped.
     [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst);
-    pValue = length(find(pointEst.values>bstat))/temp.Nboot;
+    % pValue = length(find(pointEst.values>bstat))/temp.Nboot;
+     
+    pValue = zeros(length(pointEst.values),1);
+    for kk = 1:length(pointEst.values)
+        pValue(kk) = length(find(pointEst.values(kk)>bstat(:,1,kk)))/temp.Nboot;
+    end
     pointEst.pValue = pValue;
     % Then fill in the appropriate Parameters with the confidence
     % intervals.
