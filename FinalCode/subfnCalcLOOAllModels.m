@@ -19,6 +19,7 @@ for j = 1:NCombos
     tempdata.M = tempssfSubset(:,selected_PCs);
     %behav_fit_coef = FullModelbehav_fit_coef([1 selected_PCs+1 NPCs+2:end]);
     behav_fit_coef = subfnCallRegressPCs(tempdata,LOOdata.ModelNum);
+    
     % create the SSF image
     temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
     behav_fit_composite_PC_image = temp / norm(temp);
@@ -31,6 +32,7 @@ for j = 1:NCombos
     predictedM = squeeze(Totaldata.M(SubjectIndex,:,:))'*behav_fit_composite_PC_image;
     
     % predict the left out subject
-    predictedY = subfnLOOPredictPCs(Totaldata,behav_fit_coef2,LOOdata.ModelNum,predictedM,length(selected_PCs),SubjectIndex);
+    predictedY = subfnLOOPredictPCs(Totaldata,behav_fit_coef,LOOdata.ModelNum,length(selected_PCs),SubjectIndex,);
     LOOerrorMatrix(j) = (predictedY - Totaldata.Y(SubjectIndex))^2;
+    
 end
