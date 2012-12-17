@@ -102,7 +102,6 @@ function [error img] = vennX( data, resolution, names )
        dist_A_C = venn2( data(1)+data(2), data(6)+data(7), data(4)+data(5), resolution );
 
         [error img] = plot_venn3( data(1), data(2), data(3), data(4), data(5), data(6), data(7), ...
-
            resolution, dist_A_B, dist_B_C, dist_A_C , Values);
 
        error = data - error';
