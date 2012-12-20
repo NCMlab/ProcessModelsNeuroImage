@@ -9,11 +9,11 @@ NCombos = size(combo_matrix,1);
 LOOCVMatrix = zeros(NSub,NCombos);
 for i = 1:NSub
     temp = load(fullfile(JobsDir,F(i).name));
-    LOOCVMatrix(i,:) = temp.LOOerrorMatrix;
+    LOOCVMatrix(i,:) = temp.LOOmediationMatrix;
 end
 clear temp
-sLOOCVMatrix = sum(LOOCVMatrix,1);
-selected_PCs_LOOCV = find(combo_matrix(find(sLOOCVMatrix == min(sLOOCVMatrix)),:));
+sLOOCVMatrix = sum(abs(LOOCVMatrix,1));
+selected_PCs_LOOCV = find(combo_matrix(find(sLOOCVMatrix == max(sLOOCVMatrix)),:));
 % Clean up the files created
 for i = 1:NSub 
     unix(sprintf('rm %s',fullfile(JobsDir,F(i).name)));

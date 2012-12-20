@@ -1,4 +1,5 @@
 function subfnCalculateLOOCV(InDataFile,NPCs)
+% Need to calculate the mediation effect in the left out subject
 %
 NPCs = str2num(NPCs);
 [PathName FileName] = fileparts(InDataFile);

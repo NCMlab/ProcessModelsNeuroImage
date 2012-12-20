@@ -1,5 +1,7 @@
 function subfnCalculateBootStrapPC(InDataFile)
 load(InDataFile)
+% reset the random number seed
+RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
 % Find out what count this is based on the job ID
 [a b] = unix('echo $SGE_TASK_ID');
 count = str2num(b);
@@ -28,6 +30,8 @@ for i = 1:Nboot
     end
     BootStrapResamples(:,i) = Samp;
 end
+NVox = size(data.M,3);
+BootStrapResampleImages = zeros(NVox,Nboot);
 for i = 1:Nboot
     TrainData.X = data.X(BootStrapResamples(:,i));
     TrainData.M = data.M(BootStrapResamples(:,i),:,:);
