@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 % functions
 % bootSE
 % subfnBootStrp
@@ -8,7 +7,7 @@
 
 clear
 % Test new mediation code
-N = 112;
+N = 500;
 AonB = 0.35;
 BonC = 0.35;
 AonC = 0.5;
@@ -22,37 +21,6 @@ corr([A B C])
 
 %Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
 
-V = randn(N,1); 
-W = randn(N,1); 
-
-
-=======
-% % functions
-% % bootSE
-% % subfnBootStrp
-% % subfnFindConfidenceIntervals
-% % subfnProcessModelFit
-% 
-% 
-clear
-<<<<<<< HEAD
-load ModMeddata
->>>>>>> 6b66aa81ba5272e82df9b685933e24244a7e1f4a
-=======
-% Test new mediation code
-N = 112;
-Gr = round(rand(N,1));
-Nmed = 3;
-V = randn(N,1); 
-W = randn(N,1); 
-
-M = randn(N,Nmed) + 10; 
-X = zeros(N,1);
-for i = 1:Nmed
-    X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
-end
-
-Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
 
 %corr([X M V W Y])
 %corr([X M Y])
@@ -61,36 +29,42 @@ Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
 %
 % clear
 % load ../PracticeData/ModMeddata
->>>>>>> develop
-data = {};
-data.Vname = 'V';
-data.Wname = 'W';
+
+data.names = {};
+data.names.X = 'A';
+data.names.M = {'B'};
+data.names.Y = 'C';
+data.names.V = '';
+data.names.W = '';
+data.names.Q = '';
+data.names.R = '';
+data.names.COV = {};
 data.STRAT = [];
 data.COV = [];%randn(N,2);
-data.V = V;
-data.W = V;
+data.V = [];
+data.W = [];
 data.Q = [];
 data.R = [];
-data.ModelNum = '14';
-data.Thresholds = [0.95];
+data.ModelNum = '4';
+data.Thresholds = [0.05];
 data.Indices = 1;
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 data.Nboot = 2000;
 
 % Model of interest
-data.Xname = 'A';
-data.Yname = 'C';
-data.Mname = 'B';
 data.X = A;
 data.Y = C;
 data.M = B;
 Parameters = subfnVoxelWiseProcessBatch(data);
-subfnPrintResults(Parameters{1})
+%subfnPrintResults(Parameters{1})
+
+[CC, V, T,r, R2, R2_13, R2_12, R2_23] = subfnCommonality(C, [A B]);
+corr([A B C]).^2
+[error img] = Commonality_2Pred(C,A,B,{'C' 'B' 'A'});
+%%
+
 % % alternate model 1
-data.Xname = 'A';
-data.Yname = 'B';
-data.Mname = 'C';
+
 data.X = A;
 data.Y = B;
 data.M = C;
@@ -139,7 +113,7 @@ data.Nboot = 100;
 %[ParameterToBS Parameters] = subfnProcessModelFit(data,data.ModelNum,PointEst);
 
 %tic
->>>>>>> 6b66aa81ba5272e82df9b685933e24244a7e1f4a
+
 Parameters = subfnVoxelWiseProcessBatch(data);
 subfnPrintResults(Parameters{1})
 
