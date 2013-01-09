@@ -148,7 +148,7 @@ switch ModelNum
         for i = 1:length(OutData)
             Vo = V;
             
-            Vo.fname = fullfile(OutputFolder,[OutName OutData{i}.name '.nii']);
+            Vo.fname = fullfile(OutputPath,[OutName OutData{i}.name '.nii']);
             Vo.descrip = '';
             Vo.n = [1 1];
             Y = zeros(Vo.dim);
