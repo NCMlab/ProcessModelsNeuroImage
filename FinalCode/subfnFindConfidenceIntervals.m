@@ -19,7 +19,6 @@ for i = 1:length(data.Thresholds)
             for j = 1:Nmed
                 % [Sbstat(ceil(Alpha1(j,k)*nboot),j,k) Sbstat(ceil(Alpha2(j,k)*nboot),j,k)]
                 BCaci{j,k} = setfield(BCaci{j,k},['alpha' temp(3:end)],[Sbstat(ceil(Alpha1(j,k)*nboot),j,k) Sbstat(ceil(Alpha2(j,k)*nboot),j,k)]);
-
                 PERci{j,k} = setfield(PERci{j,k},['alpha' temp(3:end)],[Sbstat(ceil(data.Thresholds(i)/2*nboot),j,k) Sbstat(ceil((1-data.Thresholds(i)/2)*nboot),j,k)]);
 
             end

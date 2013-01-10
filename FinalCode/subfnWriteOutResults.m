@@ -14,14 +14,14 @@ switch ModelNum
         end
         Nvoxels = length(AllParameters);
         Nmed = AnalysisParameters.Nmed;
-
+        
         Thresholds = AnalysisParameters.Thresholds;
         Nthr = length(Thresholds);
         VoxelIndices = zeros(Nvoxels,1);
         ImageVoxelIndices = zeros(Nvoxels,1);
         index = 1;
         OutData = {};
-
+        
         for j = 1:Nmed
             %get A model variable name
             OutData{index}.name = ['AeffMed' num2str(j)];
@@ -29,7 +29,7 @@ switch ModelNum
             %OutData{index}.field = ['A{' num2str(j) '}.beta'];
             OutData{index}.field = ['Model1{' num2str(j) '}.' AllParameters{1}.Xname '.beta'];
             index = index + 1;
-
+            
             OutData{index}.name = ['AtMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
             %OutData{index}.field = ['A{' num2str(j) '}.t'];
@@ -113,49 +113,164 @@ switch ModelNum
         index = index + 1;
         
         OutData{index}.name = 'CPp';
-        OutData{index}.data = zeros(Nvoxels,1);  
+        OutData{index}.data = zeros(Nvoxels,1);
         %OutData{index}.field = ['CP.p'];
         OutData{index}.field = ['Model2.' AllParameters{1}.Xname '.p'];
         index = index + 1;
-%         OutData{index}.name = 'k2';
-%         OutData{index}.data = zeros(Nvoxels,1);  
-%         OutData{index}.field = ['k2.pointEst'];
-
-        for i = 1:Nvoxels
-            if ~isempty(AllParameters{i})
-                VoxelIndices(i) = 1;
-                ImageVoxelIndices(i) = AnalysisParameters.Indices(i);
-                for j = 1:length(OutData)
-                    % the confidence intervals need to be treated special
-                    if strfind(OutData{j}.field,'alpha')
-                        thresholds = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                        
-                        if prod(thresholds)>0
-                            OutData{j}.data(i) = 1;
-                        end
-                    else
-                      % fprintf(1,'%s\n', ['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                        OutData{j}.data(i) = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                    end
-                end
-            end
-        end
-                
-
-        tVoxelIndices = find(VoxelIndices);
-        tImageVoxelIndices = ImageVoxelIndices(find(ImageVoxelIndices));
-
-        for i = 1:length(OutData)
-            Vo = V;
-            
-            Vo.fname = fullfile(OutputPath,[OutName OutData{i}.name '.nii']);
-            Vo.descrip = '';
-            Vo.n = [1 1];
-            Y = zeros(Vo.dim);
-            Y(tImageVoxelIndices) = OutData{i}.data(tVoxelIndices);
-            spm_write_vol(Vo,Y);
-        end
         
+        OutData{index}.name = 'k2';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['k2.pointEst'];
+    case '7'
+
+        OutName = [Tag '_Model' ModelNum '_'];
+        count = 1;
+        while isempty(AllParameters{count})
+            count = count + 1;
+        end
+        Nvoxels = length(AllParameters);
+        Nmed = AnalysisParameters.Nmed;
+        
+        Thresholds = AnalysisParameters.Thresholds;
+        Nthr = length(Thresholds);
+        VoxelIndices = zeros(Nvoxels,1);
+        ImageVoxelIndices = zeros(Nvoxels,1);
+        index = 1;
+        OutData = {};
+        
+        for j = 1:Nmed
+            % get A model variable name
+            OutData{index}.name = ['AeffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.beta'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X.beta'];
+            index = index + 1;
+            
+            OutData{index}.name = ['AtMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.t'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X.t'];
+            index = index + 1;
+            
+            OutData{index}.name = ['ApMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.p'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X.p'];
+            index = index + 1;
+% Write out the modulator effect            
+            OutData{index}.name = ['WeffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.beta'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.W.beta'];
+            index = index + 1;
+            
+            OutData{index}.name = ['WtMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.t'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.W.t'];
+            index = index + 1;
+            
+            OutData{index}.name = ['WpMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.p'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.W.p'];
+            index = index + 1;           
+ % Write out the interaction effect            
+            OutData{index}.name = ['XxWeffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.beta'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X_x_W.beta'];
+            index = index + 1;
+            
+            OutData{index}.name = ['XxWtMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.t'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X_x_W.t'];
+            index = index + 1;
+            
+            OutData{index}.name = ['XxWpMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['A{' num2str(j) '}.p'];
+            OutData{index}.field = ['Model1{' num2str(j) '}.X_x_W.p'];
+            index = index + 1;                      
+            
+            OutData{index}.name = ['BeffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['B{' num2str(j) '}.beta'];
+            OutData{index}.field = ['Model2.M.beta'];
+            index = index + 1;
+            
+            OutData{index}.name = ['BtMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['B{' num2str(j) '}.t'];
+            OutData{index}.field = ['Model2.M.t'];
+            index = index + 1;
+            
+            OutData{index}.name = ['BpMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['B{' num2str(j) '}.p'];
+            OutData{index}.field = ['Model2.M.p'];
+            index = index + 1;
+            
+            OutData{index}.name = ['CondABeffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            %OutData{index}.field = ['AB{' num2str(j) '}.pointEst'];
+            OutData{index}.field =  ['CondAB1{' num2str(j) '}.pointEst'];
+            index = index + 1;
+            
+            OutData{index}.name = ['CondABpValue' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['CondAB1{' num2str(j) '}.pValue'];
+            index = index + 1;
+            
+            for i = 1:Nthr
+                OutData{index}.name = ['CondABMed' num2str(j) 'sign_' num2str(Thresholds(i))];
+                OutData{index}.data = zeros(Nvoxels,1);
+                %OutData{index}.field = ['AB{' num2str(j) '}.BCaci.' num2str(Thresholds(i))];
+                thrStr = num2str(Thresholds(i));
+                OutData{index}.field = ['CondAB1{' num2str(j) '}.BCaci.alpha' thrStr(3:end)];
+                index = index + 1;
+            end
+
+        end
+        OutData{index}.name = 'Ceff';
+        OutData{index}.data = zeros(Nvoxels,1);
+        %OutData{index}.field = ['C.beta'];
+        %OutData{index}.field = ['Model3.X.beta'];
+        OutData{index}.field = ['Model3.X.beta'];
+        index = index + 1;
+        
+        OutData{index}.name = 'Ct';
+        OutData{index}.data = zeros(Nvoxels,1);
+        %OutData{index}.field = ['C.t'];
+        OutData{index}.field = ['Model3.X.t'];
+        index = index + 1;
+        
+        OutData{index}.name = 'Cp';
+        OutData{index}.data = zeros(Nvoxels,1);
+        %OutData{index}.field = ['C.p'];
+        OutData{index}.field = ['Model3.X.p'];
+        index = index + 1;
+        
+        OutData{index}.name = 'CPeff';
+        OutData{index}.data = zeros(Nvoxels,1);
+        %OutData{index}.field = ['CP.beta'];
+        OutData{index}.field = ['Model2.X.beta'];
+        index = index + 1;
+        
+        OutData{index}.name = 'CPt';
+        OutData{index}.data = zeros(Nvoxels,1);
+        %OutData{index}.field = ['CP.t'];
+        OutData{index}.field = ['Model2.X.t'];
+        index = index + 1;
+        
+        OutData{index}.name = 'CPp';
+        OutData{index}.data = zeros(Nvoxels,1);
+        %OutData{index}.field = ['CP.p'];
+        OutData{index}.field = ['Model2.X.p'];
+        index = index + 1;
+        
+      
     case '14'
         OutName = [Tag '_Model' ModelNum '_'];
         count = 1;
@@ -170,7 +285,7 @@ switch ModelNum
         ImageVoxelIndices = zeros(Nvoxels,1);
         index = 1;
         OutData = {};
-
+        
         for j = 1:Nmed
             OutData{index}.name = ['InteffMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
@@ -246,55 +361,50 @@ switch ModelNum
         OutData{index}.field = ['CP.t'];
         index = index + 1;
         OutData{index}.name = 'CPp';
-        OutData{index}.data = zeros(Nvoxels,1);  
+        OutData{index}.data = zeros(Nvoxels,1);
         OutData{index}.field = ['CP.p'];
         index = index + 1;
         OutData{index}.name = 'k2';
-        OutData{index}.data = zeros(Nvoxels,1);  
+        OutData{index}.data = zeros(Nvoxels,1);
         OutData{index}.field = ['k2.pointEst'];
         
-        
+end
 
-        for i = 1:Nvoxels
-            if ~isempty(AllParameters{i})
-                VoxelIndices(i) = 1;
-                ImageVoxelIndices(i) = AllParameters{i}.VoxelIndex;
-                for j = 1:length(OutData)
-                    % the confidence intervals need to be treated special
-                    if strfind(OutData{j}.field,'alpha')
-                        thresholds = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                        
-                        if prod(thresholds)>0
-                            OutData{j}.data(i) = 1;
-                        end
-                    else
-
-                      % fprintf(1,'%s\n', ['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                        OutData{j}.data(i) = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                    end
-                end
+for i = 1:Nvoxels
+    if ~isempty(AllParameters{i})
+        VoxelIndices(i) = 1;
+        ImageVoxelIndices(i) = AnalysisParameters.Indices(i);
+        for j = 1:length(OutData)
+            % the confidence intervals need to be treated special
+            if strfind(OutData{j}.field,'alpha')
+                thresholds = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
                 
+                if prod(thresholds)>0
+                    OutData{j}.data(i) = 1;
+                end
+            else
+                % fprintf(1,'%s\n', ['AllParameters{' num2str(i) '}.' OutData{j}.field]);
+                OutData{j}.data(i) = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
             end
         end
-                
-
-        tVoxelIndices = find(VoxelIndices);
-        tImageVoxelIndices = ImageVoxelIndices(find(ImageVoxelIndices));
-
-        for i = 1:length(OutData)
-            Vo = V;
-            Vo.n = [1 1];
-            Vo.fname = fullfile(Vo.fname,[OutName OutData{i}.name '.nii']);
-            Vo.descrip = '';
-            Y = zeros(Vo.dim);
-            Y(tImageVoxelIndices) = OutData{i}.data(tVoxelIndices);
-            spm_write_vol(Vo,Y);
-        end
+    end
 end
-            
-            
+
+
+tVoxelIndices = find(VoxelIndices);
+tImageVoxelIndices = ImageVoxelIndices(find(ImageVoxelIndices));
+
+for i = 1:length(OutData)
+    Vo = V;
+    Vo.fname = fullfile(OutputPath,[OutName OutData{i}.name '.nii']);
+    Vo.descrip = '';
+    Vo.n = [1 1];
+    Y = zeros(Vo.dim);
+    Y(tImageVoxelIndices) = OutData{i}.data(tVoxelIndices);
+    spm_write_vol(Vo,Y);
+end
+
 VoxelsProcessed =  length(tVoxelIndices)
-                   
-                    
-        
-        
+
+
+

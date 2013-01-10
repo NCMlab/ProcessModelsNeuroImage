@@ -1,4 +1,4 @@
-function beta = subfnCallRegressPCs(data,ModelNum)
+function beta = subfnCallRegressPCs(data)
 % This function makes the decision, based on the model, on how to estimate
 % the parameters. The simple models can use linear regression but the
 % models with interactions need to use an iterative process. 
@@ -12,7 +12,7 @@ options = optimset(options,'Algorithm','levenberg-marquardt');
 options = optimset(options,'TolFun',1e-10);
 options = optimset(options,'GradObj','on');
 NSub = size(data.Y,1);
-switch ModelNum
+switch data.ModelNum
     case '4'
         % standard linear regression
         % Expected: 

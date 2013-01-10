@@ -4,6 +4,16 @@ tic
 % This program needs to receive the entire data set, all voxels because it
 % is doing the PCA.
 %ModelNum = AnalysisParameters.ModelNum;
+BaseDir = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes';
+JobsDir = fullfile(BaseDir,'jobs');
+DataFile = fullfile(BaseDir,'AllData')
+load(DataFile)
+
+if ~exist(JobsDir,'dir')
+    % Make the outrput path for cluster jobs
+    mkdir(JobsDir)
+end
+
 ModelNum = '4';
 [NSub NMed NVox] = size(data.M);
 if NMed > 1
@@ -17,76 +27,63 @@ combo_matrix = boolean_enumeration_f(NPCs);
 % how many combos are there?
 NCombos = size(combo_matrix,1);
 remove_row_means = 1;
-LOOerrorMatrix = zeros(NSub,NCombos);
 
-LOOerrorMatrix2 = zeros(NSub,NCombos);
-% Create bootstrap resamples
-Nboot = 1000;
-BootStrapResamples = zeros(NSub,Nboot,'uint16');
-if ~isempty(data.STRAT)
-    Gr1 = find(data.STRAT == 0);
-    NGr1 = length(Gr1);
-    Gr2 = find(data.STRAT == 1);
-    NGr2 = length(Gr2);
-else
-    NGr1 = [];
-    NGr2 = [];
-end
-for i = 1:Nboot
-    if isempty(data.STRAT)
-        Samp =  floor(N*rand(N,1))+1;
-    else
-        Samp1 = floor(NGr1*rand(NGr1,1))+1;
-        Samp2 = floor(NGr2*rand(NGr2,1))+1+NGr1;
-        Samp = [Samp1; Samp2];
-    end
-    BootStrapResamples(:,i) = Samp;
-end
-% Create the array that will contain all the bootstrap resample IMAGES
-BootStrapResampleImages = zeros(NVox,Nboot,'single');
+
 
 
 %% Leave one out model selection
-LOOerrorMatrix = zeros(NSub, 2^NPCs-1);
+% This doesn;t work because this is identifying the model that accounts for
+% the greatest amount of variance in the outcome measure when controlling
+% for the input measure. This is NOT what mediation is.
+%
 fprintf(1,'** Starting the leave one out process **\n');
-
 % This is the SLOWEST method that performs the PCA for every LOO and fits
 % the regression model for every combination. Therefore, NO shortcuts are
 % taken.
-for i = 1:NSub
-    % everything in this loop should be made into a job for cluster
-    % submission and the only thing returned is the LOO values. Each call
-    % creates its own combo_matrix
-    %
-    % Inputs:
-    %   data
-    %   left out subject
-    %   NPCs
-    % Outputs: LOO vector
-    fprintf(1,' working on subject %4d of %4d\n',i,NSub);
-    % Create leave one out matrix
-    CurrentSubjects = [1:NSub];
-    CurrentSubjects(i) = 0;
-    CurrentSubjects = find(CurrentSubjects);
-    tempdata.X = data.X(CurrentSubjects);
-    tempdata.M = squeeze(data.M(CurrentSubjects,:,:));
-    tempdata.Y = data.Y(CurrentSubjects);
-    if NCOV
-        tempdata.COV = data.COV(CurrentSubjects);
-    else
-        tempdata.COV = [];
-    end
-    tempdata.ModelNum = ModelNum;
-    LOOerrorMatrix(i,:) = subfnCalcLOOAllModels(tempdata,data,NPCs,1);
+tic
+subfnClusterLOOCV(DataFile, NSub, JobsDir, NPCs)
+NDone = 0;
+h = waitbar(NDone/NSub,'Running LOOCV ...');
+while NDone < NSub
+    NDone = length(dir('LOOCV*.mat'));
+    waitbar(NDone/NSub,h);
+    pause(1);
 end
- 
+close(h)
+% Find the resultant LOOCV files and load them
+selected_PCs_LOOCV = subfnCompileClusterLOOCV(JobsDir,NPCs,NSub)
+toc
+%% Find the best mediator
+combo_matrix = boolean_enumeration_f(NPCs);
+NCombos = size(combo_matrix,1);
+[lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(data.M)', remove_row_means);
+ssf = squeeze(data.M) * eigenimages_noZeroes;
+ssfSubset = ssf(:,1:NPCs);
+beta3 = subfnregress(data.Y,[data.X data.COV]);
+c = beta3(2);
+AllMedEffects = zeros(NCombos,1);
+AIC = zeros(NCombos,1);
+for j = 1:NCombos
+    selected_PCs = find(combo_matrix(j,:));
+    TrainData = ssfSubset(:,selected_PCs);
+    S = subfnregstats(data.Y,[TrainData data.X]);
+    beta2 = subfnregress(data.Y,[TrainData data.X data.COV]);
+    cP = beta2(1+length(selected_PCs) + 1);
+    AllMedEffects(j,1) = c - cP;
+    AIC(j) = S.AIC;
+end
 
-%sLOOerrorMatrix1 = sum(LOOerrorMatrix);
-sLOOerrorMatrix = sum(LOOerrorMatrix);
-selected_PCs_LOO = find(combo_matrix(find(sLOOerrorMatrix == min(sLOOerrorMatrix)),:));
-selected_PCs_LOO_MAX = find(combo_matrix(find(sLOOerrorMatrix == max(sLOOerrorMatrix)),:));
+selected_PCs = find(combo_matrix(find(AllMedEffects == max(AllMedEffects)),:));
+% Use the top 5% of the best med effects and choose the one with the lowest
+% AIC
 
-% AIC Model selection
+[sMedEff Ind] = sort(AllMedEffects);
+top10 = sMedEff(end-9:end);
+top10Ind = Ind(end-9:end);
+combo_matrix(top10Ind,:)
+selected_PCs = find(combo_matrix(top10Ind(find(AIC(top10Ind) == min(AIC(top10Ind)))),:));
+
+%% AIC Model selection
 % do the AIC model selection approach
 combo_matrix = boolean_enumeration_f(NPCs);
 NCombos = size(combo_matrix,1);
@@ -98,20 +95,20 @@ ssfSubset = ssf(:,1:NPCs);
 
 for j = 1:NCombos
     selected_PCs = find(combo_matrix(j,:));
-
-    tempdata = ssfSubset(:,selected_PCs);
+    TrainData = ssfSubset(:,selected_PCs);
     %behav_fit_coef = FullModelbehav_fit_coef([1 selected_PCs+1 NPCs+2:end]);
-    S = subfnregstats(data.Y,[tempdata data.X]);
+    S = subfnregstats(data.Y,[TrainData data.X]);
     AICmatrix(j) = S.AIC;
     LOOCVmatrix(j) = S.CV;
 end
 selected_PCs_AIC = find(combo_matrix(find(AICmatrix == min(AICmatrix)),:));
-selected_PCs_LOOCV = find(combo_matrix(find(LOOCVmatrix == min(LOOCVmatrix)),:));
-[sLOOerrorMatrix' AICmatrix LOOCVmatrix]
-
 
 %% Create the point estimate image
 % perform the PCA on the original full data set
+
+%selected_PCs = [1     2     7     8     9    10    11    12]
+%selected_PCs = selected_PCs_LOOCV;
+remove_row_means = 1;
 [lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(data.M)', remove_row_means);
 ssf = squeeze(data.M) * eigenimages_noZeroes;
 ssfSubset = ssf(:,1:NPCs);
@@ -125,43 +122,88 @@ clear temp;
 %%%%% Obtain SSFs associated with the normalized best linear behavioral-fit image %%%%%
 PE_behav_fit_composite_PC_image_ssfs = squeeze(data.M) * PE_behav_fit_composite_PC_image;
 
+%%
+tempdata = data;
+tempdata.names.M={'SSFs'};
+tempdata.names.Y='medRT';
+tempdata.M = PE_behav_fit_composite_PC_image_ssfs;
+tempdata.Thresholds = [0.05];
+Parameters = subfnVoxelWiseProcessBatch(tempdata);
+subfnPrintResults(Parameters{1})
+[error img] = Commonality_2Pred(tempdata.X,tempdata.M,tempdata.Y,{tempdata.names.X,tempdata.names.M{1},tempdata.names.Y});
+
 %% Now use this best set of PCs for bootstrapping
-for i = 1:Nboot
-    tic
-    clear tempdata
-    tempdata.X = data.X(BootStrapResamples(:,i));
-    tempdata.M = data.M(BootStrapResamples(:,i),:,:);
-    tempdata.Y = data.Y(BootStrapResamples(:,i));
-    tempdata.ModelNum = ModelNum;
-    % Apply PCA
-    [lambdas, eigenimages_noZeroes, w] = pca_f(squeeze(tempdata.M)', remove_row_means);
-    toc
-    % calculate the subject scaling factors
-    ssf = squeeze(tempdata.M) * eigenimages_noZeroes;
-    ssfSubset = ssf(:,1:NPCs);
-    behav_fit_coef = subfnregress(tempdata.Y, [ssfSubset(:,selected_PCs) tempdata.X]);
-    % create the SSF image
-    temp = eigenimages_noZeroes(:, selected_PCs) * behav_fit_coef(1 + 1:1 + length(selected_PCs));  %nuisance regressors stay silent
-    behav_fit_composite_PC_image = temp / norm(temp);
-    clear temp;
-    BootStrapResampleImages(:,i) = behav_fit_composite_PC_image;
-    toc
-    if ~mod(i,100)
-        fprintf(1,'Bootstrap resample: %5d\n',i);
+% But this needs to create the mediating pattern. Therefore, the SSF image
+% needs to be weighted by the other effects in the model
+
+Nboot = 50;
+%selected_PCs = [1 2 4 5];
+NTimes = 100;
+
+subfnClusterBootStrapPC(data,Nboot,selected_PCs,NTimes,JobsDir)
+NDone = 0;
+h = waitbar(NDone/NTimes,'Running Bootstrapping ...');
+while NDone < NTimes
+    NDone = length(dir(fullfile(JobsDir,'BootStrapChunk*.mat')));
+    waitbar(NDone/NTimes,h);
+    pause(1);
+end
+close(h)
+
+
+BootData = subfnCompileClusterBootStrap(JobsDir);
+%% Calculate the PERci limits
+alpha = 0.05;
+ThreshImage = zeros(NVox,1);
+CI = zeros(NVox,2);
+
+nboot = size(BootData,2);
+for j = 1:NVox
+    %[Alpha1(j) Alpha2(j)] = subfnFindBCaLimits(BootData(j,:)',PE_behav_fit_composite_PC_image(j),alpha,tempdata);
+    %if (PE_behav_fit_composite_PC_image(j) < Alpha1) | (PE_behav_fit_composite_PC_image(j) > Alpha2);
+    %    ThreshImage(j) = 1;
+    %end
+    sbstat = sort(BootData(j,:)');
+    CI(j,:) = [sbstat(ceil(alpha/2*nboot)) sbstat(ceil((1-alpha/2)*nboot))];
+
+end
+%%
+S = sign(CI(:,1).*CI(:,2));
+find(S==1)
+ThreshImage = zeros(NVox,1);
+for j = 1:NVox
+    if (PE_behav_fit_composite_PC_image(j) < CI(j,1) | (PE_behav_fit_composite_PC_image(j) > CI(j,2)));
+       ThreshImage(j) = 1;
     end
 end
 %%
 clear eigenimages_noZeroes tempdata
 % create variance map
-Vmap = var(BootStrapResampleImages,0,2);
+Vmap = var(BootData,0,2);
 % create standard deviation map
-SDmap = std(BootStrapResampleImages,0,2);
+SDmap = std(BootData,0,2);
 % Create Z-map
 Zmap = PE_behav_fit_composite_PC_image./SDmap;
 % create BCaci confidence intervals for each voxel
 
 % create percentile based confidecne intervals for each voxel
 toc
+
+cd DualmSing_XageGr_MfMRI_YmedRT_10-Dec-2012_14-50
+load AnalysisParameters
+cd ..
+
+Vo=AnalysisParameters.V;
+Vo.n = [1 1];
+Vo.descrip='';
+Vo.fname=fullfile(pwd,'med_PCA_12781112.nii');
+Vo.fname=fullfile(pwd,'med_PCA_12781112_PERci_p05.nii');
+
+Y = zeros(Vo.dim);
+Y(AnalysisParameters.Indices)=Zmap;
+Y(AnalysisParameters.Indices)=ThreshImage;
+spm_write_vol(Vo,Y)
+
 
 
 

@@ -1,9 +1,9 @@
 function [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst,alpha,data)
+%
 [N Nmed] = size(data.M);
 NParameters = size(bstat,3);
 NCov = size(data.COV,2);
 nboot = length(bstat);
-
 
 % perform jackknife
 theta = zeros(N,Nmed,NParameters);
@@ -42,7 +42,6 @@ for i = 1:N
     end
     tParam = subfnProcessModelFit(temp,0);
     theta(i,:,:) = tParam.values;
-    
 end
 
 % 
