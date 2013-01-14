@@ -20,6 +20,7 @@ Nsub = size(temp.Y,1);
 if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
     % calculate the boot strap estimates
     [bstat k2stat] = subfnBootStrp(temp,temp.Nboot);
+    %[bstat k2stat] = subfnBootStrpv2(temp);
     if k2stat(1) ~= 0
         Sk2stat = sort(k2stat);
         k2 = {};

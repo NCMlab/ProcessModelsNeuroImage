@@ -20,7 +20,7 @@ else
     NGr2 = [];
 end
 % start the bootstrap loop using parallel processing
-for i = 1:Nboot
+parfor i = 1:Nboot
     % this is needed for the parallel processing to work
     temp = data;
     % create the resamples
@@ -50,4 +50,3 @@ for i = 1:Nboot
     k2stat(i) = tParam.k2;
 
 end
-

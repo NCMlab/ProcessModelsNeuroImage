@@ -22,7 +22,17 @@ corr([Gr M Y])
 %Gr = Gr./std(Gr);
 
 
+
 data = {};
+data.names = {};
+data.names.X = 'A';
+data.names.M = {'B'};
+data.names.Y = 'C';
+data.names.V = '';
+data.names.W = '';
+data.names.Q = '';
+data.names.R = '';
+data.names.COV = {};
 data.Y = Y;
 data.M = M;
 data.X = Gr;
@@ -36,7 +46,6 @@ data.STRAT = [];
 data.ModelNum = '4';
 data.Nboot = 5000;
 data.Thresholds = [0.05 0.01 0.005 0.001];
-
 Parameters = subfnVoxelWiseProcessBatch(data);
 
 S = regstats(data.Y,[data.X]);

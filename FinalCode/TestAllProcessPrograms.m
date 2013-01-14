@@ -8,15 +8,18 @@
 clear
 % Test new mediation code
 N = 500;
-AonB = 0.35;
-BonC = 0.35;
-AonC = 0.5;
+AonB = 0.5;
+BonC = 0.5;
+AonC = 0.0;
 sC = 0.5;
 sB = 0.5;
 
 A = round(rand(N,1));
 B = A.*AonB + randn(N,1).*sB;
 C = A.*AonC + B.*BonC + randn(N,1).*sC;
+A = (A - mean(A))./std(A);
+B = (B - mean(B))./std(B);
+C = (C - mean(C))./std(C);
 corr([A B C])
 
 %Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
@@ -49,14 +52,20 @@ data.ModelNum = '4';
 data.Thresholds = [0.05];
 data.Indices = 1;
 
-data.Nboot = 2000;
+data.Nboot = 10000;
 
 % Model of interest
 data.X = A;
 data.Y = C;
 data.M = B;
+% Add the bootstrap resamples to the input data
+NSub = length(data.X);
+
+data.Resamples = subfuncBootStrapResamples(data.Nboot,NSub,data.STRAT);
+
 Parameters = subfnVoxelWiseProcessBatch(data);
-%subfnPrintResults(Parameters{1})
+
+subfnPrintResults(Parameters{1})
 
 [CC, V, T,r, R2, R2_13, R2_12, R2_23] = subfnCommonality(C, [A B]);
 corr([A B C]).^2
