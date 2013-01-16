@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 % functions
 % bootSE
 % subfnBootStrp
@@ -26,7 +26,6 @@ V = randn(N,1);
 W = randn(N,1); 
 
 
-=======
 % % functions
 % % bootSE
 % % subfnBootStrp
@@ -35,10 +34,7 @@ W = randn(N,1);
 % 
 % 
 clear
-<<<<<<< HEAD
-load ModMeddata
->>>>>>> 6b66aa81ba5272e82df9b685933e24244a7e1f4a
-=======
+
 % Test new mediation code
 N = 112;
 Gr = round(rand(N,1));
@@ -61,32 +57,35 @@ Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
 %
 % clear
 % load ../PracticeData/ModMeddata
->>>>>>> develop
+
 data = {};
-data.Vname = 'V';
-data.Wname = 'W';
+data.names = {};
+data.names.X = 'X';
+data.names.M = {'M'};
+data.names.Y = 'Y';
+data.names.V = 'V';
 data.STRAT = [];
 data.COV = [];%randn(N,2);
 data.V = V;
 data.W = V;
 data.Q = [];
 data.R = [];
-data.ModelNum = '14';
+data.ModelNum = '74';
 data.Thresholds = [0.95];
 data.Indices = 1;
-<<<<<<< HEAD
-<<<<<<< HEAD
 data.Nboot = 2000;
 
 % Model of interest
-data.Xname = 'A';
-data.Yname = 'C';
-data.Mname = 'B';
+
 data.X = A;
 data.Y = C;
 data.M = B;
 Parameters = subfnVoxelWiseProcessBatch(data);
 subfnPrintResults(Parameters{1})
+
+
+
+
 % % alternate model 1
 data.Xname = 'A';
 data.Yname = 'B';

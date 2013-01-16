@@ -368,8 +368,8 @@ switch data.ModelNum
             ParameterToBS.values(1,1) = a.*(tempModel2.beta(2:Nmed+1));
             minV = min(data.V);
             maxV = max(data.V);
-            rangeV = maxV - minV;
-            stepV = rangeV/(Nsteps -1);
+            rangeX = maxV - minV;
+            stepV = rangeX/(Nsteps -1);
             probeV = [0 minV:stepV:maxV];
             for k = 2:Nsteps + 1
                 Interaction = zeros(Ndata,Nmed);
@@ -540,6 +540,7 @@ switch data.ModelNum
         %   /  /\
         %  /  /  \
         % X --    Y
+        %
         % This is a moderated mediation model where X is the moderator 
         % between M and Y. The conditional effect of X on Y via M is 
         % evaluated at multiple moderation values. The confidence intervals 
@@ -559,21 +560,51 @@ switch data.ModelNum
         Model1 = cell(Nmed);
         for j = 1:Nmed
             % Use this for loop to create the interaction term for use in
-            % Model3
+            % Model2
             Interaction(:,j) = data.M(:,j).*(data.X);
             Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
             a(j) = Model1{j}.beta(2);
         end
         clear tempModel2
-        tempModel2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
+        tempModel2 = subfnregstats(data.Y,[data.M Interaction data.X data.COV]);
         % check to see if the interaction is significant
-        
-        for j = 1:Nmed
-            if tempModel2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
-                ParameterToBS.probeMod = 1;
-            end
+        if tempModel2.tstat.pval(1+Nmed+1) < max(data.Thresholds)
+            ParameterToBS.probeMod = 1;
         end
         
+        if data.ProbeMod
+            ParameterToBS.values(1,1) = a.*(tempModel2.beta(2:Nmed+1));
+            minX = min(data.X);
+            maxX = max(data.X);
+            rangeX = maxX - minX;
+            if rangeX == 1
+                tempModel2 = subfnregstats(data.Y,[data.M (data.X - 1) Interaction data.COV]);
+                ParameterToBS.values(:,k) = a.*(tempModel2.beta(2:Nmed+1));
+                
+            else
+                stepX = rangeX/(Nsteps - 1);
+                probeX = [0 minX:stepX:maxX];
+                for k = 2:Nsteps + 1
+                    Interaction = zeros(Ndata,Nmed);
+                    for j = 1:Nmed
+                        Interaction(:,j) = data.M(:,j).*(data.X - probeX(k));
+                        Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
+                        a(j) = Model1{j}.beta(2);
+                    end
+                    % B branch model
+                    tempModel2 = subfnregstats(data.Y,[data.M (data.X - probeX(k)) Interaction data.COV]);
+                    ParameterToBS.values(:,k) = a.*(tempModel2.beta(2:Nmed+1));
+                end
+                ParameterToBS.probeValues = probeX;
+            end
+        else
+            ParameterToBS.values = a.*(tempModel2.beta(2:Nmed+1));
+            ParameterToBS.probeValues = 0;
+        end
+        ParameterToBS.k2 = 0;
+        Parameters = {};
+
+
 end
 if PointEstFlag
     Parameters.Xname = data.names.X;
