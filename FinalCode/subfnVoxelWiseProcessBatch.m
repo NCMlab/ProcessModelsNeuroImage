@@ -185,9 +185,16 @@ for i = 1:Nvoxels
             if sum(isnan(temp.M)) == 0; Mflag = 1;end
             if sum(isnan(temp.W)) == 0; Wflag = 1;end
             if Mflag && Wflag
-
                 AllDataFlag = 1;
             end
+        case '74'
+            temp.M = data.M(:,:,i);
+            if sum(isnan(temp.M)) == 0; Mflag = 1;end
+            if Mflag
+                AllDataFlag = 1;
+            end
+            
+            
     end
     
     if AllDataFlag

@@ -1,3 +1,4 @@
+
 % functions
 % bootSE
 % subfnBootStrp
@@ -24,6 +25,34 @@ corr([A B C])
 
 %Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
 
+V = randn(N,1); 
+W = randn(N,1); 
+
+
+% % functions
+% % bootSE
+% % subfnBootStrp
+% % subfnFindConfidenceIntervals
+% % subfnProcessModelFit
+% 
+% 
+clear
+
+% Test new mediation code
+N = 112;
+Gr = round(rand(N,1));
+Nmed = 3;
+V = randn(N,1); 
+W = randn(N,1); 
+
+M = randn(N,Nmed) + 10; 
+X = zeros(N,1);
+for i = 1:Nmed
+    X = X + 0.25*M(:,i) + randn(N,1)*0.15 + i;
+end
+
+Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
+
 
 %corr([X M V W Y])
 %corr([X M Y])
@@ -33,6 +62,7 @@ corr([A B C])
 % clear
 % load ../PracticeData/ModMeddata
 
+data = {};
 data.names = {};
 data.names.X = 'A';
 data.names.M = {'B'};
@@ -42,19 +72,26 @@ data.names.W = '';
 data.names.Q = '';
 data.names.R = '';
 data.names.COV = {};
+
+
+
+
 data.STRAT = [];
 data.COV = [];%randn(N,2);
 data.V = [];
 data.W = [];
 data.Q = [];
 data.R = [];
-data.ModelNum = '4';
+
+
+data.ModelNum = '74';
 data.Thresholds = [0.05];
 data.Indices = 1;
-
-data.Nboot = 10000;
+data.Nboot = 2000;
 
 % Model of interest
+
+
 data.X = A;
 data.Y = C;
 data.M = B;
@@ -71,7 +108,6 @@ subfnPrintResults(Parameters{1})
 corr([A B C]).^2
 [error img] = Commonality_2Pred(C,A,B,{'C' 'B' 'A'});
 %%
-
 % % alternate model 1
 
 data.X = A;
