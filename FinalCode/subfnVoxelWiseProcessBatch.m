@@ -47,11 +47,11 @@ data.ProbeMod = 0;
 
 % Check to see if the variables are named
 % If not use default names
-if ~isfield(data,'Xname'); data.Xname = 'X'; end
-if ~isfield(data,'Mname'); data.Mname = 'M'; end
-if ~isfield(data,'Yname'); data.Yname = 'Y'; end
-if ~isfield(data,'Vname'); data.Vname = 'V'; end
-if ~isfield(data,'Wname'); data.Wname = 'W'; end
+if ~isfield(data.names,'X'); data.names.X = 'X'; end
+if ~isfield(data.names,'M'); data.names.M = 'M'; end
+if ~isfield(data.names,'Y'); data.names.Y = 'Y'; end
+if ~isfield(data.names,'V'); data.names.V = 'V'; end
+if ~isfield(data.names,'W'); data.names.W = 'W'; end
 temp = data;
 if ~isfield(data,'COVname') && ~isempty(data.COV)
     NCov = size(data.COV,2);
@@ -144,7 +144,7 @@ for i = 1:Nvoxels
             else
                 temp.Y = data.Y;
             end
-                        % Check the W variable
+            % Check the W variable
             if size(data.W,3) > 1
                 temp.W = data.W(:,:,i);
             else
@@ -188,13 +188,12 @@ for i = 1:Nvoxels
                 AllDataFlag = 1;
             end
         case '74'
+            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
             temp.M = data.M(:,:,i);
             if sum(isnan(temp.M)) == 0; Mflag = 1;end
             if Mflag
                 AllDataFlag = 1;
             end
-            
-            
     end
     
     if AllDataFlag
