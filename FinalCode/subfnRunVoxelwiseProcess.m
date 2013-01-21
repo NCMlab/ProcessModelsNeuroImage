@@ -1,10 +1,9 @@
 function subfnRunVoxelwiseProcess(AllData,AnalysisParameters)
-<<<<<<< HEAD
+
 %addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
-=======
+
 addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 addpath /Users/jason/Desktop/ProcessModelsNeuroImage/FinalCode
->>>>>>> 3d72ef9fd0915f00b46d5309d4ece28b11b7f651
 
 BaseDir = AnalysisParameters.BaseDir;
 Nsub = AnalysisParameters.Nsub;
@@ -71,7 +70,7 @@ for i = 1:NJobSplit
         fclose(fid);
         %    Str = ['! qsub  ' jobPath];
         Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
-        unix(Str);
+       % unix(Str);
     else
         subfnVoxelWiseProcessBatch(InDataPath);
     end
@@ -106,7 +105,7 @@ if NJobSplit > 1
     fprintf(fid,'EOF\n');
     fclose(fid);
     Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
-    unix(Str);
+   % unix(Str);
 end
 %
 % % Once it is all done put the data back together

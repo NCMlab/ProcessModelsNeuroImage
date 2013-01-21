@@ -67,7 +67,7 @@ tic
 for i = 1:Nvoxels
     if Nvoxels > 1
         t = toc;
-        fprintf(1,'%6d of %6d in %6.2f sec\n',i,Nvoxels,t);
+        fprintf(1,'%6d of %6d in %6.2f sec ',i,Nvoxels,t);
         tic;
     end
     % check to make sure there is data for all subjects at this voxel. 
@@ -195,12 +195,24 @@ for i = 1:Nvoxels
                 AllDataFlag = 1;
             end
     end
-    
+    % Check for data being all zeros
+    if length(find(temp.X==0))==length(temp.X)
+        AllDataFlag = 0;
+    end
+    if length(find(temp.Y==0))==length(temp.Y)
+        AllDataFlag = 0;
+    end
+    if length(find(temp.M==0))==length(temp.M)
+        AllDataFlag = 0;
+    end
     if AllDataFlag
         tempParameters = subfnProcess(temp);
         Parameters{i} = tempParameters{:};
         Parameters{i}.Nboot = data.Nboot;
         Parameters{i}.Thresholds = data.Thresholds;
+        fprintf(1,'\n')
+    else
+        fprintf(1,' << empty\n')
     end
 
 end

@@ -122,7 +122,7 @@ switch ModelNum
         OutData{index}.data = zeros(Nvoxels,1);
         OutData{index}.field = ['k2.pointEst'];
     case '7'
-
+        
         OutName = [Tag '_Model' ModelNum '_'];
         count = 1;
         while isempty(AllParameters{count})
@@ -157,7 +157,7 @@ switch ModelNum
             %OutData{index}.field = ['A{' num2str(j) '}.p'];
             OutData{index}.field = ['Model1{' num2str(j) '}.X.p'];
             index = index + 1;
-% Write out the modulator effect            
+            % Write out the modulator effect
             OutData{index}.name = ['WeffMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
             %OutData{index}.field = ['A{' num2str(j) '}.beta'];
@@ -174,8 +174,8 @@ switch ModelNum
             OutData{index}.data = zeros(Nvoxels,1);
             %OutData{index}.field = ['A{' num2str(j) '}.p'];
             OutData{index}.field = ['Model1{' num2str(j) '}.W.p'];
-            index = index + 1;           
- % Write out the interaction effect            
+            index = index + 1;
+            % Write out the interaction effect
             OutData{index}.name = ['XxWeffMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
             %OutData{index}.field = ['A{' num2str(j) '}.beta'];
@@ -192,7 +192,7 @@ switch ModelNum
             OutData{index}.data = zeros(Nvoxels,1);
             %OutData{index}.field = ['A{' num2str(j) '}.p'];
             OutData{index}.field = ['Model1{' num2str(j) '}.X_x_W.p'];
-            index = index + 1;                      
+            index = index + 1;
             
             OutData{index}.name = ['BeffMed' num2str(j)];
             OutData{index}.data = zeros(Nvoxels,1);
@@ -231,7 +231,7 @@ switch ModelNum
                 OutData{index}.field = ['CondAB1{' num2str(j) '}.BCaci.alpha' thrStr(3:end)];
                 index = index + 1;
             end
-
+            
         end
         OutData{index}.name = 'Ceff';
         OutData{index}.data = zeros(Nvoxels,1);
@@ -270,7 +270,7 @@ switch ModelNum
         OutData{index}.field = ['Model2.X.p'];
         index = index + 1;
         
-      
+        
     case '14'
         OutName = [Tag '_Model' ModelNum '_'];
         count = 1;
@@ -367,7 +367,102 @@ switch ModelNum
         OutData{index}.name = 'k2';
         OutData{index}.data = zeros(Nvoxels,1);
         OutData{index}.field = ['k2.pointEst'];
+    case '74'
+        OutName = [Tag '_Model' ModelNum '_'];
+        count = 1;
+        while isempty(AllParameters{count})
+            count = count + 1;
+        end
+        Nvoxels = length(AllParameters);
+        Nmed = size(AllParameters{count}.AB,2);
+        Thresholds = fieldnames(AllParameters{count}.AB{1}.BCaci);
+        Nthr = length(Thresholds);
+        VoxelIndices = zeros(Nvoxels,1);
+        ImageVoxelIndices = zeros(Nvoxels,1);
+        index = 1;
+        OutData = {};
         
+        for j = 1:Nmed
+            OutData{index}.name = ['InteffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['Int{' num2str(j) '}.beta'];
+            index = index + 1;
+            OutData{index}.name = ['InttMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['Int{' num2str(j) '}.t'];
+            index = index + 1;
+            OutData{index}.name = ['IntpMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['Int{' num2str(j) '}.p'];
+            index = index + 1;
+            
+            OutData{index}.name = ['AeffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['A{' num2str(j) '}.beta'];
+            index = index + 1;
+            OutData{index}.name = ['AtMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['A{' num2str(j) '}.t'];
+            index = index + 1;
+            OutData{index}.name = ['ApMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['A{' num2str(j) '}.p'];
+            index = index + 1;
+            OutData{index}.name = ['BeffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['B{' num2str(j) '}.beta'];
+            index = index + 1;
+            OutData{index}.name = ['BtMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['B{' num2str(j) '}.t'];
+            index = index + 1;
+            OutData{index}.name = ['BpMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['B{' num2str(j) '}.p'];
+            index = index + 1;
+            OutData{index}.name = ['ABeffMed' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['AB{' num2str(j) '}.pointEst'];
+            index = index + 1;
+            OutData{index}.name = ['ABpValue' num2str(j)];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['AB{' num2str(j) '}.pValue'];
+            index = index + 1;
+            
+            for i = 1:Nthr
+                OutData{index}.name = ['ABMed' num2str(j) 'sign_' Thresholds{i}];
+                OutData{index}.data = zeros(Nvoxels,1);
+                OutData{index}.field = ['AB{' num2str(j) '}.BCaci.' Thresholds{i}];
+                index = index + 1;
+            end
+        end
+        OutData{index}.name = 'Ceff';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['C.beta'];
+        index = index + 1;
+        OutData{index}.name = 'Ct';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['C.t'];
+        index = index + 1;
+        OutData{index}.name = 'Cp';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['C.p'];
+        index = index + 1;
+        OutData{index}.name = 'CPeff';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['CP.beta'];
+        index = index + 1;
+        OutData{index}.name = 'CPt';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['CP.t'];
+        index = index + 1;
+        OutData{index}.name = 'CPp';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['CP.p'];
+        index = index + 1;
+        OutData{index}.name = 'k2';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['k2.pointEst'];
 end
 
 for i = 1:Nvoxels
