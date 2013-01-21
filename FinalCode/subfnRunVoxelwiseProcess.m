@@ -77,7 +77,7 @@ for i = 1:NJobSplit
 end
 if NJobSplit > 1
     % now run the last chunk of data
-    VoxelForThisJob =[(i)*NvoxelsPerJob + 1:Nvoxels];
+    VoxelForThisJob =[(i-1)*NvoxelsPerJob + 1:Nvoxels];
     data = AllData;
     
     data = CreateDataChunk(AllData,VoxelForThisJob,ModelNum);
@@ -85,12 +85,12 @@ if NJobSplit > 1
     % keep track of which voxels are being processed
     data.Indices = AllData.Indices(VoxelForThisJob);
     %Parameters = subfnVoxelWiseProcessBatch(temp,ModelNum,Nboot,Thresholds);
-    InTag = sprintf('data_%04d',i+1);
+    InTag = sprintf('data_%04d',i);
     InDataPath = fullfile(OutFolder,InTag);
     Str = ['save ' InDataPath ' data '];
     eval(Str);
     
-    jobPath = fullfile(OutFolder,sprintf('job_%04d.sh',i+1));
+    jobPath = fullfile(OutFolder,sprintf('job_%04d.sh',i));
     fid = fopen(jobPath,'w');
     fprintf(fid,'#!/bin/bash\n');
     fprintf(fid,'#PBS -N Matlab\n');
@@ -105,7 +105,7 @@ if NJobSplit > 1
     fprintf(fid,'EOF\n');
     fclose(fid);
     Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
-   % unix(Str);
+    unix(Str);
 end
 %
 % % Once it is all done put the data back together
