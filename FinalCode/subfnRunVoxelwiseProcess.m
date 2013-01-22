@@ -70,7 +70,7 @@ for i = 1:NJobSplit
         fclose(fid);
         %    Str = ['! qsub  ' jobPath];
         Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
-       % unix(Str);
+        unix(Str);
     else
         subfnVoxelWiseProcessBatch(InDataPath);
     end
@@ -132,13 +132,13 @@ function data = CreateDataChunk(data,VoxelForThisJob,ModelNum)
                 data.X = data.X;
             end
             % Check the M variable
-            if size(AllData.M,3) > 1
+            if size(data.M,3) > 1
                 data.M = data.M(:,:,VoxelForThisJob);
             else
                 data.M = data.M;
             end
             % Check the Y variable
-            if size(AllData.Y,3) > 1
+            if size(data.Y,3) > 1
                 data.Y = data.Y(:,:,VoxelForThisJob);
             else
                 data.Y = data.Y;
