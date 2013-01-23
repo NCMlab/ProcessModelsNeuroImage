@@ -296,7 +296,7 @@ switch ModelNum
         VoxelIndices = zeros(Nvoxels,1);
         ImageVoxelIndices = zeros(Nvoxels,1);
 
-        [OutData index] = subfnCreateOutDataStructureForModels(AllParameters);
+        [OutData index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters);
         % Conditional Effects
         for j = 1:Nmed
            for i = 1:Nthr
@@ -310,6 +310,7 @@ switch ModelNum
         end
 end
 
+% put the data into the output structure
 for i = 1:Nvoxels
     if ~isempty(AllParameters{i})
         VoxelIndices(i) = 1;
@@ -318,9 +319,9 @@ for i = 1:Nvoxels
             % the confidence intervals need to be treated special
             if strfind(OutData{j}.field,'alpha')
                 thresholds = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                
                 if prod(thresholds)>0
                     OutData{j}.data(i) = 1;
+                    OutData{j}.dataType = 2;
                 end
             else
                 % fprintf(1,'%s\n', ['AllParameters{' num2str(i) '}.' OutData{j}.field]);
@@ -330,7 +331,7 @@ for i = 1:Nvoxels
     end
 end
 
-
+% write images to file
 tVoxelIndices = find(VoxelIndices);
 tImageVoxelIndices = ImageVoxelIndices(find(ImageVoxelIndices));
 for i = 1:length(OutData)
@@ -338,17 +339,18 @@ for i = 1:length(OutData)
     Vo.fname = fullfile(OutputPath,[OutName OutData{i}.name '.nii']);
     Vo.descrip = '';
     Vo.n = [1 1];
-    Vo.dt = [16 0];
+    Vo.dt = [OutData{i}.dataType 0];
     Y = zeros(Vo.dim);
     Y(tImageVoxelIndices) = OutData{i}.data(tVoxelIndices);
     spm_write_vol(Vo,Y);
 end
-
 VoxelsProcessed =  length(tVoxelIndices)
 
 
-function [OutData index] = subfnCreateOutDataStructureForModels(AllParameters)
+function [OutData index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters)
 index = 1;
+Nmed = AnalysisParameters.Nmed;
+Nvoxels = length(AllParameters);
 OutData = {};
 for j = 1:Nmed
     % Model 1
@@ -357,7 +359,7 @@ for j = 1:Nmed
         if isempty(strmatch(Model1FieldNames(k),'Outcome')) && isempty(strmatch(Model1FieldNames(k),'Model'))
             OutData{index}.name = ['Model1_Med' num2str(j) '_' Model1FieldNames{k} '_beta'];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['Model1{' num2str(j) '}.' Model1FieldNames{k} '.beta']
+            OutData{index}.field = ['Model1{' num2str(j) '}.' Model1FieldNames{k} '.beta'];
             OutData{index}.dataType = 16;
             index = index + 1;
             OutData{index}.name = ['Model1_Med' num2str(j) '_' Model1FieldNames{k} '_t'];
@@ -374,7 +376,7 @@ for k = 1:length(Model2FieldNames)
     if isempty(strmatch(Model2FieldNames(k),'Outcome')) && isempty(strmatch(Model2FieldNames(k),'Model'))
         OutData{index}.name = ['Model2_' Model2FieldNames{k} '_beta'];
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['Model2.' Model2FieldNames{k} '.beta']
+        OutData{index}.field = ['Model2.' Model2FieldNames{k} '.beta'];
         OutData{index}.dataType = 16;
         index = index + 1;
         OutData{index}.name = ['Model2_' Model2FieldNames{k} '_t'];
@@ -390,7 +392,7 @@ for k = 1:length(Model3FieldNames)
     if isempty(strmatch(Model3FieldNames(k),'Outcome')) && isempty(strmatch(Model3FieldNames(k),'Model'))
         OutData{index}.name = ['Model3_' Model3FieldNames{k} '_beta'];
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['Model3.' Model3FieldNames{k} '.beta']
+        OutData{index}.field = ['Model3.' Model3FieldNames{k} '.beta'];
         OutData{index}.dataType = 16;
         index = index + 1;
         OutData{index}.name = ['Model3_' Model3FieldNames{k} '_t'];
@@ -400,15 +402,3 @@ for k = 1:length(Model3FieldNames)
         index = index + 1;
     end
 end
-% Conditional Effects
-for j = 1:Nmed
-    for i = 1:Nthr
-        thrStr = num2str(Thresholds(i));
-        OutData{index}.name = ['CondABMed' num2str(j) 'sign_' num2str(Thresholds(i))];
-        OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['CondAB' num2str(j) '{' num2str(j) '}.BCaci.alpha' thrStr(3:end)];
-        OutData{index}.dataType = 2;
-        index = index + 1;
-    end
-end
-    
