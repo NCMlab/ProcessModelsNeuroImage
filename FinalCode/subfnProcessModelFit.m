@@ -480,7 +480,6 @@ switch data.ModelNum
         end
         ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
         
-        
         Model1 = cell(Nmed);
         Interaction = zeros(Ndata,Nmed);
         a = zeros(Nmed,1);
@@ -496,7 +495,7 @@ switch data.ModelNum
             Interaction(:,j) = data.M(:,j).*(data.W);
             a(j) = Model1{j}.beta(2);
         end
-        clear tempModel2
+        
         Model2 = subfnregstats(data.Y,[data.M data.W Interaction data.X data.COV]);
         % check to see if the BRANCH B interaction is significant
         for j = 1:Nmed
@@ -504,27 +503,29 @@ switch data.ModelNum
                 ParameterToBS.probeMod = 1;
             end
         end
+        
         % If either of the interactions are significant then probe them
          if data.ProbeMod
             % calculate the condition effect when the moderator equals zero
-            ParameterToBS.values(1,1) = (tempModel2.beta(2:Nmed+1));
+            %ParameterToBS.values(1,1) = (Model1)(Model2.beta(2:Nmed+1));
             minW = min(data.W);
             maxW = max(data.W);
             rangeW = maxW - minW;
             stepW = rangeW/(Nsteps -1);
             probeW = [0 minW:stepW:maxW];
-            for k = 2:Nsteps + 1
+            %probeW = [-0.8080 0.1120 1.0319]
+            for k = 1:Nsteps + 1
                 Interaction = zeros(Ndata,Nmed);
                 for j = 1:Nmed
                     Interaction(:,j) = data.M(:,j).*(data.W - probeW(k));
-                    tempModel1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X.*(data.W - probeW(k)) data.COV]);
-                    ABranchEffect(j) = tempModel1{j}.beta(2) + tempModel1{j}.beta(4).*probeW(k);
-                    BBranchEffect(j) = tempModel2.beta(1+j) + tempModel2.beta(1+Nmed+1+j).*probeW(k);
+                %    tempModel1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X.*(data.W - probeW(k)) data.COV]);
+                    ABranchEffect(j) = Model1{j}.beta(2) + Model1{j}.beta(4).*probeW(k);
+%                     BBranchEffect(j) = Model2.beta(1+j) + Model2.beta(1+Nmed+1+j).*probeW(k);
                 end
                 % B branch model
-                tempModel2 = subfnregstats(data.Y,[data.M (data.W-probeW(k)) Interaction data.X data.COV]);      
+%                tempModel2 = subfnregstats(data.Y,[data.M (data.W-probeW(k)) Interaction data.X data.COV]);      
                 for j = 1:Nmed
-                     BBranchEffect(j) = tempModel2.beta(1+j) + tempModel2.beta(1+Nmed+1+j).*probeW(k);
+                     BBranchEffect(j) = Model2.beta(1+j) + Model2.beta(1+Nmed+1+j).*probeW(k);
                 end
                 ParameterToBS.values(:,k) = ABranchEffect.*BBranchEffect;
             end
@@ -533,6 +534,78 @@ switch data.ModelNum
             ParameterToBS.values = a.*Model2.beta(2:Nmed+1);
             ParameterToBS.probeValues = 0;
          end
+         ParameterToBS.k2 = 0;
+         
+         if PointEstFlag
+             Interaction = zeros(Ndata,Nmed);
+             Model1 = cell(Nmed);
+             for j = 1:Nmed
+                 % Use this for loop to create the interaction term for use in
+                 % Model2
+                 Model1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X.*(data.W) data.COV]);
+                 Interaction(:,j) = data.M(:,j).*(data.W);
+                 a(j) = Model1{j}.beta(2);
+             end
+             Model2 = subfnregstats(data.Y,[data.M data.W Interaction data.X data.COV]);
+             %Model2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
+             Model3 = subfnregstats(data.Y,[data.X data.COV]);
+             noInt2 = subfnregstats(data.Y,[data.M data.W data.X data.COV]);
+             diff2 = subfnCalculateModelFitDiff(Model2,noInt2);
+             Parameters.EffOfInt = subfnSetModelParameters(diff2);
+             Parameters.Model2.Model = subfnSetModelParameters(Model2);
+             Parameters.Model3.Model = subfnSetModelParameters(Model3);
+             % calculate the Johnson-Neyman value
+             JNvalue = -99;
+             Parameters.JohnsonNeyman = JNvalue;
+             Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1);','const','const');
+             eval(Str);            
+             Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1);',data.names.W,data.names.W);
+             eval(Str); 
+             Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1);',data.names.X,data.names.X);
+             eval(Str); 
+             for j = 1:Nmed
+                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
+
+                 Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2);',data.names.X,data.names.X);
+                 eval(Str)
+                 Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,j+1);',[data.names.M{j}],[data.names.M{j}]);
+                 eval(Str)
+                 Str = sprintf('Parameters.Model2.%s_x_%s=subfnSetParameters(''%s_x%s'',Model2,Nmed+2+j);',[data.names.M{j}],data.names.W,[data.names.M{j}],data.names.W);
+                 eval(Str)
+                 
+                 for k = 1:size(data.COV,2)
+                     Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},4+k);',data.names.COV{k},data.names.COV{k});
+                     eval(Str)
+                 end
+                 Parameters.Model1{j}.Model = subfnSetModelParameters(Model1{j});
+                 Parameters.Model1{j}.Outcome = data.names.M{1};
+             end
+             
+%                          Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,Nmed+2);',data.Vname,data.Vname);
+%             eval(Str)
+%             Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1);',data.Xname,data.Xname);
+%             eval(Str)
+%             for k = 1:size(data.COV,2)
+%                 Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model2,1+NMed+1+NMed+1+k);',data.COVname{k},data.COVname{k});
+%                 eval(Str)
+%             end
+%             for j = 1:Nmed
+%                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
+%             end
+%             Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+%             Parameters.Model2.Outcome = data.Yname;
+%             Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
+%             Parameters.Model3.Outcome = data.Yname;
+%             Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2);',data.Xname,data.Xname);
+%             eval(Str)
+% 
+%             for k = 1:size(data.COV,2)
+%                 Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2+k);',data.COVname{k},data.COVname{k});
+%                 eval(Str)
+%             end
+
+         end
+         
     case '74'
          %
         %     M
