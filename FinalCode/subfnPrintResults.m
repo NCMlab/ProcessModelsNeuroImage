@@ -130,7 +130,7 @@ switch ModelNum
                 Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
-            for k = 2:length(Parameters.CondAB1)
+            for k = 1:length(Parameters.CondAB1)
                 limits = getfield(Parameters.CondAB1{k}.BCaci,ThresholdField);
                 fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',...
                     Parameters.CondAB1{k}.probeValue,...

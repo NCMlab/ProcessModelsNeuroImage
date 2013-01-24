@@ -156,7 +156,7 @@ switch data.ModelNum
                 Str = sprintf('Parameters.Model1{i}.%s=subfnSetParameters(''%s'',Model1{i},2);',data.names.X,data.names.X);
                 eval(Str)
                 for j = 1:size(data.COV,2)
-                    Str = sprintf('Parameters.Model1{i}.%s=subfnSetParameters(''%s'',Model1{i},2+j);',data.COVname{j},data.COVname{j});
+                    Str = sprintf('Parameters.Model1{i}.%s=subfnSetParameters(''%s'',Model1{i},2+j);',data.COnames.V{j},data.COnames.V{j});
                     eval(Str)
                 end
                 Parameters.Model1{i}.Model = subfnSetModelParameters(Model1{i});
@@ -174,7 +174,7 @@ switch data.ModelNum
             Str = sprintf('Parameters.Model2.%s = subfnSetParameters(''%s'', Model2, 1+Nmed+1);',data.names.X,data.names.X);
             eval(Str);
             for j = 1:size(data.COV,2)
-                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+j);',data.COVname{j},data.COVname{j});
+                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+j);',data.COnames.V{j},data.COnames.V{j});
                 eval(Str);
             end
             Parameters.Model2.Model = subfnSetModelParameters(Model2);
@@ -185,7 +185,7 @@ switch data.ModelNum
             Str = sprintf('Parameters.Model3.%s = subfnSetParameters(''%s'', Model3, 2);',data.names.X,data.names.X);
             eval(Str);
             for j = 1:size(data.COV,2)
-                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+1+j);',data.COVname{j},data.COVname{j});
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+1+j);',data.COnames.V{j},data.COnames.V{j});
                 eval(Str);
             end
             Parameters.Model3.Model = subfnSetModelParameters(Model3);
@@ -272,18 +272,18 @@ switch data.ModelNum
             tcrit = tinv(1 - max(data.Thresholds)/2,length(data.X) - (4 + size(data.COV,2)));
             for j = 1:Nmed
                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
-                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2);',data.Xname,data.Xname);
+                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2);',data.names.X,data.names.X);
                 eval(Str)
-                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},3);',data.Wname,data.Wname);
+                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},3);',data.names.W,data.names.W);
                 eval(Str)
-                Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x%s'',Model1{j},4);',data.Xname,data.Wname,data.Xname,data.Wname);
+                Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x%s'',Model1{j},4);',data.names.X,data.names.W,data.names.X,data.names.W);
                 eval(Str)
                 for k = 1:size(data.COV,2)
-                    Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},4+k);',data.COVname{k},data.COVname{k});
+                    Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},4+k);',data.names.COV{k},data.names.COV{k});
                     eval(Str)
                 end
                 Parameters.Model1{j}.Model = subfnSetModelParameters(Model1{j});
-                Parameters.Model1{j}.Outcome = data.Mname;
+                Parameters.Model1{j}.Outcome = data.names.M{j};
                 Parameters.JNvalue = subfnJohnsonNeyman(Model1{j}.beta(2),Model1{j}.covb(2,2),Model1{j}.beta(4),Model1{j}.covb(4,4),Model1{j}.covb(2,4),tcrit);
                 %Parameters.JNvalue = Parameters.JNvalue.*Model2.beta(2);
             end
@@ -292,21 +292,21 @@ switch data.ModelNum
             %diffS = subfnCalculateModelFitDiff(S,noIntS);
             %Parameters.EffOfInt = subfnSetModelParameters(diffS);
             Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
-            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,2);',data.Mname,data.Mname);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,2);',data.names.M{j},data.names.M{j});
             eval(Str)
-            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,3);',data.Xname,data.Xname);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,3);',data.names.X,data.names.X);
             eval(Str)
             Parameters.Model2.Model = subfnSetModelParameters(Model2);
-            Parameters.Model2.Outcome = data.Yname;
+            Parameters.Model2.Outcome = data.names.Y;
             % from Model 3
-            Parameters.Model3.Outcome = data.Yname;
+            Parameters.Model3.Outcome = data.names.Y;
             Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
-            Str = sprintf('Parameters.Model3.%s = subfnSetParameters(''%s'', Model3, 2);',data.Xname,data.Xname);
+            Str = sprintf('Parameters.Model3.%s = subfnSetParameters(''%s'', Model3, 2);',data.names.X,data.names.X);
             eval(Str);
             for j = 1:size(data.COV,2)
-                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model2,3+j);',data.COVname{j},data.COVname{j});
+                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,3+j);',data.names.COV{j},data.names.COV{j});
                 eval(Str);
-                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2+j);',data.COVname{j},data.COVname{j});
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2+j);',data.names.COV{j},data.names.COV{j});
                 eval(Str);
             end
             Parameters.Model3.Model = subfnSetModelParameters(Model3);
@@ -354,35 +354,41 @@ switch data.ModelNum
             a(j) = Model1{j}.beta(2);
         end
         clear tempModel2
-        tempModel2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
+        Model2 = subfnregstats(data.Y,[data.M data.V Interaction data.X data.COV]);
         % check to see if the interaction is significant
         
         for j = 1:Nmed
-            if tempModel2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
+            if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
                 ParameterToBS.probeMod = 1;
             end
         end
         if data.ProbeMod
-            ParameterToBS.values(1,1) = a.*(tempModel2.beta(2:Nmed+1));
+           
             minV = min(data.V);
             maxV = max(data.V);
             rangeX = maxV - minV;
             stepV = rangeX/(Nsteps -1);
             probeV = [0 minV:stepV:maxV];
-            for k = 2:Nsteps + 1
-                Interaction = zeros(Ndata,Nmed);
-                for j = 1:Nmed
-                    Interaction(:,j) = data.M(:,j).*(data.V - probeV(k));
-                    Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
-                    a(j) = Model1{j}.beta(2);
+            
+            for j = 1:Nmed
+                a = Model1{j}.beta(2);
+                for k = 1:Nsteps + 1
+                    ParameterToBS.values(:,k) = a.*(Model2.beta(1+j) + Model2.beta(1+Nmed+1+1:1+Nmed+1+Nmed)*probeV(k));
                 end
-                % B branch model
-                tempModel2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
-                ParameterToBS.values(:,k) = a.*(tempModel2.beta(2:Nmed+1));
             end
+            %                 Interaction = zeros(Ndata,Nmed);
+%                 for j = 1:Nmed
+%                     Interaction(:,j) = data.M(:,j).*(data.V - probeV(k));
+%                     Model1{j} = subfnregstats(data.M(:,j),[data.X data.COV]);
+%                     
+%                 end
+%                 % B branch model
+%                 tempModel2 = subfnregstats(data.Y,[data.M (data.V - probeV(k)) Interaction data.X data.COV]);
+%                 ParameterToBS.values(:,k) = a.*(tempModel2.beta(2:Nmed+1));
+%             end
             ParameterToBS.probeValues = probeV;
         else
-            ParameterToBS.values = a.*(tempModel2.beta(2:Nmed+1));
+            ParameterToBS.values = a.*(Model2.beta(2:Nmed+1));
             ParameterToBS.probeValues = 0;
         end
         ParameterToBS.k2 = 0;
@@ -410,18 +416,18 @@ switch data.ModelNum
             Parameters.JohnsonNeyman = JNvalue;
             for j = 1:Nmed
                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
-                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2);',data.Xname,data.Xname);
+                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2);',data.names.X,data.names.X);
                 eval(Str)
-                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,j+1);',[data.Mname num2str(j)],[data.Mname num2str(j)]);
+                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,j+1);',data.names.M{j},[data.names.M{j} num2str(j)]);
                 eval(Str)
-                Str = sprintf('Parameters.Model2.%s_x_%s=subfnSetParameters(''%s_x%s'',Model2,Nmed+2+j);',[data.Mname num2str(j)],data.Vname,[data.Mname num2str(j)],data.Vname);
+                Str = sprintf('Parameters.Model2.%s_x_%s=subfnSetParameters(''%s_x%s'',Model2,Nmed+2+j);',data.names.M{j},data.names.V,data.names.M{j},data.names.V);
                 eval(Str)
                 for k = 1:size(data.COV,2)
-                    Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},4+k);',data.COVname{k},data.COVname{k});
+                    Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2+k);',data.names.COV{k},data.names.COV{k});
                     eval(Str)
                 end
                 Parameters.Model1{j}.Model = subfnSetModelParameters(Model1{j});
-                Parameters.Model1{j}.Outcome = data.Mname{1};
+                Parameters.Model1{j}.Outcome = data.names.M{j};
                 %                Parameters.JNvalue = subfnJohnsonNeyman(Model1{j}.beta(2),Model1{j}.covb(2,2),Model1{j}.beta(4),Model1{j}.covb(4,4),Model1{j}.covb(2,4),tcrit);
                 %
                 %                 Parameters.Model1.Model = subfnSetModelParameters(Model1{i});
@@ -430,26 +436,26 @@ switch data.ModelNum
                 %                 Parameters.B{i} = subfnSetParameters('B', Model2,i + 1);
                 %                 Parameters.Int{i} = subfnSetParameters('Int',Model2,1 + Nmed + 1 + i);
             end
-            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,Nmed+2);',data.Vname,data.Vname);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,Nmed+2);',data.names.V,data.names.V);
             eval(Str)
-            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1);',data.Xname,data.Xname);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1);',data.names.X,data.names.X);
             eval(Str)
             for k = 1:size(data.COV,2)
-                Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model2,1+NMed+1+NMed+1+k);',data.COVname{k},data.COVname{k});
+                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1+k);',data.names.COV{k},data.names.COV{k});
                 eval(Str)
             end
             for j = 1:Nmed
                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
             end
             Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
-            Parameters.Model2.Outcome = data.Yname;
+            Parameters.Model2.Outcome = data.names.Y;
             Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
-            Parameters.Model3.Outcome = data.Yname;
-            Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2);',data.Xname,data.Xname);
+            Parameters.Model3.Outcome = data.names.Y;
+            Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2);',data.names.X,data.names.X);
             eval(Str)
 
             for k = 1:size(data.COV,2)
-                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2+k);',data.COVname{k},data.COVname{k});
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2+k);',data.names.COV{k},data.names.COV{k});
                 eval(Str)
             end
 %             Parameters.Bconst = subfnSetParameters('Bconst',Model2,1);
@@ -597,26 +603,26 @@ switch data.ModelNum
              end
 
              
-%                          Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,Nmed+2);',data.Vname,data.Vname);
+%                          Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,Nmed+2);',data.names.V,data.names.V);
 %             eval(Str)
-%             Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1);',data.Xname,data.Xname);
+%             Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1);',data.names.X,data.names.X);
 %             eval(Str)
 %             for k = 1:size(data.COV,2)
-%                 Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model2,1+NMed+1+NMed+1+k);',data.COVname{k},data.COVname{k});
+%                 Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model2,1+NMed+1+NMed+1+k);',data.names.COV{k},data.names.COV{k});
 %                 eval(Str)
 %             end
 %             for j = 1:Nmed
 %                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);
 %             end
 %             Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
-%             Parameters.Model2.Outcome = data.Yname;
+%             Parameters.Model2.Outcome = data.names.Y;
 %             Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
-%             Parameters.Model3.Outcome = data.Yname;
-%             Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2);',data.Xname,data.Xname);
+%             Parameters.Model3.Outcome = data.names.Y;
+%             Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2);',data.names.X,data.names.X);
 %             eval(Str)
 % 
 %             for k = 1:size(data.COV,2)
-%                 Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2+k);',data.COVname{k},data.COVname{k});
+%                 Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,2+k);',data.names.COV{k},data.names.COV{k});
 %                 eval(Str)
 %             end
 

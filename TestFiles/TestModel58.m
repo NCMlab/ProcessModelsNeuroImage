@@ -5,11 +5,11 @@ load('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/PracticeData/Mod
 
 data = {};
 data.names = {};
-data.names.X = 'A';
-data.names.M = {'B'};
-data.names.Y = 'C';
+data.names.X = 'X';
+data.names.M = {'M'};
+data.names.Y = 'Y';
 data.names.V = 'V';
-data.names.W = 'W';
+data.names.W = 'V';
 data.names.Q = '';
 data.names.R = '';
 data.names.COV = {'cov1' 'cov2'};
@@ -20,8 +20,8 @@ data.W = V;
 data.Q = [];
 data.R = [];
 
-data.ModelNum = '58';
-data.Thresholds = [0.05];
+data.ModelNum = '14';
+data.Thresholds = [0.0001];
 data.Indices = 1;
 data.Nboot = 2000;
 
