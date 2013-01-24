@@ -47,11 +47,11 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
     [BCaci PERci] = subfnFindConfidenceIntervals(temp,bstat,pointEst);
     % pValue = length(find(pointEst.values>bstat))/temp.Nboot;
      
-    pValue = zeros(length(pointEst.values),1);
-    for kk = 1:length(pointEst.values)
-        pValue(kk) = length(find(pointEst.values(kk)>bstat(:,1,kk)))/temp.Nboot;
-    end
-    pointEst.pValue = pValue;
+%     pValue = zeros(length(pointEst.values),1);
+%     for kk = 1:length(pointEst.values)
+%         pValue(kk) = length(find(pointEst.values(kk)>bstat(:,1,kk)))/temp.Nboot;
+%     end
+%    pointEst.pValue = pValue';
     % Then fill in the appropriate Parameters with the confidence
     % intervals.
     %            str = [pointEst.names ' = {};'];
@@ -70,8 +70,8 @@ if temp.Nboot %& Parameters{i}.JohnsonNeyman ~= -99
             eval(str);
             str = sprintf('temp2=setfield(temp2,''pointEst'',pointEst.values(j,k));');
             eval(str);
-            str = sprintf('temp2=setfield(temp2,''pValue'',pointEst.pValue);');
-            eval(str);
+%             str = sprintf('temp2=setfield(temp2,''pValue'',pointEst.pValue);');
+%             eval(str);
             if isfield(pointEst,'probeValues')
                 str = sprintf('temp2=setfield(temp2,''probeValue'',pointEst.probeValues(k));');
                 eval(str);

@@ -10,9 +10,9 @@ switch ModelNum
         FirstThresh = Thresholds{1};
         fprintf(fid,'======================================================\n');
         fprintf(fid,'Model = %s\n',Parameters.ModelNum);
-        fprintf(fid,'\tY = %s\n',Parameters.Yname);
-        fprintf(fid,'\tX = %s\n',Parameters.Xname);
-        fprintf(fid,'\tM = %s\n',Parameters.Mname);
+        fprintf(fid,'\tY = %s\n',Parameters.names.Y);
+        fprintf(fid,'\tX = %s\n',Parameters.names.X);
+        fprintf(fid,'\tM = %s\n',Parameters.names.M{1});
         fprintf(fid,'Sample size = %d\n\n',Parameters.SampleSize);
         
         fprintf(fid,'******************************************************\n')
@@ -24,9 +24,9 @@ switch ModelNum
         fprintf(fid,'Moderator value(s) defining Johnson-Neyman significance region(s)\n');
         fprintf(fid,'\t%8.4f\n',Parameters.JNvalue)
         fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
-            Parameters.Xname,Parameters.Yname,Parameters.Mname);
+            Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
         fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-            Parameters.Mname,'Effect','boot se','lowerCI','upperCI')
+            Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
         for k = 2:length(Parameters.CondMod)
             tempBCaci = getfield(Parameters.CondMod{1}.BCaci,FirstThresh);
             fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',...
@@ -100,10 +100,10 @@ switch ModelNum
         %
         fprintf(1,'======================================================\n');
         fprintf(1,'Model = %s\n',Parameters.ModelNum);
-        fprintf(1,'\tY = %s\n',Parameters.Yname);
-        fprintf(1,'\tX = %s\n',Parameters.Xname);
-        fprintf(1,'\tM = %s\n',Parameters.Mname);
-        fprintf(1,'\tW = %s\n',Parameters.Wname);
+        fprintf(1,'\tY = %s\n',Parameters.names.Y);
+        fprintf(1,'\tX = %s\n',Parameters.names.X);
+        fprintf(1,'\tM = %s\n',Parameters.names.M{1});
+        fprintf(1,'\tW = %s\n',Parameters.names.W);
         fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
@@ -125,9 +125,9 @@ switch ModelNum
         fprintf(fid,'******************************************************\n')
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
-                Parameters.Xname,Parameters.Yname,Parameters.Mname);
+                Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.Mname,'Effect','boot se','lowerCI','upperCI')
+                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 2:length(Parameters.CondAB1)
@@ -162,10 +162,10 @@ switch ModelNum
         % simple mediation model.
         fprintf(1,'======================================================\n');
         fprintf(1,'Model = %s\n',Parameters.ModelNum);
-        fprintf(1,'\tY = %s\n',Parameters.Yname);
-        fprintf(1,'\tX = %s\n',Parameters.Xname);
-        fprintf(1,'\tM = %s\n',Parameters.Mname);
-        fprintf(1,'\tW = %s\n',Parameters.Wname);
+        fprintf(1,'\tY = %s\n',Parameters.names.Y);
+        fprintf(1,'\tX = %s\n',Parameters.names.X);
+        fprintf(1,'\tM = %s\n',Parameters.names.M{1});
+        fprintf(1,'\tW = %s\n',Parameters.names.W);
         fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
@@ -187,9 +187,9 @@ switch ModelNum
         fprintf(fid,'******************************************************\n')
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
-                Parameters.Xname,Parameters.Yname,Parameters.Mname);
+                Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.Mname,'Effect','boot se','lowerCI','upperCI')
+                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 2:length(Parameters.CondAB1)
@@ -207,5 +207,64 @@ switch ModelNum
         fprintf(fid,'\t%d\n',Parameters.Nboot);
         fprintf(fid,'\nLevel of confidence for all confidence intervals in output:\n');
         fprintf(fid,'\t%0.4f\n',Parameters.Thresholds(1));
-       
+   case '58'
+        %
+        %     M
+        %    / \
+        %   /\ /\
+        %  /  W  \
+        % X       Y
+        % This is a moderated mediation model. The moderator (W) affects
+        % the relationship between X and M and between M and Y. The
+        % conditional effect of X on Y via M is evaluated at multiple
+        % moderation values. The confidence intervals for each of these
+        % moderating values are calculated via bootstrapping.
+
+        fprintf(1,'======================================================\n');
+        fprintf(1,'Model = %s\n',Parameters.ModelNum);
+        fprintf(1,'\tY = %s\n',Parameters.names.Y);
+        fprintf(1,'\tX = %s\n',Parameters.names.X);
+        fprintf(1,'\tM = %s\n',Parameters.names.M{1});
+        fprintf(1,'\tW = %s\n',Parameters.names.W);
+        fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
+        % Print out Model 1
+        for i = 1:size(Parameters.Model1,2)
+            fprintf(fid,'******************************************************\n')
+            fprintf(1,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome)
+            subfnPrintModelSummary(Parameters.Model1{i}.Model,fid)
+            subfnPrintModelResults(Parameters.Model1{i},fid)
+        end
+        % Print out Model 2
+        fprintf(fid,'******************************************************\n')
+        fprintf(1,'Outcome: %s\n\n',Parameters.Model2.Outcome)
+        subfnPrintModelSummary(Parameters.Model2.Model,fid)
+        subfnPrintModelResults(Parameters.Model2,fid)
+        % Print out Model 3
+        fprintf(fid,'******************************************************\n')
+        fprintf(1,'Outcome: %s\n\n',Parameters.Model3.Outcome)
+        subfnPrintModelSummary(Parameters.Model3.Model,fid)
+        subfnPrintModelResults(Parameters.Model3,fid)
+        fprintf(fid,'******************************************************\n')
+        for i = 1:length(Parameters.Model1)
+            fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
+                Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
+            fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
+                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
+            ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
+            ThresholdField = ThresholdField{1};
+            for k = 2:length(Parameters.CondAB1)
+                limits = getfield(Parameters.CondAB1{k}.BCaci,ThresholdField);
+                fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',...
+                    Parameters.CondAB1{k}.probeValue,...
+                    Parameters.CondAB1{k}.pointEst,...
+                    Parameters.CondAB1{k}.bootSE,...
+                    limits(1),...
+                    limits(2));
+            end
+        end
+        fprintf(fid,'********* ANALYSIS NOTES ************\n');
+        fprintf(fid,'Number of bootstrap resamples for BIAS CORRECTED confidence intervales: \n');
+        fprintf(fid,'\t%d\n',Parameters.Nboot);
+        fprintf(fid,'\nLevel of confidence for all confidence intervals in output:\n');
+        fprintf(fid,'\t%0.4f\n',Parameters.Thresholds(1));    
 end % switch ModelNum

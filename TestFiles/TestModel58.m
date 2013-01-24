@@ -3,7 +3,6 @@ load('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/PracticeData/Mod
 
 
 
-
 data = {};
 data.names = {};
 data.names.X = 'A';
@@ -13,10 +12,10 @@ data.names.V = 'V';
 data.names.W = 'W';
 data.names.Q = '';
 data.names.R = '';
-data.names.COV = {};
+data.names.COV = {'cov1' 'cov2'};
 
 data.STRAT = [];
-data.COV = [];%randn(N,2);
+data.COV = COV;
 data.W = V;
 data.Q = [];
 data.R = [];
@@ -37,3 +36,4 @@ NSub = N;
 %data.Resamples = subfuncBootStrapResamples(data.Nboot,NSub,data.STRAT);
 
 Parameters = subfnVoxelWiseProcessBatch(data);
+subfnPrintResults(Parameters{1})
