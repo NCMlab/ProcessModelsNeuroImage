@@ -1,7 +1,7 @@
 function subfnPrintModelSummary(data,fid)
 
-fprintf(fid,'Model Summary\n')
-fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\n','R','R-sq','adjR-sq','F','df1','df2','p')
+fprintf(fid,'Model Summary\n');
+fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s\n','R','R-sq','adjR-sq','F','df1','df2','p');
 
 fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',sqrt(data.rsquare),...
     data.rsquare,...

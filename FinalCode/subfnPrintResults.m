@@ -10,18 +10,18 @@ switch ModelNum
         FirstThresh = Thresholds{1};
         PrintModelInfo(Parameters,fid)
         
-        fprintf(fid,'******************************************************\n')
-        fprintf(fid,'Outcome: %s\n\n',Parameters.Model1.Outcome)
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model1.Outcome);
         subfnPrintModelSummary(Parameters.Model1.Model,fid)
         subfnPrintModelResults(Parameters.Model1,fid)
         fprintf(fid,'\nR-square increase due to interaction:\n');
         subfnPrintModelSummary(Parameters.DiffModel,fid)
         fprintf(fid,'Moderator value(s) defining Johnson-Neyman significance region(s)\n');
-        fprintf(fid,'\t%8.4f\n',Parameters.JNvalue)
+        fprintf(fid,'\t%8.4f\n',Parameters.JNvalue);
         fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
             Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
         fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-            Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
+            Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
         for k = 2:length(Parameters.CondMod)
             tempBCaci = getfield(Parameters.CondMod{1}.BCaci,FirstThresh);
             fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',...
@@ -38,31 +38,31 @@ switch ModelNum
         Thresholds = fieldnames(Parameters.AB1{1}.BCaci);
         FirstThresh = Thresholds{1};
         tempBCaci = getfield(Parameters.AB1{1}.BCaci,FirstThresh);
-        fprintf(1,'Indirect effect of %s on %s via %s (a*b pathway)\n',Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
-        fprintf(1,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootULCI');
-        fprintf(1,'%8.4f\t%8.4f\t%8.4f\t%8.4f\n',Parameters.AB1{1}.pointEst,Parameters.AB1{1}.bootSE,Parameters.AB1{1}.BCaci.alpha05(1),Parameters.AB1{1}.BCaci.alpha05(2));
+        fprintf(fid,'Indirect effect of %s on %s via %s (a*b pathway)\n',Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
+        fprintf(fid,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootULCI');
+        fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\n',Parameters.AB1{1}.pointEst,Parameters.AB1{1}.bootSE,Parameters.AB1{1}.BCaci.alpha05(1),Parameters.AB1{1}.BCaci.alpha05(2));
         % print out effect sizes
-        fprintf(1,'Preacher and Kelley (2011) Kappa-squared\n');
-        fprintf(1,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootULCI');
+        fprintf(fid,'Preacher and Kelley (2011) Kappa-squared\n');
+        fprintf(fid,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootULCI');
         tempk2ci = getfield(Parameters.k2.PERci{1},FirstThresh);
-        fprintf(1,'%8.4f\t%8.4f\t%8.4f\t%8.4f\n',Parameters.k2.pointEst,-99,tempk2ci(1),tempk2ci(2));
+        fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\n',Parameters.k2.pointEst,-99,tempk2ci(1),tempk2ci(2));
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
-            fprintf(fid,'******************************************************\n')
-            fprintf(1,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome)
+            fprintf(fid,'******************************************************\n');
+            fprintf(fid,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome);
             subfnPrintModelSummary(Parameters.Model1{i}.Model,fid)
             subfnPrintModelResults(Parameters.Model1{i},fid)
         end
         
         % Print out Model 2
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model2.Outcome)
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model2.Outcome);
         subfnPrintModelSummary(Parameters.Model2.Model,fid)
         subfnPrintModelResults(Parameters.Model2,fid)
         
         % Print out Model 3
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model3.Outcome)
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model3.Outcome);
         subfnPrintModelSummary(Parameters.Model3.Model,fid)
         subfnPrintModelResults(Parameters.Model3,fid)
         PrintAnalysisNotes(Parameters,fid)
@@ -77,27 +77,27 @@ switch ModelNum
         PrintModelInfo(Parameters,fid)
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
-            fprintf(fid,'******************************************************\n')
-            fprintf(1,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome)
+            fprintf(fid,'******************************************************\n');
+            fprintf(fid,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome);
             subfnPrintModelSummary(Parameters.Model1{i}.Model,fid)
             subfnPrintModelResults(Parameters.Model1{i},fid)
         end
         % Print out Model 2
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model2.Outcome)
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model2.Outcome);
         subfnPrintModelSummary(Parameters.Model2.Model,fid)
         subfnPrintModelResults(Parameters.Model2,fid)
         % Print out Model 3
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model3.Outcome)
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model3.Outcome);
         subfnPrintModelSummary(Parameters.Model3.Model,fid)
         subfnPrintModelResults(Parameters.Model3,fid)
-        fprintf(fid,'******************************************************\n')
+        fprintf(fid,'******************************************************\n');
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
                 Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
+                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 1:length(Parameters.CondAB1)
@@ -128,27 +128,27 @@ switch ModelNum
         PrintModelInfo(Parameters,fid)
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
-            fprintf(fid,'******************************************************\n')
-            fprintf(1,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome)
+            fprintf(fid,'******************************************************\n');
+            fprintf(fid,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome);
             subfnPrintModelSummary(Parameters.Model1{i}.Model,fid)
             subfnPrintModelResults(Parameters.Model1{i},fid)
         end
         % Print out Model 2
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model2.Outcome)
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model2.Outcome);
         subfnPrintModelSummary(Parameters.Model2.Model,fid)
         subfnPrintModelResults(Parameters.Model2,fid)
         % Print out Model 3
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model3.Outcome)
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model3.Outcome);
         subfnPrintModelSummary(Parameters.Model3.Model,fid)
         subfnPrintModelResults(Parameters.Model3,fid)
-        fprintf(fid,'******************************************************\n')
+        fprintf(fid,'******************************************************\n');
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
                 Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
+                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 2:length(Parameters.CondAB1)
@@ -174,30 +174,30 @@ switch ModelNum
         % conditional effect of X on Y via M is evaluated at multiple
         % moderation values. The confidence intervals for each of these
         % moderating values are calculated via bootstrapping.
-        PrintModelInfo(Parameters,fid)
+        PrintModelInfo(Parameters,fid);
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
-            fprintf(fid,'******************************************************\n')
-            fprintf(1,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome)
-            subfnPrintModelSummary(Parameters.Model1{i}.Model,fid)
-            subfnPrintModelResults(Parameters.Model1{i},fid)
+            fprintf(fid,'******************************************************\n');
+            fprintf(fid,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome);
+            subfnPrintModelSummary(Parameters.Model1{i}.Model,fid);
+            subfnPrintModelResults(Parameters.Model1{i},fid);
         end
         % Print out Model 2
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model2.Outcome)
-        subfnPrintModelSummary(Parameters.Model2.Model,fid)
-        subfnPrintModelResults(Parameters.Model2,fid)
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model2.Outcome);
+        subfnPrintModelSummary(Parameters.Model2.Model,fid);
+        subfnPrintModelResults(Parameters.Model2,fid);
         % Print out Model 3
-        fprintf(fid,'******************************************************\n')
-        fprintf(1,'Outcome: %s\n\n',Parameters.Model3.Outcome)
-        subfnPrintModelSummary(Parameters.Model3.Model,fid)
-        subfnPrintModelResults(Parameters.Model3,fid)
-        fprintf(fid,'******************************************************\n')
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model3.Outcome);
+        subfnPrintModelSummary(Parameters.Model3.Model,fid);
+        subfnPrintModelResults(Parameters.Model3,fid);
+        fprintf(fid,'******************************************************\n');
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
                 Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI')
+                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 2:length(Parameters.CondAB1)
@@ -214,8 +214,8 @@ switch ModelNum
 end % switch ModelNum
 
 function PrintModelInfo(Parameters,fid)
-fprintf(1,'======================================================\n');
-fprintf(1,'Model = %s\n',Parameters.ModelNum);
+fprintf(fid,'======================================================\n');
+fprintf(fid,'Model = %s\n',Parameters.ModelNum);
 Names = fieldnames(Parameters.names);
 for i = 1:length(Names)
     currentName = getfield(Parameters.names,Names{i});
@@ -231,7 +231,7 @@ for i = 1:length(Names)
         end
     end
 end
-fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
+fprintf(fid,'Sample size = %d\n\n',Parameters.SampleSize);
 
 function PrintAnalysisNotes(Parameters,fid)
 fprintf(fid,'********* ANALYSIS NOTES ************\n');
