@@ -19,7 +19,7 @@ switch ModelNum
         Nthr = length(Thresholds);
         VoxelIndices = zeros(Nvoxels,1);
         ImageVoxelIndices = zeros(Nvoxels,1);
-        [OutData index] = subfnCreateOutDataStructureForModels(AllParameters);
+        [OutData index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters);
         
         % Conditional Effects
         for j = 1:Nmed
@@ -35,7 +35,17 @@ switch ModelNum
         OutData{index}.name = 'k2';
         OutData{index}.data = zeros(Nvoxels,1);
         OutData{index}.field = ['k2.pointEst'];
+        OutData{index}.dataType = 16;
+        index = index + 1;
+        % write out Model 2 R2
+        OutData{index}.name = 'Model2_Rsq';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['Model2.Model.rsquare'];
+        OutData{index}.dataType = 16;
     case '7'
+        
+        
+        
         
         OutName = [Tag '_Model' ModelNum '_'];
         count = 1;
@@ -308,6 +318,12 @@ switch ModelNum
                 index = index + 1;
             end
         end
+        
+        % write out Model 2 R2
+        OutData{index}.name = 'Model2_Rsq';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = ['Model2.Model.rsquare'];
+        OutData{index}.dataType = 16;
 end
 
 % put the data into the output structure
@@ -330,7 +346,6 @@ for i = 1:Nvoxels
         end
     end
 end
-
 % write images to file
 tVoxelIndices = find(VoxelIndices);
 tImageVoxelIndices = ImageVoxelIndices(find(ImageVoxelIndices));
@@ -345,7 +360,15 @@ for i = 1:length(OutData)
     spm_write_vol(Vo,Y);
 end
 VoxelsProcessed =  length(tVoxelIndices)
-
+% write out the mask
+Vo = V;
+Vo.fname = fullfile(OutputPath,['mask.nii']);
+Vo.descrip = '';
+vo.n = [1 1];
+Vo.dt = [2 0];
+Y = zeros(Vo.dim);
+Y(tImageVoxelIndices) = 1;
+spm_write_vol(Vo,Y);
 
 function [OutData index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters)
 index = 1;

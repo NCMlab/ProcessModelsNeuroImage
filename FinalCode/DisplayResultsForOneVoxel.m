@@ -38,3 +38,37 @@ data1.M = data.M(:,:,dataChunkIndex);
 % Print the results to the screen
 
 subfnPrintResults(Parameters1)
+
+%%
+groups = unique(data1.X);
+if length(groups) == 2
+    % dicotomous, print mean differences
+    fprintf(1,'\n**** GROUP DIFFERENCES IN M ****\n');
+    Gr1 = find(data1.X == groups(1));
+    Gr2 = find(data1.X == groups(2));
+    [Mh Mp Mci Mstats] = ttest2(data1.M(Gr1),data1.M(Gr2));
+    [Mh1 Mp1 Mci1 Mstats1] = ttest(data1.M(Gr1));
+    [Mh2 Mp2 Mci2 Mstats2] = ttest(data1.M(Gr2));
+    
+    M1 = mean(data1.M(Gr1));
+    M2 = mean(data1.M(Gr2));
+    S1 = std(data1.M(Gr1));
+    S2 = std(data1.M(Gr2));
+    % print this all
+    fprintf(1,'%10s%10s%10s%10s%10s\n','group','mean','std','t-val','p-val');
+    fprintf(1,'%10s%10.4f%10.4f%10.4f%10.4f\n','Gr1',M1,S1,Mstats1.tstat,Mp1);
+    fprintf(1,'%10s%10.4f%10.4f%10.4f%10.4f\n','Gr2',M2,S2,Mstats2.tstat,Mp2);    
+    fprintf(1,'%10s%10s%10.4f,%10s%10.4f\n','Between:','t-val',Mstats.tstat,'p-val',Mp);
+    
+    [rA pA] = corr([data1.M data1.Y]);
+    
+    [r1 p1] = corr([data1.M(Gr1) data1.Y(Gr1)]);
+    [r2 p2] = corr([data1.M(Gr2) data1.Y(Gr2)]);
+    fprintf(1,'corr M-Y group1: %0.4f, p-val %0.4f\n',r1(1,2),p1(1,2));
+    fprintf(1,'corr M-Y group2: %0.4f, p-val %0.4f\n',r2(1,2),p2(1,2));
+    fprintf(1,'corr M-Y All: %0.4f, p-val %0.4f\n',rA(1,2),pA(1,2));
+    
+    
+end
+    
+

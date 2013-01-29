@@ -8,12 +8,7 @@ switch ModelNum
         % Get the threshold
         Thresholds = fieldnames(Parameters.CondMod{1}.BCaci);
         FirstThresh = Thresholds{1};
-        fprintf(fid,'======================================================\n');
-        fprintf(fid,'Model = %s\n',Parameters.ModelNum);
-        fprintf(fid,'\tY = %s\n',Parameters.names.Y);
-        fprintf(fid,'\tX = %s\n',Parameters.names.X);
-        fprintf(fid,'\tM = %s\n',Parameters.names.M{1});
-        fprintf(fid,'Sample size = %d\n\n',Parameters.SampleSize);
+        PrintModelInfo(Parameters,fid)
         
         fprintf(fid,'******************************************************\n')
         fprintf(fid,'Outcome: %s\n\n',Parameters.Model1.Outcome)
@@ -36,26 +31,12 @@ switch ModelNum
                 tempBCaci(1),...
                 tempBCaci(2));
         end
-        fprintf(fid,'********* ANALYSIS NOTES ************\n');
-        fprintf(fid,'Number of bootstrap resamples for BIAS CORRECTED confidence intervales: \n');
-        fprintf(fid,'\t%d\n',Parameters.Nboot);
-        fprintf(fid,'\nLevel of confidence for all confidence intervals in output:\n');
-        fprintf(fid,'\t%0.4f\n',Parameters.Thresholds(1));
-        
+        PrintAnalysisNotes(Parameters,fid)
     case '4'
+        PrintModelInfo(Parameters,fid)
         % Get the threshold
         Thresholds = fieldnames(Parameters.AB1{1}.BCaci);
         FirstThresh = Thresholds{1};
-        % MODEL 4
-        fprintf(1,'======================================================\n');
-        fprintf(1,'Model = %s\n',Parameters.ModelNum);
-        fprintf(1,'\tY = %s\n',Parameters.names.Y);
-        fprintf(1,'\tX = %s\n',Parameters.names.X);
-        for i = 1:size(Parameters.Model1,2)
-            fprintf(1,'\tM = %s\n',Parameters.names.M{i});
-        end
-        fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
-        
         tempBCaci = getfield(Parameters.AB1{1}.BCaci,FirstThresh);
         fprintf(1,'Indirect effect of %s on %s via %s (a*b pathway)\n',Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
         fprintf(1,'%8s\t%8s\t%8s\t%8s\n','Effect','Boot SE','BootLLCI','BootULCI');
@@ -84,12 +65,7 @@ switch ModelNum
         fprintf(1,'Outcome: %s\n\n',Parameters.Model3.Outcome)
         subfnPrintModelSummary(Parameters.Model3.Model,fid)
         subfnPrintModelResults(Parameters.Model3,fid)
-        fprintf(fid,'********* ANALYSIS NOTES ************\n');
-        fprintf(fid,'Number of bootstrap resamples for BIAS CORRECTED confidence intervales: \n');
-        fprintf(fid,'\t%d\n',Parameters.Nboot);
-        fprintf(fid,'\nLevel of confidence for all confidence intervals in output:\n');
-        fprintf(fid,'\t%0.4f\n',Parameters.Thresholds(1));
-        
+        PrintAnalysisNotes(Parameters,fid)
     case '7'
         % MODEL 7
         %
@@ -98,13 +74,7 @@ switch ModelNum
         %   /   \
         %  X     Y
         %
-        fprintf(1,'======================================================\n');
-        fprintf(1,'Model = %s\n',Parameters.ModelNum);
-        fprintf(1,'\tY = %s\n',Parameters.names.Y);
-        fprintf(1,'\tX = %s\n',Parameters.names.X);
-        fprintf(1,'\tM = %s\n',Parameters.names.M{1});
-        fprintf(1,'\tW = %s\n',Parameters.names.W);
-        fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
+        PrintModelInfo(Parameters,fid)
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
             fprintf(fid,'******************************************************\n')
@@ -140,12 +110,7 @@ switch ModelNum
                     limits(2));
             end
         end
-        fprintf(fid,'********* ANALYSIS NOTES ************\n');
-        fprintf(fid,'Number of bootstrap resamples for BIAS CORRECTED confidence intervales: \n');
-        fprintf(fid,'\t%d\n',Parameters.Nboot);
-        fprintf(fid,'\nLevel of confidence for all confidence intervals in output:\n');
-        fprintf(fid,'\t%0.4f\n',Parameters.Thresholds(1));
-        
+        PrintAnalysisNotes(Parameters,fid)
     case '14'
         %
         %     M  V
@@ -160,13 +125,7 @@ switch ModelNum
         % bootstrapping. Since the model is calulated 22 (21 steps + 1 point
         % estimate) times this model is then 22 times slower than the
         % simple mediation model.
-        fprintf(1,'======================================================\n');
-        fprintf(1,'Model = %s\n',Parameters.ModelNum);
-        fprintf(1,'\tY = %s\n',Parameters.names.Y);
-        fprintf(1,'\tX = %s\n',Parameters.names.X);
-        fprintf(1,'\tM = %s\n',Parameters.names.M{1});
-        fprintf(1,'\tW = %s\n',Parameters.names.W);
-        fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
+        PrintModelInfo(Parameters,fid)
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
             fprintf(fid,'******************************************************\n')
@@ -202,12 +161,8 @@ switch ModelNum
                     limits(2));
             end
         end
-        fprintf(fid,'********* ANALYSIS NOTES ************\n');
-        fprintf(fid,'Number of bootstrap resamples for BIAS CORRECTED confidence intervales: \n');
-        fprintf(fid,'\t%d\n',Parameters.Nboot);
-        fprintf(fid,'\nLevel of confidence for all confidence intervals in output:\n');
-        fprintf(fid,'\t%0.4f\n',Parameters.Thresholds(1));
-   case '58'
+        PrintAnalysisNotes(Parameters,fid)
+    case '58'
         %
         %     M
         %    / \
@@ -219,14 +174,7 @@ switch ModelNum
         % conditional effect of X on Y via M is evaluated at multiple
         % moderation values. The confidence intervals for each of these
         % moderating values are calculated via bootstrapping.
-
-        fprintf(1,'======================================================\n');
-        fprintf(1,'Model = %s\n',Parameters.ModelNum);
-        fprintf(1,'\tY = %s\n',Parameters.names.Y);
-        fprintf(1,'\tX = %s\n',Parameters.names.X);
-        fprintf(1,'\tM = %s\n',Parameters.names.M{1});
-        fprintf(1,'\tW = %s\n',Parameters.names.W);
-        fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
+        PrintModelInfo(Parameters,fid)
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
             fprintf(fid,'******************************************************\n')
@@ -262,9 +210,32 @@ switch ModelNum
                     limits(2));
             end
         end
-        fprintf(fid,'********* ANALYSIS NOTES ************\n');
-        fprintf(fid,'Number of bootstrap resamples for BIAS CORRECTED confidence intervales: \n');
-        fprintf(fid,'\t%d\n',Parameters.Nboot);
-        fprintf(fid,'\nLevel of confidence for all confidence intervals in output:\n');
-        fprintf(fid,'\t%0.4f\n',Parameters.Thresholds(1));    
+        PrintAnalysisNotes(Parameters,fid)
 end % switch ModelNum
+
+function PrintModelInfo(Parameters,fid)
+fprintf(1,'======================================================\n');
+fprintf(1,'Model = %s\n',Parameters.ModelNum);
+Names = fieldnames(Parameters.names);
+for i = 1:length(Names)
+    currentName = getfield(Parameters.names,Names{i});
+    if length(currentName)
+        if iscell(currentName)
+            fprintf(fid,'\t%s = ',Names{i});
+            for j = 1:length(currentName)
+                fprintf(fid,'%s, ',currentName{j});
+            end
+            fprintf(fid,'\n');
+        else
+            fprintf(fid,'\t%s = %s\n',Names{i},currentName);
+        end
+    end
+end
+fprintf(1,'Sample size = %d\n\n',Parameters.SampleSize);
+
+function PrintAnalysisNotes(Parameters,fid)
+fprintf(fid,'********* ANALYSIS NOTES ************\n');
+fprintf(fid,'Number of bootstrap resamples for BIAS CORRECTED confidence intervales: \n');
+fprintf(fid,'\t%d\n',Parameters.Nboot);
+fprintf(fid,'\nLevel of confidence for all confidence intervals in output:\n');
+fprintf(fid,'\t%0.4f\n',Parameters.Thresholds(1));

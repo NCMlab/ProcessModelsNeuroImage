@@ -59,8 +59,8 @@ if ~isfield(data,'COVname') && ~isempty(data.COV)
         for j = 1:NCov 
             NameCovStruct{j} = sprintf('Cov%d',j);
         end
-    data.COVname = NameCovStruct;    
-    temp.COVname = NameCovStruct;
+    data.names.COV = NameCovStruct;    
+    temp.names.COV = NameCovStruct;
 end
 
 tic 
@@ -94,68 +94,24 @@ for i = 1:Nvoxels
             % pull out one voxel. It is also possible to have all varaibles
             % be voxelwise and to have voxelwise covariates.
             % Check the X variable
-            if size(data.X,3) > 1
-                temp.X = data.X(:,:,i);
-            else
-                temp.X = data.X;
-            end
-            % Check the M variable
-            if size(data.M,3) > 1
-                temp.M = data.M(:,:,i);
-            else
-                temp.M = data.M;
-            end
-            % Check the Y variable
-            if size(data.Y,3) > 1
-                temp.Y = data.Y(:,:,i);
-            else
-                temp.Y = data.Y;
-            end
-            % Check the covariates
-            if size(data.COV,3) > 1
-                temp.COV = data.COV(:,i);
-            else
-                temp.COV = data.COV;
-            end
+            temp = CheckVariables(i,data,temp);
             % If there are no not-a-number variables then the data is ready
             % to be processed.
             if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
                 AllDataFlag = 1;
             end
         case '7'
+            if isempty(data.W)
+                errordlg('The modulator variable is missing');
+            end
+            % Calculate the minimum critical t-value for use with the
+            % Johnson-Neyman technique.
+            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
             % Check each variable and if it is a voxel-wise measure then
             % pull out one voxel. It is also possible to have all varaibles
             % be voxelwise and to have voxelwise covariates.
             % Check the X variable
-            if size(data.X,3) > 1
-                temp.X = data.X(:,:,i);
-            else
-                temp.X = data.X;
-            end
-            % Check the M variable
-            if size(data.M,3) > 1
-                temp.M = data.M(:,:,i);
-            else
-                temp.M = data.M;
-            end
-            % Check the Y variable
-            if size(data.Y,3) > 1
-                temp.Y = data.Y(:,:,i);
-            else
-                temp.Y = data.Y;
-            end
-            % Check the W variable
-            if size(data.W,3) > 1
-                temp.W = data.W(:,:,i);
-            else
-                temp.W = data.W;
-            end
-            % Check the covariates
-            if size(data.COV,3) > 1
-                temp.COV = data.COV(:,i);
-            else
-                temp.COV = data.COV;
-            end
+            temp = CheckVariables(i,data,temp);
             % If there are no not-a-number variables then the data is ready
             % to be processed.
             if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)...
@@ -166,32 +122,36 @@ for i = 1:Nvoxels
             if isempty(data.V)
                 errordlg('The modulator variable is missing');
             end
+            
             % Calculate the minimum critical t-value for use with the
             % Johnson-Neyman technique.
             temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
-            temp.M = data.M(:,:,i);
-            temp.V = data.V(:,:,i);
-            if sum(isnan(temp.M)) == 0; Mflag = 1;end
-            if sum(isnan(temp.V)) == 0; Vflag = 1;end
-            if Mflag && Vflag 
+            temp = CheckVariables(i,data,temp);
+            % If there are no not-a-number variables then the data is ready
+            % to be processed.
+            if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)...
+                    &(sum(isnan(temp.Y)) == 0)&(sum(isnan(temp.V)) == 0)
                 AllDataFlag = 1;
             end
+
         case '58'
             if isempty(data.W)
                 errordlg('The modulator variable is missing');
             end
-            temp.M = data.M(:,:,i);
-            temp.W = data.W(:,:,i);
-            if sum(isnan(temp.M)) == 0; Mflag = 1;end
-            if sum(isnan(temp.W)) == 0; Wflag = 1;end
-            if Mflag && Wflag
+            % Calculate the minimum critical t-value for use with the
+            % Johnson-Neyman technique.
+            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
+            temp = CheckVariables(i,data,temp);
+            if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)...
+                    &(sum(isnan(temp.Y)) == 0)...
+                    &(sum(isnan(temp.W)) == 0)
                 AllDataFlag = 1;
             end
+          
         case '74'
             temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
-            temp.M = data.M(:,:,i);
-            if sum(isnan(temp.M)) == 0; Mflag = 1;end
-            if Mflag
+            temp = CheckVariables(i,data,temp);
+            if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
                 AllDataFlag = 1;
             end
     end
@@ -227,4 +187,51 @@ end
 % if OpenPoolFlag
 %     matlabpool close 
 % end
-
+function temp = CheckVariables(VoxelIndex,data,temp)
+if size(data.X,3) > 1
+    temp.X = data.X(:,:,VoxelIndex);
+else
+    temp.X = data.X;
+end
+% Check the M variable
+if size(data.M,3) > 1
+    temp.M = data.M(:,:,VoxelIndex);
+else
+    temp.M = data.M;
+end
+% Check the Y variable
+if size(data.Y,3) > 1
+    temp.Y = data.Y(:,:,VoxelIndex);
+else
+    temp.Y = data.Y;
+end
+% Check the V variable
+if size(data.V,3) > 1
+    temp.V = data.V(:,:,VoxelIndex);
+else
+    temp.V = data.V;
+end
+% Check the W variable
+if size(data.W,3) > 1
+    temp.W = data.W(:,:,VoxelIndex);
+else
+    temp.W = data.W;
+end
+% Check the Q variable
+if size(data.Q,3) > 1
+    temp.Q = data.Q(:,:,VoxelIndex);
+else
+    temp.Q = data.Q;
+end
+% Check the R variable
+if size(data.R,3) > 1
+    temp.R = data.R(:,:,VoxelIndex);
+else
+    temp.R = data.R;
+end
+% Check the covariates
+if size(data.COV,3) > 1
+    temp.COV = data.COV(:,VoxelIndex);
+else
+    temp.COV = data.COV;
+end

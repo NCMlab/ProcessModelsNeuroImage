@@ -41,7 +41,7 @@ clear
 % Test new mediation code
 N = 112;
 Gr = round(rand(N,1));
-Nmed = 3;
+Nmed = 1;
 V = randn(N,1); 
 W = randn(N,1); 
 
@@ -67,8 +67,8 @@ data.names = {};
 data.names.X = 'A';
 data.names.M = {'B'};
 data.names.Y = 'C';
-data.names.V = '';
-data.names.W = '';
+data.names.V = 'V';
+data.names.W = 'W';
 data.names.Q = '';
 data.names.R = '';
 data.names.COV = {};
@@ -78,29 +78,31 @@ data.names.COV = {};
 
 data.STRAT = [];
 data.COV = [];%randn(N,2);
-data.V = [];
-data.W = [];
+data.W = W;
 data.Q = [];
 data.R = [];
 
 
-data.ModelNum = '74';
+data.ModelNum = '58';
 data.Thresholds = [0.05];
 data.Indices = 1;
 data.Nboot = 2000;
 
 % Model of interest
-
-
-data.X = A;
-data.Y = C;
-data.M = B;
+data.X = X;
+data.Y = Y;
+data.M = M;
+data.V = V;
 % Add the bootstrap resamples to the input data
 NSub = length(data.X);
 
-data.Resamples = subfuncBootStrapResamples(data.Nboot,NSub,data.STRAT);
+%data.Resamples = subfuncBootStrapResamples(data.Nboot,NSub,data.STRAT);
 
 Parameters = subfnVoxelWiseProcessBatch(data);
+
+%%
+
+
 
 subfnPrintResults(Parameters{1})
 
