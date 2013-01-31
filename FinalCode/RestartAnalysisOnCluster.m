@@ -19,12 +19,12 @@ F = dir('Results_*.mat');
 if ~(AnalysisParameters.NJobSplit == length(F))
     % find the unfinished jobs
     FinishedData = zeros(AnalysisParameters.NJobSplit,1);
-    for i = 1:AnalysisParameters.NJobSplit
+    for i = 1:140AnalysisParameters.NJobSplit
         if ~isempty(dir(sprintf('Results_%04d.mat',i)))
             FinishedData(i) = 1;
         end
     end
-    for i = 1:AnalysisParameters.NJobSplit
+    for i = 1:140AnalysisParameters.NJobSplit
         if ~FinishedData(i)
             jobPath = fullfile(OutFolder,sprintf('job_%04d.sh',i));
             %    Str = ['! qsub  ' jobPath];

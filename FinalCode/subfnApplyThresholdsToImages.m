@@ -1,4 +1,4 @@
-function subfnApplyThresholdsToImages(InputImages,HeightThreshold,ExtentThreshold)
+function OutImage = subfnApplyThresholdsToImages(InputImage,HeightThreshold,ExtentThreshold)
 % P = spm_select(Inf,'image');
 % HeightThreshold = 0.5;
 % ExtentThreshold = 300;
@@ -7,7 +7,7 @@ Hthr = num2str(HeightThreshold);
 Hthr(findstr(Hthr,'.')) = 'p';
 
 
-for j = 1:size(InputImages,1)
+for j = 1:size(InputImage,1)
     % check to see if this image is a binary significance image
     if ~isempty(strfind(deblank(InputImages(j,:)),'sign0'))
         thrString = sprintf('_Kthr%d',ExtentThreshold);
@@ -72,3 +72,4 @@ for j = 1:size(InputImages,1)
     spm_write_vol(Vo,OutI);
     fprintf(1,'Image written to: %s\n,',Vo.fname);
 end
+OutImage = Vo.fname;

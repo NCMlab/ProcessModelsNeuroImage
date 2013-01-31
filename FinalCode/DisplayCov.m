@@ -1,7 +1,7 @@
 function [SPM xSPM] = DisplayCov(varargin)
 %clear classes
 if nargin == 3
-    HeightThr = varargin{2}
+    HeightThr = varargin{2};
     ExtentThr = varargin{3};
     P = varargin{1};
 elseif nargin == 1
@@ -145,6 +145,9 @@ else
     xSPM.title = 'Positive Direction';
 end
 xSPM.Ic = 1;
+xSPM.uc = [];
+xSPM.Pc = [];
+xSPM.Pp = [];
 xSPM.Im = [];
 xSPM.pm = [];
 xSPM.Ex = [];
@@ -178,7 +181,7 @@ SPM.xCon = {};
 SPM.xCon(1).name = 'Contrast 1';
 SPM.xCon(1).STAT = STAT;
 SPM.xCon(1).c = 1;
-SPM.xCon(1).X0 = {}
+SPM.xCon(1).X0 = {};
 SPM.xCon(1).iX0 = 'c';
 SPM.xCon(1).X1o = [];
 SPM.xCon(1).eidf =1;
