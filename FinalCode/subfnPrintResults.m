@@ -211,6 +211,45 @@ switch ModelNum
             end
         end
         PrintAnalysisNotes(Parameters,fid)
+    case '74'
+         PrintModelInfo(Parameters,fid)
+        % Print out Model 1
+        for i = 1:size(Parameters.Model1,2)
+            fprintf(fid,'******************************************************\n');
+            fprintf(fid,'Outcome: %s\n\n',Parameters.Model1{i}.Outcome);
+            subfnPrintModelSummary(Parameters.Model1{i}.Model,fid)
+            subfnPrintModelResults(Parameters.Model1{i},fid)
+        end
+        % Print out Model 2
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model2.Outcome);
+        subfnPrintModelSummary(Parameters.Model2.Model,fid)
+        subfnPrintModelResults(Parameters.Model2,fid)
+        % Print out Model 3
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model3.Outcome);
+        subfnPrintModelSummary(Parameters.Model3.Model,fid)
+        subfnPrintModelResults(Parameters.Model3,fid)
+        fprintf(fid,'******************************************************\n');
+        for i = 1:length(Parameters.Model1)
+            fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
+                Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
+            fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
+                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
+            ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
+            ThresholdField = ThresholdField{1};
+            for k = 1:length(Parameters.CondAB1)
+                limits = getfield(Parameters.CondAB1{k}.BCaci,ThresholdField);
+                fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',...
+                    Parameters.CondAB1{k}.probeValue,...
+                    Parameters.CondAB1{k}.pointEst,...
+                    Parameters.CondAB1{k}.bootSE,...
+                    limits(1),...
+                    limits(2));
+            end
+        end
+        PrintAnalysisNotes(Parameters,fid)
+
 end % switch ModelNum
 
 function PrintModelInfo(Parameters,fid)

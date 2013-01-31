@@ -181,7 +181,7 @@ if ischar(InData)
     % save the results to a mat file so that the main program can load them up
     Str = ['save ' fullfile(PathName,['Results_' tag]) ' Parameters'];
     eval(Str);
-    fprintf(1,'Done!')
+    fprintf(1,'Done!');
 end
 
 % if OpenPoolFlag

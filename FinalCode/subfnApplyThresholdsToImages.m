@@ -5,9 +5,15 @@ function subfnApplyThresholdsToImages(InputImages,HeightThreshold,ExtentThreshol
 % convert HeightThreshold value to a string
 Hthr = num2str(HeightThreshold);
 Hthr(findstr(Hthr,'.')) = 'p';
-thrString = sprintf('_Hthr%s_Kthr%d',Hthr,ExtentThreshold);
+
 
 for j = 1:size(InputImages,1)
+    % check to see if this image is a binary significance image
+    if ~isempty(strfind(deblank(InputImages(j,:)),'sign0'))
+        thrString = sprintf('_Kthr%d',ExtentThreshold);
+    else
+        thrString = sprintf('_Hthr%s_Kthr%d',Hthr,ExtentThreshold);
+    end
     % load the image
     V = spm_vol(deblank(InputImages(j,:)));
     I = spm_read_vols(V);
