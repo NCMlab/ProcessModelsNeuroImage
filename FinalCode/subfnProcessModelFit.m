@@ -234,7 +234,7 @@ switch data.ModelNum
         % B branch model
         Model2 = subfnregress(data.Y,[data.M data.X data.COV]);
         
-        if data.ProbeMod %
+        if data.ProbeMod %m
             
             % check to see if the interaction is significant! This should
             % only be checked the first time through.

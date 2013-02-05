@@ -3,6 +3,7 @@ index = 1;
 Nmed = AnalysisParameters.Nmed;
 Nvoxels = length(AllParameters);
 OutData = {};
+
 % Find the first non-empty parameter set
 count = 1;
 while isempty(AllParameters{count})
@@ -12,6 +13,7 @@ end
 for j = 1:Nmed
     % Model 1
     Model1FieldNames = fieldnames(AllParameters{count}.Model1{j});
+
     for k = 1:length(Model1FieldNames)
         if isempty(strmatch(Model1FieldNames(k),'Outcome')) && isempty(strmatch(Model1FieldNames(k),'Model'))
             OutData{index}.name = ['Model1_Med' num2str(j) '_' Model1FieldNames{k} '_beta'];
@@ -29,6 +31,7 @@ for j = 1:Nmed
 end
 % Model 2
 Model2FieldNames = fieldnames(AllParameters{count}.Model2);
+
 for k = 1:length(Model2FieldNames)
     if isempty(strmatch(Model2FieldNames(k),'Outcome')) && isempty(strmatch(Model2FieldNames(k),'Model'))
         OutData{index}.name = ['Model2_' Model2FieldNames{k} '_beta'];

@@ -6,6 +6,7 @@ for i = 1:Nvoxels
     if mod(i,1000) == 0
         fprintf(1,'Working on voxel: %d of %d\n',i,Nvoxels);
     end
+
     if ~isempty(AllParameters{i})
         VoxelIndices(i) = 1;
         ImageVoxelIndices(i) = AnalysisParameters.Indices(i);

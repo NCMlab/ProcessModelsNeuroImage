@@ -62,6 +62,12 @@ for i = 1:length(Header)
         
     end
 end
+% Create a mapping of the brain regions back to the parameters in teh
+% results.
+index = length(OutData) + 1;
+OutData{index}.name = 'BrainToParameters';
+OutData{index}.data = [1:length(OutData{index-1}.data)];
+OutData{index}.dataType = 4;
 
 % Write the images out
 % To Do: make sure to change the output name and folders

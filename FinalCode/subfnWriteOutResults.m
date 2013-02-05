@@ -156,3 +156,4 @@ Vo.dt = [2 0];
 Y = zeros(Vo.dim);
 Y(tImageVoxelIndices) = 1;
 spm_write_vol(Vo,Y);
+
