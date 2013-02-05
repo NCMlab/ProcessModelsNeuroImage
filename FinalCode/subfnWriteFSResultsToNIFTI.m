@@ -44,7 +44,7 @@ I = spm_read_vols(V);
 %     fprintf(1,'%d\t%s\n',i,Header{i});
 % end
 
-MeasureOfInterest = 'volume';
+MeasureOfInterest = 'thickness';
 
 
 FSNameAndLabel = {};
@@ -68,7 +68,7 @@ end
 for i = 1:length(OutData)
     Vo = V;
     Vo.dt = [16 0];    
-    Vo.fname = fullfile(OutFolder,[OutData{i}.name '.nii']);
+    Vo.fname = fullfile(OutFolder,[OutData{i}.name '_' MeasureOfInterest '.nii']);
     Y = zeros(Vo.dim);
     for j = 1:length(FSNameAndLabel)
         if ~isempty(FSNameAndLabel{j})

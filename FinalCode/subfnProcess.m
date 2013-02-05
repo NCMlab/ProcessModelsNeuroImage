@@ -5,7 +5,7 @@ function Parameters = subfnProcess(temp)
 [pointEst Parameters{1}] = subfnProcessModelFit(temp,1);
 % here we check to see if the interaction is significant.
 % if so then probe the mod for all bootstraps
-if pointEst.probeMod
+if pointEst.ProbeMod
     temp.ProbeMod = 1;
     % since the interaction is significant then we want to probe
     % the moderator by re-running the regression
