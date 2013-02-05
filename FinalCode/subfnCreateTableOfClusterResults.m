@@ -50,7 +50,7 @@ negXYZ = [x y z];
 negXYZmm = (SPM.xVol.M*[negXYZ ones(length(negXYZ),1)]')';
 negZ = I(F)';
 negxSPM = xSPM;
-negxSPM.Z = negZ;
+negxSPM.Z = -1.*negZ;
 negxSPM.XYZ = negXYZ';
 negxSPM.XYZmm = negXYZmm(:,1:3)';
 negxSPM.title = 'negative direction';
@@ -58,9 +58,9 @@ negxSPM.title = 'negative direction';
 
 negOutStruct = findAALandBAfromTabDat(negxSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba);
 fprintf(1,'===== %s ======\n','POSITIVE DIRECTION');
-WriteTableOutResultsToScreen(posOutStruct,InputImage)
+WriteTableOutResultsToScreen(posOutStruct,InputImage,'POS')
 fprintf(1,'===== %s ======\n','NEGATIVE DIRECTION');
-WriteTableOutResultsToScreen(negOutStruct,InputImage)
+WriteTableOutResultsToScreen(negOutStruct,InputImage,'NEG')
 
 
 % Find the negative clusters
@@ -72,20 +72,29 @@ WriteTableOutResultsToScreen(negOutStruct,InputImage)
 % find teh BA/AAL locations for these maxima
 
 
-function WriteTableOutResultsToScreen(OutStruct,InputImage)
+function WriteTableOutResultsToScreen(OutStruct,InputImage,direction)
 NCl = length(OutStruct.t);
 fid = 1;
 fprintf(fid,'===== %s ======\n',InputImage);
 fprintf(fid,'%-20s\t%5s\t%5s\t%5s\t%5s\t%5s\t%10s\t%10s\n','Region','Lat','BA','Xmm','Ymm','Zmm','Z','ClSize');
 for i = 1:NCl
-    fprintf(fid,'%-20s\t%5s\t%5d\t',OutStruct.aal{i}(1:end-2), OutStruct.aal{i}(end),OutStruct.ba(i));
+    fprintf(fid,'%-20s\t%5d\t',OutStruct.aal{i}, OutStruct.ba(i));
     fprintf(fid,'%5d\t%5d\t%5d\t',OutStruct.loc(i,:));
-    fprintf(fid,'%10.2f\t%10s\n', OutStruct.t(i),OutStruct.k{i});
+    
+        t = OutStruct.t(i);
+     if strmatch(direction,'NEG')   
+        fprintf(fid,'%10.2f\t', -t);
+    else
+        fprintf(fid,'%10.2f\t', OutStruct.t(i));
+    end
+        fprintf(fid,'%10s\n',OutStruct.k{i});
 end
 fprintf(fid,'=============================================================\n');
 
 function [AALList BAList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba)
+
 [aalCol1 aalCol2 aalCol3] = textread('/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/aal.nii.txt','%d%s%d');
+AALlabels = FormatALLNames(aalCol2);
 NVoxels = size(XYZ,1);
 AALList = {};
 BAList = zeros(NVoxels,1);
@@ -93,7 +102,8 @@ for i = 1:NVoxels
     CurrentValue = Iaal(XYZ(i,1), XYZ(i,2), XYZ(i,3));
     BAList(i,1) = Iba(XYZ(i,1), XYZ(i,2), XYZ(i,3));
     if CurrentValue
-        AALList{i} = aalCol2{CurrentValue};
+        %AALList{i} = aalCol2{CurrentValue};
+        AALList{i} = AALlabels{CurrentValue}.out;
     else
         AALList{i} = '**empty**';
     end
@@ -151,6 +161,28 @@ OutStruct.aal = AALList';
 OutStruct.ba = BAList;
 
 
-
-
+function AALlabels = FormatALLNames(aalCol2)
+N = length(aalCol2);
+AALlabels = {};
+for i = 1:N
+    AALlabels{i}.in = aalCol2{i};
+    temp = aalCol2{i};
+    fUnder = findstr(temp,'_');
+    lastPiece = temp(fUnder(end)+1:end);
+    if ~isempty(strmatch(lastPiece,'L')) || ~isempty(strmatch(lastPiece,'R'))
+        AALlabels{i}.hemi = lastPiece;
+    else
+        AALlabels{i}.hemi = '';
+    end
+    prefix = '';
+    if length(fUnder) > 1
+        for j = 1:length(fUnder) - 1
+            prefix = [prefix temp(fUnder(j)+1:fUnder(j+1)-1) '. '];
+        end
+    end
+    AALlabels{i}.prefix = prefix;
+    AALlabels{i}.name = temp(1:fUnder(1)-1);
+   AALlabels{i}.out = [prefix AALlabels{i}.name];
+end
+    
 

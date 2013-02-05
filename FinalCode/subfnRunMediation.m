@@ -25,7 +25,8 @@ for i = 1:NSubs
 end
 
 [m n p] = size(IMGdata);
-
+Thresholds = [0.05 0.01 0.005];
+NJobSplit = 150;
 AllData = {};
 AllData.names = {};
 AllData.names.Y = Yname;
@@ -48,10 +49,12 @@ AllData.Q = [];
 AllData.R = [];
 AllData.Indices = VoxelsToInclude;
 AllData.DIM = V.dim;
+AllData.ModelNum = ModelNum;
+AllData.Nboot = Nboot
+AllData.Thresholds = Thresholds;
 %Nboot = 5000;
 %ModelNum = '4';
-Thresholds = [0.05 0.01 0.005];
-NJobSplit = 150;
+
 [Nsub Nmed Nvoxels] = size(AllData.M);
 
 % Create a parameter file

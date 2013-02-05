@@ -53,7 +53,7 @@ if ~isfield(data.names,'Y'); data.names.Y = 'Y'; end
 if ~isfield(data.names,'V'); data.names.V = 'V'; end
 if ~isfield(data.names,'W'); data.names.W = 'W'; end
 temp = data;
-if ~isfield(data,'COVname') && ~isempty(data.COV)
+if ~isfield(data.names,'COV') && ~isempty(data.COV)
     NCov = size(data.COV,2);
     NameCovStruct = cell(NCov,1);
         for j = 1:NCov 
