@@ -17,7 +17,7 @@ switch data.ModelNum
         %     |
         % X ----- Y
         %
-        ParameterToBS = struct('names','CondMod','values',zeros(1,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
+        ParameterToBS = struct('names','CondMod','values',zeros(1,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
         Ndata = size(data.Y,1);
         % First, check to see if the interaction effect is significant or
         % not.
@@ -30,11 +30,11 @@ switch data.ModelNum
 
         if Model1.tstat.pval(4) < max(data.Thresholds)
 
-            ParameterToBS.probeMod = 1;
+            ParameterToBS.ProbeMod = 1;
         end
         %
         % If the probeMd flag is set to TRUE then check to see if the
-        % interaction is significant. If so then leave the probeMod flag
+        % interaction is significant. If so then leave the ProbeMod flag
         % set to TRUE. If the interaction is not significant then set the
         % flag to FALSE.
         if data.ProbeMod %
@@ -116,7 +116,7 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('AB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,1),'probeMod',0);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,1),'ProbeMod',0);
         % redo the setup so that results are organized based on models
         % =================================================================
         % Model1
@@ -217,7 +217,7 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('CondAB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
         
         % Model 1
         % create the interaction terms
@@ -226,16 +226,14 @@ switch data.ModelNum
             Model1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X(:,j).*(data.W) data.COV]);
             % check each interaction term and set the flag here for whether
             % to probe the interaction.
-            if Model1{j}.tstat.pval(4) < max(data.Thresholds)
-                ParameterToBS.probeMod = 1;
-            end
+            %if Model1{j}.tstat.pval(4) < max(data.Thresholds)
+                ParameterToBS.ProbeMod = 1;
+            %end
         end
         % Model 2
         % B branch model
         Model2 = subfnregress(data.Y,[data.M data.X data.COV]);
-        
         if data.ProbeMod %m
-            
             % check to see if the interaction is significant! This should
             % only be checked the first time through.
             % if S.tstat.pval(4) < max(data.Thresholds)
@@ -340,7 +338,7 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('CondAB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
         a = zeros(Nmed,1);
         % First, check to see if the interaction effect is significant or
         % not.
@@ -358,9 +356,9 @@ switch data.ModelNum
         % check to see if the interaction is significant
         
         for j = 1:Nmed
-            if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
-                ParameterToBS.probeMod = 1;
-            end
+        %    if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
+                ParameterToBS.ProbeMod = 1;
+        %    end
         end
         if data.ProbeMod
            
@@ -482,7 +480,7 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('CondAB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
         
         Model1 = cell(Nmed);
         Interaction = zeros(Ndata,Nmed);
@@ -492,7 +490,7 @@ switch data.ModelNum
             % check each interaction term and set the flag here for whether
             % to probe the interaction for BRANCH A.
             if Model1{j}.tstat.pval(4) < max(data.Thresholds)
-                ParameterToBS.probeMod = 1;
+                ParameterToBS.ProbeMod = 1;
             end
             % Use this for loop to create the interaction term for use in
             % Model2
@@ -503,9 +501,9 @@ switch data.ModelNum
         Model2 = subfnregstats(data.Y,[data.M data.W Interaction data.X data.COV]);
         % check to see if the BRANCH B interaction is significant
         for j = 1:Nmed
-            if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
-                ParameterToBS.probeMod = 1;
-            end
+       %     if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
+                ParameterToBS.ProbeMod = 1;
+       %     end
         end
         
         % If either of the interactions are significant then probe them
@@ -657,7 +655,7 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('CondAB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'probeMod',0);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
         a = zeros(Nmed,1);
         % First, check to see if the interaction effect is significant or
         % not.
@@ -675,9 +673,9 @@ switch data.ModelNum
         % check to see if the interaction is significant
         
         for j = 1:Nmed
-            if tempModel2.tstat.pval(1+Nmed+j) < max(data.Thresholds)
-                ParameterToBS.probeMod = 1;
-            end
+         %   if tempModel2.tstat.pval(1+Nmed+j) < max(data.Thresholds)
+                ParameterToBS.ProbeMod = 1;
+          %  end
         end
         if data.ProbeMod
             ParameterToBS.values(1,1) = a.*(tempModel2.beta(2:Nmed+1));

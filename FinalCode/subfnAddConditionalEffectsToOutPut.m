@@ -30,13 +30,13 @@ switch ModelNum
                 thrStr = num2str(num2str(Thresholds(i)));
                 OutData{index}.name = sprintf('CondABMed%d_pV000_sign%0.4f',j,Thresholds(i));
                 OutData{index}.data = zeros(Nvoxels,1);
-                OutData{index}.field = ['CondAB' num2str(j) '{1}.BCaci.alpha' thrStr(3:end)];
+                OutData{index}.field = ['CondAB' num2str(j) '{000}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
                 index = index + 1;
             end
             OutData{index}.name = sprintf('CondABMed%d_pV000_pointEst',j);
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['CondAB' num2str(j) '{1}.pointEst'];
+            OutData{index}.field = ['CondAB' num2str(j) '{000}.pointEst'];
             OutData{index}.dataType = 16;
             index = index + 1;
         end
@@ -47,13 +47,13 @@ switch ModelNum
                 thrStr = num2str(num2str(Thresholds(i)));
                 OutData{index}.name = sprintf('CondABMed%d_pV000_sign%0.4f',j,Thresholds(i));
                 OutData{index}.data = zeros(Nvoxels,1);
-                OutData{index}.field = ['CondAB' num2str(j) '{1}.BCaci.alpha' thrStr(3:end)];
+                OutData{index}.field = ['CondAB' num2str(j) '{000}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
                 index = index + 1;
             end
             OutData{index}.name = sprintf('CondABMed%d_pV000_pointEst',j);
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['CondAB' num2str(j) '{1}.pointEst'];
+            OutData{index}.field = ['CondAB' num2str(j) '{000}.pointEst'];
             OutData{index}.dataType = 16;
             index = index + 1;
         end
@@ -81,13 +81,13 @@ switch ModelNum
                 thrStr = num2str(num2str(Thresholds(i)));
                 OutData{index}.name = sprintf('CondABMed%d_pV000_sign%0.4f',j,Thresholds(i));
                 OutData{index}.data = zeros(Nvoxels,1);
-                OutData{index}.field = ['CondAB' num2str(j) '{1}.BCaci.alpha' thrStr(3:end)];
+                OutData{index}.field = ['CondAB' num2str(j) '{000}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
                 index = index + 1;
             end
             OutData{index}.name = sprintf('CondABMed%d_pV000_pointEst',j);
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['CondAB' num2str(j) '{1}.pointEst'];
+            OutData{index}.field = ['CondAB' num2str(j) '{000}.pointEst'];
             OutData{index}.dataType = 16;
             index = index + 1;
         end

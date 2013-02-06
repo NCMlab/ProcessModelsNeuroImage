@@ -50,10 +50,7 @@ for i = 1:Nvoxels
                         tempOutData{index}.dataType = 2;
                         index = index + 1;
                     end
-                    % remove the OutData cell and add the new structure to
-                    % the end.
-                    OutData{j} = [];
-                    OutData = OutData(~cellfun('isempty',OutData));
+                   OutData{j} = [];
                     index = length(OutData);
                     for k = 1:Nprobe
                         OutData{index+k} = tempOutData{k};
@@ -61,6 +58,11 @@ for i = 1:Nvoxels
                 end
             end
         end
+         % remove the OutData cell and add the new structure to
+                    % the end.
+                    
+                OutData = OutData(~cellfun('isempty',OutData));
+                    
         % This double checking may be slow, but it is done so that if you
         % are in the first voxel with probe values that the new additions
         % ot the OutData are still cycled over.
@@ -82,6 +84,7 @@ for i = 1:Nvoxels
                 
             else
                 % fprintf(1,'%s\n', ['AllParameters{' num2str(i) '}.' OutData{j}.field]);
+                % fprintf(1,'%s\n',['AllParameters{' num2str(i) '}.' OutData{j}.field]);
                 OutData{j}.data(i) = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
             end
         end
