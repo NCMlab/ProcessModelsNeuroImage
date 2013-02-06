@@ -78,10 +78,10 @@ fid = 1;
 fprintf(fid,'===== %s ======\n',InputImage);
 fprintf(fid,'%-20s\t%5s\t%5s\t%5s\t%5s\t%5s\t%10s\t%10s\n','Region','Lat','BA','Xmm','Ymm','Zmm','Z','ClSize');
 for i = 1:NCl
-    fprintf(fid,'%-20s\t%5d\t',OutStruct.aal{i}, OutStruct.ba(i));
+    fprintf(fid,'%-20s\t%5s\t%5d\t',OutStruct.aal{i},OutStruct.hemi{i}, OutStruct.ba(i));
     fprintf(fid,'%5d\t%5d\t%5d\t',OutStruct.loc(i,:));
     
-        t = OutStruct.t(i);
+     t = OutStruct.t(i);
      if strmatch(direction,'NEG')   
         fprintf(fid,'%10.2f\t', -t);
     else
@@ -91,11 +91,12 @@ for i = 1:NCl
 end
 fprintf(fid,'=============================================================\n');
 
-function [AALList BAList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba)
+function [AALList BAList HemiList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba)
 
 [aalCol1 aalCol2 aalCol3] = textread('/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/aal.nii.txt','%d%s%d');
 AALlabels = FormatALLNames(aalCol2);
 NVoxels = size(XYZ,1);
+HemiList = {};
 AALList = {};
 BAList = zeros(NVoxels,1);
 for i = 1:NVoxels
@@ -104,8 +105,10 @@ for i = 1:NVoxels
     if CurrentValue
         %AALList{i} = aalCol2{CurrentValue};
         AALList{i} = AALlabels{CurrentValue}.out;
+        HemiList{i} = AALlabels{CurrentValue}.hemi;
     else
         AALList{i} = '**empty**';
+        HemiList{i} = '-';
     end
 end
 
@@ -149,7 +152,7 @@ end
 XYZ = (inv(xSPM.Vspm.mat)*([XYZmm ones(length(XYZmm),1)])')';
 % This program finds the AAL and Brodmann Area labels for all XYZ mm
 % coordinates it is passed.
-[AALList BAList] = subfnLocalFindAALandBA(XYZ(:,1:3),Iaal,Iba);
+[AALList BAList HemiList] = subfnLocalFindAALandBA(XYZ(:,1:3),Iaal,Iba);
 
 OutStruct = {};
 OutStruct.loc = XYZmm;
@@ -159,6 +162,7 @@ OutStruct.p = pList;
 OutStruct.k = ClList';
 OutStruct.aal = AALList';
 OutStruct.ba = BAList;
+OutStruct.hemi =  HemiList;
 
 
 function AALlabels = FormatALLNames(aalCol2)

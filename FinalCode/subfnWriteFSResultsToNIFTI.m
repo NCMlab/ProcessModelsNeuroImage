@@ -1,4 +1,4 @@
-function subfnWriteFSResultsToNIFTI(OutData,OutFolder,BasePath)
+function subfnWriteFSResultsToNIFTI(OutData,OutFolder,BasePath,MeasureOfInterest)
 
 FSPath = fullfile(BasePath,'FreeSurferFiles');
 % Load up the Header file used with the data
@@ -43,9 +43,6 @@ I = spm_read_vols(V);
 % for i = 1:length(Header)
 %     fprintf(1,'%d\t%s\n',i,Header{i});
 % end
-
-MeasureOfInterest = 'thickness';
-
 
 FSNameAndLabel = {};
 for i = 1:length(Header)
