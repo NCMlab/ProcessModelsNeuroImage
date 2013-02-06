@@ -357,9 +357,9 @@ switch data.ModelNum
         % check to see if the interaction is significant
         
         for j = 1:Nmed
-            if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
+        %    if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
                 ParameterToBS.ProbeMod = 1;
-            end
+        %    end
         end
         if data.ProbeMod
            
@@ -502,9 +502,9 @@ switch data.ModelNum
         Model2 = subfnregstats(data.Y,[data.M data.W Interaction data.X data.COV]);
         % check to see if the BRANCH B interaction is significant
         for j = 1:Nmed
-            if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
+       %     if Model2.tstat.pval(1+Nmed+1+j) < max(data.Thresholds)
                 ParameterToBS.ProbeMod = 1;
-            end
+       %     end
         end
         
         % If either of the interactions are significant then probe them
@@ -674,9 +674,9 @@ switch data.ModelNum
         % check to see if the interaction is significant
         
         for j = 1:Nmed
-            if tempModel2.tstat.pval(1+Nmed+j) < max(data.Thresholds)
+         %   if tempModel2.tstat.pval(1+Nmed+j) < max(data.Thresholds)
                 ParameterToBS.ProbeMod = 1;
-            end
+          %  end
         end
         if data.ProbeMod
             ParameterToBS.values(1,1) = a.*(tempModel2.beta(2:Nmed+1));
