@@ -25,8 +25,8 @@ switch choice
         num_lines = 1;
         def = {'1.96','100'};
         answer = inputdlg(prompt,dlg_title,num_lines,def);
-        HeightThreshold = answer{1};
-        ExtentThreshold = answer{2};
+        HeightThreshold = str2num(answer{1});
+        ExtentThreshold = str2num(answer{2});
         InputImage = subfnApplyThresholdsToImages(InputImage,HeightThreshold,ExtentThreshold);
 end
 

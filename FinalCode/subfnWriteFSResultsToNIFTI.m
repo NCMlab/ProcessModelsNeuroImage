@@ -59,6 +59,15 @@ for i = 1:length(Header)
         
     end
 end
+List = {};
+index = 1;
+for i = 1:length(FSNameAndLabel)
+    if ~isempty(FSNameAndLabel{i})
+        List{index} = FSNameAndLabel{i}.name;
+        index = index + 1;
+    end
+end
+
 % Create a mapping of the brain regions back to the parameters in teh
 % results.
 index = length(OutData) + 1;
@@ -67,8 +76,27 @@ OutData{index}.data = [1:length(OutData{index-1}.data)];
 OutData{index}.dataType = 4;
 
 % Write the images out
-% To Do: make sure to change the output name and folders
+% Check for the thresholdindex values and the order values. These will be
+% used to create 4-D images of the probe values.
+FilesToRemove = {};
+Str = '';
 for i = 1:length(OutData)
+%     thresholdIndex = 0;
+    order = 0;
+    % check for threshold index
+%     if isfield(OutData{i},'thresholdIndex')
+%         thresholdIndex = OutData{i}.thresholdIndex;
+%     end
+    if isfield(OutData{i},'order')
+        order = OutData{i}.order;
+    end
+    
+    if order == 1
+        Str
+        unix(Str);
+        Str = sprintf('fslmerge -t %s_4D',OutData{i}.name);
+    end
+    
     Vo = V;
     Vo.dt = [16 0];    
     Vo.fname = fullfile(OutFolder,[OutData{i}.name '_' MeasureOfInterest '.nii']);
@@ -79,4 +107,15 @@ for i = 1:length(OutData)
         end
     end
     spm_write_vol(Vo,Y);
+    if order > 0
+        Str = sprintf('%s %s',Str,Vo.fname);
+        FilesToRemove{length(FilesToRemove)+1} = Vo.fname;
+    end
+end
+
+Str
+unix(Str);
+for i = 1:length(FilesToRemove)
+    Str = sprintf('rm %s',FilesToRemove{i});
+    unix(Str);
 end

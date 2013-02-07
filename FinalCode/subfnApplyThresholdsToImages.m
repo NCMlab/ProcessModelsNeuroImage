@@ -3,19 +3,20 @@ function OutImage = subfnApplyThresholdsToImages(InputImage,HeightThreshold,Exte
 % HeightThreshold = 0.5;
 % ExtentThreshold = 300;
 % convert HeightThreshold value to a string
+
 Hthr = num2str(HeightThreshold);
 Hthr(findstr(Hthr,'.')) = 'p';
 
 
 for j = 1:size(InputImage,1)
     % check to see if this image is a binary significance image
-    if ~isempty(strfind(deblank(InputImages(j,:)),'sign0'))
+    if ~isempty(strfind(deblank(InputImage(j,:)),'sign0'))
         thrString = sprintf('_Kthr%d',ExtentThreshold);
     else
         thrString = sprintf('_Hthr%s_Kthr%d',Hthr,ExtentThreshold);
     end
     % load the image
-    V = spm_vol(deblank(InputImages(j,:)));
+    V = spm_vol(deblank(InputImage(j,:)));
     I = spm_read_vols(V);
     
     % find voxels above threhsold in the POSITIVE direction    

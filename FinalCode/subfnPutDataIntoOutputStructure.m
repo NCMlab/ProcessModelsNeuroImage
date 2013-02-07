@@ -1,4 +1,5 @@
 function OutData = subfnPutDataIntoOutputStructure(OutData,AllParameters,AnalysisParameters)
+fprintf(1,'Hello\n');
 % put the data into the output structure
 Nvoxels = AnalysisParameters.Nvoxels;
 OutDataForProbesFlag = 0;
@@ -43,11 +44,20 @@ for i = 1:Nvoxels
                     index = 1;
                     tempName = OutData{j}.name;
                     tempField = OutData{j}.field;
+             
                     for k = 1:Nprobe
+                        try
+                            tempOutData{index}.thresholdIndex = OutData{j}.thresholdIndex;
+                        catch me
+                        end
                         tempOutData{index}.name = strrep(tempName,'000',sprintf('%0.2f',probeValues(k)));
                         tempOutData{index}.field = strrep(tempField,'000',num2str(k));
                         tempOutData{index}.data = zeros(Nvoxels,1);
                         tempOutData{index}.dataType = 2;
+                        if k>1 % This way the zero value of the moderator is 
+                            % not included in the 4D output images
+                            tempOutData{index}.order = k - 1;
+                        end
                         index = index + 1;
                     end
                    OutData{j} = [];
@@ -78,6 +88,7 @@ for i = 1:Nvoxels
                     if prod(thresholds)>0
                         OutData{j}.data(i) = 1;
                         OutData{j}.dataType = 2;
+                        
                     end
                 catch
                 end

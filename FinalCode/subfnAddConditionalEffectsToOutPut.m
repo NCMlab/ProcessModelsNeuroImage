@@ -15,6 +15,7 @@ switch ModelNum
                 OutData{index}.data = zeros(Nvoxels,1);
                 OutData{index}.field = ['AB' num2str(j) '{' num2str(j) '}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
+                OutData{index}.thresholdIndex = i;
                 index = index + 1;
             end
         end
@@ -32,6 +33,7 @@ switch ModelNum
                 OutData{index}.data = zeros(Nvoxels,1);
                 OutData{index}.field = ['CondAB' num2str(j) '{000}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
+                OutData{index}.thresholdIndex = i;
                 index = index + 1;
             end
             OutData{index}.name = sprintf('CondABMed%d_pV000_pointEst',j);
@@ -49,6 +51,7 @@ switch ModelNum
                 OutData{index}.data = zeros(Nvoxels,1);
                 OutData{index}.field = ['CondAB' num2str(j) '{000}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
+                OutData{index}.thresholdIndex = i;
                 index = index + 1;
             end
             OutData{index}.name = sprintf('CondABMed%d_pV000_pointEst',j);
@@ -83,6 +86,7 @@ switch ModelNum
                 OutData{index}.data = zeros(Nvoxels,1);
                 OutData{index}.field = ['CondAB' num2str(j) '{000}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
+                OutData{index}.thresholdIndex = i;
                 index = index + 1;
             end
             OutData{index}.name = sprintf('CondABMed%d_pV000_pointEst',j);
@@ -104,6 +108,7 @@ switch ModelNum
                     OutData{index}.data = zeros(Nvoxels,1);
                     OutData{index}.field = ['CondAB' num2str(j) '{' num2str(k) '}.BCaci.alpha' thrStr(3:end)];
                     OutData{index}.dataType = 2;
+                    OutData{index}.thresholdIndex = i;
                     index = index + 1;
                     
                 end
