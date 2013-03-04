@@ -1,12 +1,10 @@
-function subfnWriteFSResultsToNIFTI(OutData,OutFolder,BasePath,MeasureOfInterest)
+function subfnWriteFSResultsToNIFTI(OutData,OutFolder,MeasureOfInterest,Header)
 
-FSPath = fullfile(BasePath,'FreeSurferFiles');
-% Load up the Header file used with the data
-load(fullfile(BasePath,'FSheader'))
+
 % Use the Freesurfer lookup table to map location names to spots in the
 % brain. The file has been cleaned so that it does not have any of the
 % descriptive breaks that are in the original
-D = textread(fullfile(BasePath,'FreeSurferColorLUTclean.txt'),'%s','delimiter',' ');
+D = textread(fullfile('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles','FreeSurferColorLUTclean.txt'),'%s','delimiter',' ');
 
 NCol = 6;
 NRow = length(D)/NCol;
@@ -35,7 +33,7 @@ end
 % Load up the example images
 % These are taken from a single subject and they really shuld be rotated
 % correctly. 
-P = fullfile(BasePath,'raparc+asegROT.nii');
+P = fullfile('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles','raparc+asegROT.nii');
 V = spm_vol(P);
 I = spm_read_vols(V);
 % for all locations in the Freesurfer header file, which comes from
@@ -94,7 +92,7 @@ for i = 1:length(OutData)
     if order == 1
         Str
         unix(Str);
-        Str = sprintf('fslmerge -t %s_4D',OutData{i}.name);
+        Str = sprintf('fslmerge -t %s_%s_4D',MeasureOfInterest,OutData{i}.name);
     end
     
     Vo = V;
@@ -113,7 +111,6 @@ for i = 1:length(OutData)
     end
 end
 
-Str
 unix(Str);
 for i = 1:length(FilesToRemove)
     Str = sprintf('rm %s',FilesToRemove{i});

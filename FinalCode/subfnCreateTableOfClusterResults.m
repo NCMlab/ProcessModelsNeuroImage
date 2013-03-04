@@ -11,10 +11,21 @@ Iba = spm_read_vols(Vba);
 
 % Select the thresholded image
 InputImage = spm_select(1,'image');
+cd(fileparts(InputImage))
+
+choice = questdlg('Select Mask Image?', ...
+	'Mask?', ...
+	'yes','no','no');
+switch choice
+    case 'yes'
+        MaskImage = spm_select(1,'image','Select mask image');
+    case 'no'
+        MaskImage = '';
+end
+
 choice = questdlg('Is this image thresholded?', ...
 	'Thresholded?', ...
 	'yes','no','yes');
-
 switch choice
     case 'yes'
         HeightThreshold = 0.5;
@@ -27,16 +38,33 @@ switch choice
         answer = inputdlg(prompt,dlg_title,num_lines,def);
         HeightThreshold = str2num(answer{1});
         ExtentThreshold = str2num(answer{2});
-        InputImage = subfnApplyThresholdsToImages(InputImage,HeightThreshold,ExtentThreshold);
+        InputImage = subfnApplyThresholdsToImages(InputImage,HeightThreshold,ExtentThreshold,MaskImage);
 end
+
+
 
 % Create the table of results using SPM
 % POSITIVE DIRECTION
 [SPM xSPM] = DisplayCov(InputImage,HeightThreshold,ExtentThreshold);
 NumLocalMaxima = 3;
 DistancebetweenMaxima = 8;
-
+% Check to see if all the voxelwise values are one. If so then this is an
+% image of thresholded significant effects and we need to replace these
+% values with effects sizes.
+if unique(xSPM.Z) == 1
+    EffectImage = spm_select(1,'image');
+    Veffect = spm_vol(EffectImage);
+    Ieffect = spm_read_vols(Veffect);
+    effectZ = zeros(size(xSPM.Z));
+    for i = 1:length(xSPM.Z)
+        effectZ(i) = Ieffect(xSPM.XYZ(1,i),xSPM.XYZ(2,i),xSPM.XYZ(3,i));
+    end
+    xSPM.Z = effectZ;
+end
 posOutStruct = findAALandBAfromTabDat(xSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba);
+posOutStruct.InputImage = InputImage;
+posOutStruct.VoxelsMM = xSPM.XYZmm;
+posOutStruct.VoxelsVOX = xSPM.XYZ;
 
 
 % NEGATIVE DIRECTION
@@ -57,11 +85,18 @@ negxSPM.title = 'negative direction';
 
 
 negOutStruct = findAALandBAfromTabDat(negxSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba);
+negOutStruct.InputImage = InputImage;
+negOutStruct.VoxelsMM = negxSPM.XYZmm;
+negOutStruct.VoxelsVOX = negxSPM.XYZ;
+
+
 fprintf(1,'===== %s ======\n','POSITIVE DIRECTION');
 WriteTableOutResultsToScreen(posOutStruct,InputImage,'POS')
 fprintf(1,'===== %s ======\n','NEGATIVE DIRECTION');
 WriteTableOutResultsToScreen(negOutStruct,InputImage,'NEG')
 
+
+%CreateMaskOfResults(posOutStruct,xSPM,negxSPM)
 
 % Find the negative clusters
 
@@ -70,7 +105,20 @@ WriteTableOutResultsToScreen(negOutStruct,InputImage,'NEG')
 % fine the locations of the local maxima in each cluster
 
 % find teh BA/AAL locations for these maxima
-
+function CreateMaskOfResults(posOutStruct,xSPM,negxSPM)
+[PathName FileName Ext] = fileparts(posOutStruct.InputImage);
+I = zeros(xSPM.Vspm.dim);
+for i = 1:length(xSPM.XYZ)
+    I(xSPM.XYZ(1,i),xSPM.XYZ(2,i),xSPM.XYZ(3,i)) = 1;
+end
+for i = 1:length(negxSPM.XYZ)
+    I(negxSPM.XYZ(1,i),negxSPM.XYZ(2,i),negxSPM.XYZ(3,i)) = 1;
+end
+OutFile = fullfile(PathName, [FileName '_mask' Ext]);
+Vo = xSPM.Vspm;
+Vo.fname = OutFile;
+Vo.dt = [2 0];
+spm_write_vol(Vo,I);
 
 function WriteTableOutResultsToScreen(OutStruct,InputImage,direction)
 NCl = length(OutStruct.t);
@@ -83,16 +131,15 @@ for i = 1:NCl
     
      t = OutStruct.t(i);
      if strmatch(direction,'NEG')   
-        fprintf(fid,'%10.2f\t', -t);
+        fprintf(fid,'%10.3f\t', -t);
     else
-        fprintf(fid,'%10.2f\t', OutStruct.t(i));
+        fprintf(fid,'%10.3f\t', OutStruct.t(i));
     end
         fprintf(fid,'%10s\n',OutStruct.k{i});
 end
 fprintf(fid,'=============================================================\n');
 
 function [AALList BAList HemiList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba)
-
 [aalCol1 aalCol2 aalCol3] = textread('/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/aal.nii.txt','%d%s%d');
 AALlabels = FormatALLNames(aalCol2);
 NVoxels = size(XYZ,1);
@@ -149,7 +196,7 @@ for i = 1:NClust
     end
 end
 
-XYZ = (inv(xSPM.Vspm.mat)*([XYZmm ones(length(XYZmm),1)])')';
+XYZ = (inv(xSPM.Vspm.mat)*([XYZmm ones(size(XYZmm,1),1)])')';
 % This program finds the AAL and Brodmann Area labels for all XYZ mm
 % coordinates it is passed.
 [AALList BAList HemiList] = subfnLocalFindAALandBA(XYZ(:,1:3),Iaal,Iba);

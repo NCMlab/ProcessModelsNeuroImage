@@ -113,6 +113,10 @@ end
 % hMIPax = axes('Parent',Fgraph,'Position',[0.05 0.60 0.55 0.36],'Visible','off');
 % hMIPax = spm_mip_ui(ZValues,XYZmm,V.mat,V.dim',hMIPax,units);
 [FWHM,VRpv] = spm_est_smoothness(P,P);
+% This is a special catch 
+if sum(FWHM == [Inf Inf Inf])==3
+    FWHM = [20 20 20];
+end
 %FWHM = [8 8 8];
 R           = spm_resels_vol(spm_vol(P),FWHM)';
 %R = [1 1 1 1];

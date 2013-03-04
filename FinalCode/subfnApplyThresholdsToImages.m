@@ -1,4 +1,4 @@
-function OutImage = subfnApplyThresholdsToImages(InputImage,HeightThreshold,ExtentThreshold)
+function OutImage = subfnApplyThresholdsToImages(InputImage,HeightThreshold,ExtentThreshold,MaskImage)
 % P = spm_select(Inf,'image');
 % HeightThreshold = 0.5;
 % ExtentThreshold = 300;
@@ -18,9 +18,16 @@ for j = 1:size(InputImage,1)
     % load the image
     V = spm_vol(deblank(InputImage(j,:)));
     I = spm_read_vols(V);
-    
+    % Check to see if there is a mask image to load up
+    if ~isempty(MaskImage)
+        Vmask = spm_vol(MaskImage);
+        Imask = spm_read_vols(Vmask);
+        I = I.*Imask;
+    end
     % find voxels above threhsold in the POSITIVE direction    
+    
     F = find(I > HeightThreshold);
+
     % convert supreathreshold voxels to locations    
     [x y z] = ind2sub(V.dim,F);
     L = [x y z];

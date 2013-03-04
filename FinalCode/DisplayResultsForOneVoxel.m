@@ -13,7 +13,8 @@ end
 F = dir(fullfile(SelectedPath,'*.nii'));
 
 
-V = AnalysisParameters.V;
+%V = AnalysisParameters.V;
+V = spm_vol(F(1).name);
 %VOXmm = [30 56 8];
 % Convert to locations
 VOXind = inv(V.mat)*[VOXmm 1]';
@@ -23,6 +24,9 @@ VOXind = inv(V.mat)*[VOXmm 1]';
 NVox = AnalysisParameters.Nvoxels;
 NVoxPerChunk = ceil(NVox/AnalysisParameters.NJobSplit);
 DataIndex = find(AnalysisParameters.Indices == index);
+if isempty(DataIndex)
+    DataIndex = 1;
+end
 DataFileIndex = ceil(DataIndex/NVoxPerChunk);
 % Load the data file
 load(fullfile(SelectedPath,[sprintf('data_%04d',DataFileIndex)]))

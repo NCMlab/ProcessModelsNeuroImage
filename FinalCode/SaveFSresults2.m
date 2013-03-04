@@ -1,10 +1,12 @@
 function SaveFSresults2
 %BasePath = '/Users/jason/Documents/MyData/ModMedCogRes';
 %BasePath = 'C:\Users\steffener\Dropbox\ModMedCogRes';
-BasePath = 'w:/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
-BasePath = '/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
+%BasePath = 'w:/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
 
-load(fullfile(BasePath,'FSheader.mat'));
+
+
+
+
 SelectedPath = spm_select(1,'dir');
 cd(SelectedPath)
 if exist('AnalysisParameters.mat')
@@ -13,7 +15,12 @@ else
     errordlg('this folder does not have the required AnalysticParameters.mat file');
 end
 
-MeasureOfInterest = 'volume';
+for i = 1:length(AnalysisParameters.Header)
+    fprintf(1,'%d\t%s\n',i,AnalysisParameters.Header{i});
+end
+
+
+MeasureOfInterest = 'thickness';
 % Check to see if the process is finished
 F = dir('Results_*.mat');
 if AnalysisParameters.NJobSplit == length(F) 
@@ -34,7 +41,7 @@ if AnalysisParameters.NJobSplit == length(F)
      OutData = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters);
      OutData = subfnAddConditionalEffectsToOutPut(OutData,AnalysisParameters);
      OutData = subfnPutDataIntoOutputStructure(OutData,AllParameters,AnalysisParameters);
-     subfnWriteFSResultsToNIFTI(OutData,SelectedPath,BasePath,MeasureOfInterest) 
+     subfnWriteFSResultsToNIFTI(OutData,SelectedPath,MeasureOfInterest,AnalysisParameters.Header) 
       
 else
     errordlg('This process has not finished')
