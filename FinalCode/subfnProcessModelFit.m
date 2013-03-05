@@ -274,7 +274,7 @@ switch data.ModelNum
                 eval(Str)
                 Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},3);',data.names.W,data.names.W);
                 eval(Str)
-                Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x%s'',Model1{j},4);',data.names.X,data.names.W,data.names.X,data.names.W);
+                Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x_%s'',Model1{j},4);',data.names.X,data.names.W,data.names.X,data.names.W);
                 eval(Str)
                 for k = 1:size(data.COV,2)
                     Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},4+k);',data.names.COV{k},data.names.COV{k});
@@ -418,7 +418,7 @@ switch data.ModelNum
                 eval(Str)
                 Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,j+1);',data.names.M{j},[data.names.M{j} num2str(j)]);
                 eval(Str)
-                Str = sprintf('Parameters.Model2.%s_x_%s=subfnSetParameters(''%s_x%s'',Model2,Nmed+2+j);',data.names.M{j},data.names.V,data.names.M{j},data.names.V);
+                Str = sprintf('Parameters.Model2.%s_x_%s=subfnSetParameters(''%s_x_%s'',Model2,Nmed+2+j);',data.names.M{j},data.names.V,data.names.M{j},data.names.V);
                 eval(Str)
                 for k = 1:size(data.COV,2)
                     Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},2+k);',data.names.COV{k},data.names.COV{k});
@@ -573,11 +573,11 @@ switch data.ModelNum
                  eval(Str)
                  Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model1{j},3);',data.names.W,data.names.W);%W
                  eval(Str)
-                 Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x_%s'',Model1{j},4);',data.names.X,data.names.X,data.names.W,data.names.W);%XxW
+                 Str = sprintf('Parameters.Model1{j}.%s_x_%s=subfnSetParameters(''%s_x_%s'',Model1{j},4);',data.names.X,data.names.W,data.names.X,data.names.W);%XxW
                  eval(Str)
                  Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,j+1);',[data.names.M{j}],[data.names.M{j}]);
                  eval(Str)
-                 Str = sprintf('Parameters.Model2.%s_x_%s=subfnSetParameters(''%s_x%s'',Model2,Nmed+2+j);',[data.names.M{j}],data.names.W,[data.names.M{j}],data.names.W);
+                 Str = sprintf('Parameters.Model2.%s_x_%s=subfnSetParameters(''%s_x_%s'',Model2,Nmed+2+j);',[data.names.M{j}],data.names.W,[data.names.M{j}],data.names.W);
                  eval(Str)
                  Parameters.Model1{j}.Outcome = data.names.M{j};
                  for k = 1:size(data.COV,2)

@@ -167,6 +167,12 @@ function data = CreateDataChunk(data,VoxelForThisJob,ModelNum)
             else
                 data.Y = data.Y;
             end
+            % Check the W variable
+            if size(data.W,3) > 1
+                data.W = data.W(:,:,VoxelForThisJob);
+            else
+                data.W = data.W;
+            end
             % Check the covariates
             if size(data.COV,3) > 1
                 data.COV = data.COV(:,VoxelForThisJob);
@@ -191,6 +197,49 @@ function data = CreateDataChunk(data,VoxelForThisJob,ModelNum)
                 data.Y = data.Y(:,:,VoxelForThisJob);
             else
                 data.Y = data.Y;
+            end
+            % Check the V variable
+            if size(data.V,3) > 1
+                data.V = data.V(:,:,VoxelForThisJob);
+            else
+                data.V = data.V;
+            end
+            % Check the covariates
+            if size(data.COV,3) > 1
+                data.COV = data.COV(:,VoxelForThisJob);
+            else
+                data.COV = data.COV;
+            end
+
+        case '58'
+            if size(data.X,3) > 1
+                data.X = data.X(:,:,VoxelForThisJob);
+            else
+                data.X = data.X;
+            end
+            % Check the M variable
+            if size(data.M,3) > 1
+                data.M = data.M(:,:,VoxelForThisJob);
+            else
+                data.M = data.M;
+            end
+            % Check the Y variable
+            if size(data.Y,3) > 1
+                data.Y = data.Y(:,:,VoxelForThisJob);
+            else
+                data.Y = data.Y;
+            end
+            % Check the W variable
+            if size(data.W,3) > 1
+                data.W = data.W(:,:,VoxelForThisJob);
+            else
+                data.W = data.W;
+            end
+            % Check the V variable
+            if size(data.V,3) > 1
+                data.V = data.V(:,:,VoxelForThisJob);
+            else
+                data.V = data.V;
             end
             % Check the covariates
             if size(data.COV,3) > 1
