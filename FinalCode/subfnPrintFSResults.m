@@ -1,8 +1,17 @@
-function subfnPrintFSResults(SelectedPath)
+function subfnPrintFSResults(SelectedPath,alpha,fid)
 % write Fressurfer results to tables
-if nargin < 1
-    SelectedPath = spm_select(1,'dir');
+switch nargin
+    case 2
+        fid = 1;
+    case 1
+        alpha = 0.05;
+        fid = 1;
+    case 0
+        SelectedPath = spm_select(1,'dir');
+        alpha = 0.05;
+        fid = 1;
 end
+
 cd(SelectedPath)
 if exist('AnalysisParameters.mat')
     load AnalysisParameters
@@ -22,8 +31,11 @@ Nvoxels = AnalysisParameters.Nvoxels;
 
 ModelNum = AnalysisParameters.ModelNum;
 thr = 1.96;
-alpha = 0.05;%/Nvoxels;
-fid = 1;
+%alpha = 0.05;%/Nvoxels;
+StrAlpha = num2str(alpha);
+Dot=findstr(StrAlpha,'.');
+AlphaLimit = ['alpha' StrAlpha(Dot+1:end)];
+
 fprintf(fid,'==========================================\n')
 fprintf(fid,'%s\n',FileName);
 
@@ -254,7 +266,7 @@ for i = 1:AnalysisParameters.Nvoxels
                 % get the conditional effects
                 CondEffects = zeros(NCondSteps-1,1);
                 for j = 2:NCondSteps
-                    Limits = P.CondAB1{j}.BCaci.alpha05;
+                    Limits = getfield(P.CondAB1{j}.BCaci,AlphaLimit);
                     if prod(Limits) > 0
                         CondEffects(j-1) = 1;
                     end
@@ -299,7 +311,7 @@ for i = 1:AnalysisParameters.Nvoxels
                 % get the conditional effects
                 CondEffects = zeros(NCondSteps-1,1);   
                 for j = 2:NCondSteps
-                    Limits = P.CondAB1{j}.BCaci.alpha05;
+                    Limits = getfield(P.CondAB1{j}.BCaci,AlphaLimit);
                     if prod(Limits) > 0
                         CondEffects(j-1) = 1;
                     end
@@ -343,8 +355,7 @@ for i = 1:AnalysisParameters.Nvoxels
                 % get the conditional effects
                 CondEffects = zeros(NCondSteps-1,1);   
                 for j = 2:NCondSteps
-                    Limits = P.CondAB1{j}.BCaci.alpha05;
-                    
+                    Limits = getfield(P.CondAB1{j}.BCaci,AlphaLimit);
                     if prod(Limits) > 0
                         CondEffects(j-1) = 1;
                     end
@@ -367,7 +378,8 @@ for i = 1:AnalysisParameters.Nvoxels
             
         case '4'
             if PrintHeaderFlag
-                fprintf(fid,'\n%4d,%-40s,%7s,%7s,%7s,%7s,%7s,','ind','Region','a','cP','b');
+                fprintf(fid,'Alpha = %s\n',StrAlpha);
+                fprintf(fid,'\n%4s,%-40s,%7s,%7s,%7s,','ind','Region','a','cP','b');
                 fprintf(fid,'\n');
                 PrintHeaderFlag = 0;
             end
@@ -378,7 +390,7 @@ for i = 1:AnalysisParameters.Nvoxels
             cP =getfield(P.Model2,[P.names.X]);
             b = getfield(P.Model2,[P.names.M{1} '1']);
             % Check the significance of the conditional effect
-            Limits = P.AB1{1}.BCaci.alpha05;
+            Limits = getfield(P.AB1{1}.BCaci,AlphaLimit);
             if prod(Limits) > 0
                 %fprintf(fid,'%7d,',1);
                 fprintf(fid,'%4d,%-40s,',i,AnalysisParameters.Header{i});

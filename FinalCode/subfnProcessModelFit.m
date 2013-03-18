@@ -9,7 +9,7 @@ function [ParameterToBS Parameters] = subfnProcessModelFit(data,PointEstFlag)
 % Model 3 is the C Branch. This is from X to Y
 
 Parameters = {};
-Nsteps = 11;
+
 switch data.ModelNum
     case '1'
         %
@@ -17,7 +17,8 @@ switch data.ModelNum
         %     |
         % X ----- Y
         %
-        ParameterToBS = struct('names','CondMod','values',zeros(1,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
+        probeM = subfnCalculateProbeValues(data.M);
+        ParameterToBS = struct('names','CondMod','values',zeros(1,length(probeM)),'probeValues',zeros(1,length(probeM)),'ProbeMod',0);
         Ndata = size(data.Y,1);
         % First, check to see if the interaction effect is significant or
         % not.
@@ -28,10 +29,7 @@ switch data.ModelNum
         % when the point estimate is being tested and not for any boot
         % strap re-estimates.
 
-        if Model1.tstat.pval(4) < max(data.Thresholds)
-
-            ParameterToBS.ProbeMod = 1;
-        end
+        ParameterToBS.ProbeMod = 1;
         %
         % If the probeMd flag is set to TRUE then check to see if the
         % interaction is significant. If so then leave the ProbeMod flag
@@ -44,12 +42,9 @@ switch data.ModelNum
             
             ParameterToBS.values(1,1) = Model1.beta(2);
             
-            minM = min(data.M);
-            maxM = max(data.M);
-            rangeM = maxM - minM;
-            stepM = rangeM/(Nsteps -1);
-            probeM = [0 minM:stepM:maxM];
-            for j = 1:Nsteps + 1
+            
+            
+            for j = 1:length(probeM)
                 %temp = subfnregress(data.Y,[data.X (data.M-probeM(j))  (data.M-probeM(j)).*data.X data.COV]);
                 ParameterToBS.values(1,j) = Model1.beta(2)+Model1.beta(4)*probeM(j);
                 ParameterToBS.probeValues(1,j) = probeM(j);
@@ -116,7 +111,7 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('AB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,1),'ProbeMod',0);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,1),'probeValues',zeros(1,1),'ProbeMod',0);
         % redo the setup so that results are organized based on models
         % =================================================================
         % Model1
@@ -217,7 +212,8 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('CondAB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
+        probeW = subfnCalculateProbeValues(data.W);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,length(probeW)),'probeValues',zeros(1,length(probeW)),'ProbeMod',0);
         
         % Model 1
         % create the interaction terms
@@ -240,12 +236,8 @@ switch data.ModelNum
             for j = 1:Nmed
                 ParameterToBS.values(j,1) = Model1{j}.beta(2)*Model2(2);
             end
-            minW = min(data.W);
-            maxW = max(data.W);
-            rangeW = maxW - minW;
-            stepW = rangeW/(Nsteps -1);
-            probeW = [0 minW:stepW:maxW];
-            for k = 2:Nsteps + 1
+            
+            for k = 2:length(probeW)
                 for j = 1:Nmed
                     temp = subfnregress(data.M(:,j),[data.X (data.W-probeW(k)) data.X(:,j).*(data.W - probeW(k)) data.COV]);
                     % this is the conditional parameter
@@ -338,7 +330,8 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('CondAB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
+        probeV = subfnCalculateProbeValues(data.V);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,length(probeV)),'probeValues',zeros(1,length(probeV)),'ProbeMod',0);
         a = zeros(Nmed,1);
         % First, check to see if the interaction effect is significant or
         % not.
@@ -361,16 +354,9 @@ switch data.ModelNum
         %    end
         end
         if data.ProbeMod
-           
-            minV = min(data.V);
-            maxV = max(data.V);
-            rangeX = maxV - minV;
-            stepV = rangeX/(Nsteps -1);
-            probeV = [0 minV:stepV:maxV];
-            
             for j = 1:Nmed
                 a = Model1{j}.beta(2);
-                for k = 1:Nsteps + 1
+                for k = 1:length(probeV)
                     ParameterToBS.values(:,k) = a.*(Model2.beta(1+j) + Model2.beta(1+Nmed+1+1:1+Nmed+1+Nmed)*probeV(k));
                 end
             end
@@ -480,7 +466,8 @@ switch data.ModelNum
         for j = 1:Nmed
             NameStruct{j} = sprintf('CondAB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
+        probeW = subfnCalculateProbeValues(data.W);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,length(probeW)),'probeValues',zeros(1,length(probeW)),'ProbeMod',0);
         
         Model1 = cell(Nmed);
         Interaction = zeros(Ndata,Nmed);
@@ -510,13 +497,10 @@ switch data.ModelNum
          if data.ProbeMod
             % calculate the condition effect when the moderator equals zero
             %ParameterToBS.values(1,1) = (Model1)(Model2.beta(2:Nmed+1));
-            minW = min(data.W);
-            maxW = max(data.W);
-            rangeW = maxW - minW;
-            stepW = rangeW/(Nsteps -1);
-            probeW = [0 minW:stepW:maxW];
-            %probeW = [-0.8080 0.1120 1.0319]
-            for k = 1:Nsteps + 1
+
+            
+
+            for k = 1:length(probeW)
                 Interaction = zeros(Ndata,Nmed);
                 for j = 1:Nmed
                     Interaction(:,j) = data.M(:,j).*(data.W - probeW(k));
@@ -646,16 +630,15 @@ switch data.ModelNum
         rangeX = maxX - minX;
         if rangeX == 1
             probeX = [0 1];
-            Nsteps = 1;
         else
-            stepX = rangeX/(Nsteps -1);
-            probeX = [0 minX:stepX:maxX];
+
+                 probeX = subfnCalculateProbeValues(data.X);       
         end
         NameStruct = cell(Nmed,1);
         for j = 1:Nmed
             NameStruct{j} = sprintf('CondAB%d',j);
         end
-        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,Nsteps + 1),'probeValues',zeros(1,Nsteps + 1),'ProbeMod',0);
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,length(probeX)),'probeValues',zeros(1,length(probeX)),'ProbeMod',0);
         a = zeros(Nmed,1);
         % First, check to see if the interaction effect is significant or
         % not.
@@ -680,7 +663,7 @@ switch data.ModelNum
         if data.ProbeMod
             ParameterToBS.values(1,1) = a.*(tempModel2.beta(2:Nmed+1));
 
-            for k = 2:Nsteps + 1
+            for k = 2:length(probeX)+1
                 Interaction = zeros(Ndata,Nmed);
                 for j = 1:Nmed
                     Interaction(:,j) = data.M(:,j).*(data.X - probeX(k));
