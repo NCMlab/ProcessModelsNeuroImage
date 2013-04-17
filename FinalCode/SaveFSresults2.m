@@ -1,18 +1,18 @@
-function SaveFSresults2
+function SaveFSresults2(SelectedPath)
 %BasePath = '/Users/jason/Documents/MyData/ModMedCogRes';
 %BasePath = 'C:\Users\steffener\Dropbox\ModMedCogRes';
 %BasePath = 'w:/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
 
 
 
-
-
-SelectedPath = spm_select(1,'dir');
+if nargin < 1
+    SelectedPath = spm_select(1,'dir');
+end
 cd(SelectedPath)
 if exist('AnalysisParameters.mat')
     load AnalysisParameters
 else
-    errordlg('this folder does not have the required AnalysticParameters.mat file');
+    errordlg('this folder does not have the required AnalysisParameters.mat file');
 end
 
 for i = 1:length(AnalysisParameters.Header)

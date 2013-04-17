@@ -95,9 +95,9 @@ switch ModelNum
         fprintf(fid,'******************************************************\n');
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
-                Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
+                Parameters.names.X,Parameters.names.Y,Parameters.names.W);
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
+                Parameters.names.W,'Effect','boot se','lowerCI','upperCI');
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 1:length(Parameters.CondAB1)
@@ -146,9 +146,9 @@ switch ModelNum
         fprintf(fid,'******************************************************\n');
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
-                Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
+                Parameters.names.X,Parameters.names.Y,Parameters.names.V);
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
+                Parameters.names.V,'Effect','boot se','lowerCI','upperCI');
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 2:length(Parameters.CondAB1)
@@ -195,9 +195,9 @@ switch ModelNum
         fprintf(fid,'******************************************************\n');
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
-                Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
+                Parameters.names.X,Parameters.names.Y,Parameters.names.W);
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
+                Parameters.names.W,'Effect','boot se','lowerCI','upperCI');
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 2:length(Parameters.CondAB1)
@@ -233,9 +233,9 @@ switch ModelNum
         fprintf(fid,'******************************************************\n');
         for i = 1:length(Parameters.Model1)
             fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
-                Parameters.names.X,Parameters.names.Y,Parameters.names.M{1});
+                Parameters.names.X,Parameters.names.Y,Parameters.names.X);
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
-                Parameters.names.M{1},'Effect','boot se','lowerCI','upperCI');
+                Parameters.names.X,'Effect','boot se','lowerCI','upperCI');
             ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
             ThresholdField = ThresholdField{1};
             for k = 1:length(Parameters.CondAB1)

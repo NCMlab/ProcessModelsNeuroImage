@@ -40,7 +40,6 @@ for i = 1:NumClust
 end
 % which clusters are big enough
 SignClusters = find(ClusterSize >= ClusterThr);
-
 SignVoxelsAndClusters = zeros(size(A));
 ClusterMaxStat = zeros(length(SignClusters),1);
 ClusterSize = zeros(length(SignClusters),1);

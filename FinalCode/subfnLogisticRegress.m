@@ -24,7 +24,7 @@ while sse > tol
     s = X'*(Y-p);
     m = (X'*V*X);
     beta = b0 + inv(m)*s;
-    %beta = b0 + m\s; % This is supposed to be faste rthen using the inverse function
+    %beta = b0 + m\s; % This is supposed to be faster then using the inverse function
     p = exp(X*beta)./(1 + exp(X*beta));
     V = diag(p.*(1-p));
     err = (beta - b0);

@@ -18,6 +18,8 @@ for i = 1:length(name)
         name{i} = strrep(name{i},'ctx-','');
     end
 end
+
+
 % convert dashes to underscores
 for i = 1:length(name)
     temp = name{i};
@@ -27,13 +29,23 @@ for i = 1:length(name)
         name{i} = temp;
     end
 end
-        
+
+for i = 1:length(Header)
+    temp = Header{i};
+    fDash = findstr(temp,'-');
+    if ~isempty(fDash)
+        temp(fDash) = '_';
+        Header{i} = temp;
+    end
+end
+
     
         
 % Load up the example images
 % These are taken from a single subject and they really shuld be rotated
 % correctly. 
-P = fullfile('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles','raparc+asegROT.nii');
+%P = fullfile('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles','raparc+asegROT.nii');
+P = fullfile('/share/users/js2746_Jason/Studies/ModMedCogRes/FreeSurferFiles','STANDARD_aparc+aseg.nii');
 V = spm_vol(P);
 I = spm_read_vols(V);
 % for all locations in the Freesurfer header file, which comes from
@@ -42,21 +54,27 @@ I = spm_read_vols(V);
 %     fprintf(1,'%d\t%s\n',i,Header{i});
 % end
 
+for i = 1:length(name)
+    fprintf(1,'%d\t%s\n',i,name{i});
+end
+
 FSNameAndLabel = {};
 for i = 1:length(Header)
     for j = 1:length(name)
-        if strmatch(Header{i},[name{j} '_' MeasureOfInterest])
-            FSNameAndLabel{i}.name = [name{j} '_' MeasureOfInterest];
+        if strfind(Header{i},[name{j}])
+            FSNameAndLabel{i}.name = [Header{i}];
             FSNameAndLabel{i}.label = label(j);
             F = find(I == FSNameAndLabel{i}.label);
             FSNameAndLabel{i}.voxels = F;
             break
         else
-             FSNameAndLabel{i} = [];
+            FSNameAndLabel{i} = [];
         end
         
     end
 end
+
+
 List = {};
 index = 1;
 for i = 1:length(FSNameAndLabel)
