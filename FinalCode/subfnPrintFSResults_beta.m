@@ -1,4 +1,4 @@
-function subfnPrintFSResults(SelectedPath,alpha,fid)
+function subfnPrintFSResults_beta(SelectedPath,alpha,fid)
 % write Fressurfer results to tables
 switch nargin
     case 2
@@ -17,11 +17,11 @@ if exist('AnalysisParameters.mat')
     load AnalysisParameters
     load Results_0001
 else
-    errordlg('this folder does not have the required AnalysticParameters.mat file');
+    errordlg('this folder does not have the required AnalysisParameters.mat file');
 end
 [PathName FileName] = fileparts(SelectedPath);
-
-
+% Setup FS names
+[outNames Hemi MeasurementType] = subfnModifyFreesurferNames(AnalysisParameters.Header);
 %%
 Nvoxels = AnalysisParameters.Nvoxels;
 % for i = 1:Nvoxels
@@ -243,7 +243,7 @@ for i = 1:AnalysisParameters.Nvoxels
             NCondSteps = length(Parameters{1}.CondAB1);
             if PrintHeaderFlag
                 fprintf(fid,'Interaction threshold = %0.4f, %0.4f\n',wTHR,vTHR);
-                fprintf(fid,'%4s,%-40s,%7s,%7s,%7s,%7s,%7s,%7s,%7s,','ind','Region','a','p','w','cP','b','q','v');
+                fprintf(fid,'%4s,%-30s,%-10s,%-10s,%7s,%7s,%7s,%7s,%7s,%7s,%7s,','ind','Region','Hemi','Measure','a','p','w','cP','b','q','v');
                 for j = 2:NCondSteps
                     fprintf(fid,'%7.3f,',Parameters{1}.CondAB1{j}.probeValue);
                 end
@@ -264,25 +264,40 @@ for i = 1:AnalysisParameters.Nvoxels
             % Are BOTH interactions significant?
             if abs(w.p) < wTHR & abs(v.p) < vTHR
                 % get the conditional effects
+                CondEffectsSIGN = zeros(NCondSteps-1,1);
                 CondEffects = zeros(NCondSteps-1,1);
                 for j = 2:NCondSteps
                     Limits = getfield(P.CondAB1{j}.BCaci,AlphaLimit);
+                    CondEffects(j-1) = P.CondAB1{j}.pointEst;
                     if prod(Limits) > 0
-                        CondEffects(j-1) = sign(Limits(1));
+                        CondEffectsSIGN(j-1) = sign(Limits(1));
+                        
                     end
                 end
-                if ~isempty(find(CondEffects~=0))
+                if ~isempty(find(CondEffectsSIGN~=0))
                     % print out results
-                    fprintf(fid,'%4d,%-40s,',i,AnalysisParameters.Header{i});
-                    fprintf(fid,'%7.3f,',a.t);
-                    fprintf(fid,'%7.3f,',p.t);
-                    fprintf(fid,'%7.3f,',w.t);
-                    fprintf(fid,'%7.3f,',cP.t);
-                    fprintf(fid,'%7.3f,',b.t);
-                    fprintf(fid,'%7.3f,',q.t);
-                    fprintf(fid,'%7.3f,',v.t);
+                    fprintf(fid,'%4d,%-30s,%-10s,%-10s,',i,outNames{i},Hemi{i},MeasurementType{i});
+                    str = subfnCreateParamStr(a,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(p,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(w,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(cP,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(b,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(q,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(v,alpha);
+                    fprintf(fid,'%s,',str);
+
                     for j = 2:NCondSteps
-                        fprintf(fid,'%7d,',CondEffects(j-1));
+                        if CondEffectsSIGN(j-1) ~= 0
+                            fprintf(fid,'%7.3f*,',CondEffects(j-1));
+                        else
+                           fprintf(fid,'%7.3f,',CondEffects(j-1));
+                        end
                     end
                     fprintf(fid,'\n');
                 end
@@ -291,7 +306,7 @@ for i = 1:AnalysisParameters.Nvoxels
             NCondSteps = length(Parameters{1}.CondAB1);
             if PrintHeaderFlag
                 fprintf(fid,'Interaction threshold = %0.4f\n',vTHR);
-                fprintf(fid,'%4s,%-40s,%7s,%7s,%7s,%7s,%7s,','ind','Region','a','cP','b','q','v');
+                fprintf(fid,'%4s,%-30s,%-10s,%-10s,%7s,%7s,%7s,%7s,%7s,','ind','Region','Hemi','Measure','a','cP','b','q','v');
                 for j = 2:NCondSteps
                     fprintf(fid,'%7.3f,',Parameters{1}.CondAB1{j}.probeValue);
                 end
@@ -309,23 +324,35 @@ for i = 1:AnalysisParameters.Nvoxels
             % Is the interaction significant?
             if abs(v.p) < vTHR
                 % get the conditional effects
-                CondEffects = zeros(NCondSteps-1,1);   
+                CondEffectsSIGN = zeros(NCondSteps-1,1);
+                CondEffects = zeros(NCondSteps-1,1);
                 for j = 2:NCondSteps
                     Limits = getfield(P.CondAB1{j}.BCaci,AlphaLimit);
+                    CondEffects(j-1) = P.CondAB1{j}.pointEst;
                     if prod(Limits) > 0
-                        CondEffects(j-1) = sign(Limits(1));
+                        CondEffectsSIGN(j-1) = sign(Limits(1));
+                        
                     end
                 end
-                if ~isempty(find(CondEffects~=0))
+                if ~isempty(find(CondEffectsSIGN~=0))
                     % print out results
-                    fprintf(fid,'%4d,%-40s,',i,AnalysisParameters.Header{i});
-                    fprintf(fid,'%7.3f,',a.t);
-                    fprintf(fid,'%7.3f,',cP.t);
-                    fprintf(fid,'%7.3f,',b.t);
-                    fprintf(fid,'%7.3f,',q.t);
-                    fprintf(fid,'%7.3f,',v.t);
+                    fprintf(fid,'%4d,%-30s,%-10s,%-10s,',i,outNames{i},Hemi{i},MeasurementType{i});
+                    str = subfnCreateParamStr(a,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(cP,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(b,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(q,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(v,alpha);
+                    fprintf(fid,'%s,',str);
                     for j = 2:NCondSteps
-                        fprintf(fid,'%7d,',CondEffects(j-1));
+                        if CondEffectsSIGN(j-1) ~= 0
+                            fprintf(fid,'%7.3f*,',CondEffects(j-1));
+                        else
+                           fprintf(fid,'%7.3f,',CondEffects(j-1));
+                        end
                     end
                     fprintf(fid,'\n');
                 end
@@ -334,7 +361,7 @@ for i = 1:AnalysisParameters.Nvoxels
             NCondSteps = length(Parameters{1}.CondAB1);
             if PrintHeaderFlag
                 fprintf(fid,'Interaction threshold = %0.4f\n',wTHR);
-                fprintf(fid,'%4s,%-40s,%7s,%7s,%7s,%7s,%7s,','ind','Region','a','p','w','cP','b');
+                fprintf(fid,'%4s,%-30s,%-10s,%-10s,%7s,%7s,%7s,%7s,%7s,','ind','Region','Hemi','Measure','a','p','w','cP','b');
                 for j = 2:NCondSteps
                     fprintf(fid,'%7.3f,',Parameters{1}.CondAB1{j}.probeValue);
                 end
@@ -353,24 +380,38 @@ for i = 1:AnalysisParameters.Nvoxels
             % Is the interaction significant?
             if abs(w.p) < wTHR
                 % get the conditional effects
-                CondEffects = zeros(NCondSteps-1,1);   
+                CondEffectsSIGN = zeros(NCondSteps-1,1);
+                CondEffects = zeros(NCondSteps-1,1);
                 for j = 2:NCondSteps
                     Limits = getfield(P.CondAB1{j}.BCaci,AlphaLimit);
+                    CondEffects(j-1) = P.CondAB1{j}.pointEst;
                     if prod(Limits) > 0
-                        CondEffects(j-1) = sign(Limits(1));
+                        CondEffectsSIGN(j-1) = sign(Limits(1));
+                        
                     end
                 end
+
                 if ~isempty(find(CondEffects~=0))
                     % print out results
-                    fprintf(fid,'%4d,%-40s,',i,AnalysisParameters.Header{i});
-                    fprintf(fid,'%7.3f,',a.t);
-                    fprintf(fid,'%7.3f,',p.t);
-                    fprintf(fid,'%7.3f,',w.t);
-                    fprintf(fid,'%7.3f,',cP.t);
-                    fprintf(fid,'%7.3f,',b.t);
+                    fprintf(fid,'%4d,%-30s,%-10s,%-10s,',i,outNames{i},Hemi{i},MeasurementType{i});
+                    str = subfnCreateParamStr(a,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(p,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(w,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(cP,alpha);
+                    fprintf(fid,'%s,',str);
+                    str = subfnCreateParamStr(b,alpha);
+                    fprintf(fid,'%s,',str);
                     for j = 2:NCondSteps
-                        fprintf(fid,'%7d,',CondEffects(j-1));
+                        if CondEffectsSIGN(j-1) ~= 0
+                            fprintf(fid,'%7.3f*,',CondEffects(j-1));
+                        else
+                           fprintf(fid,'%7.3f,',CondEffects(j-1));
+                        end
                     end
+
                     fprintf(fid,'\n');
                 end
                 
@@ -379,7 +420,7 @@ for i = 1:AnalysisParameters.Nvoxels
         case '4'
             if PrintHeaderFlag
                 fprintf(fid,'Alpha = %s\n',StrAlpha);
-                fprintf(fid,'\n%4s,%-40s,%7s,%7s,%7s,','ind','Region','a','cP','b');
+                fprintf(fid,'\n%4s,%-30s,%-10s,%-10s,%7s,%7s,%7s,','ind','Region','Hemi','Measure','a','cP','b');
                 fprintf(fid,'\n');
                 PrintHeaderFlag = 0;
             end
@@ -393,10 +434,13 @@ for i = 1:AnalysisParameters.Nvoxels
             Limits = getfield(P.AB1{1}.BCaci,AlphaLimit);
             if prod(Limits) > 0
                 %fprintf(fid,'%7d,',1);
-                fprintf(fid,'%4d,%-40s,',i,AnalysisParameters.Header{i});
-                fprintf(fid,'%7.3f,',a.t);
-                fprintf(fid,'%7.3f,',cP.t);
-                fprintf(fid,'%7.3f,',b.t);
+                fprintf(fid,'%4d,%-30s,%-10s,%-10s,',i,outNames{i},Hemi{i},MeasurementType{i});
+                str = subfnCreateParamStr(a,alpha);
+                fprintf(fid,'%s,',str);
+                str = subfnCreateParamStr(cP,alpha);
+                fprintf(fid,'%s,',str);
+                str = subfnCreateParamStr(b,alpha);
+                fprintf(fid,'%s,',str);
                 fprintf(fid,'\n');
                 
             end
@@ -405,4 +449,11 @@ for i = 1:AnalysisParameters.Nvoxels
     end
     
 end
+
+
+function out = subfnCreateParamStr(input,alpha);
+if input.p < alpha
+    out = sprintf('%7.3f*',input.beta);
+else
+    out = sprintf('%7.3f',input.beta);
 end

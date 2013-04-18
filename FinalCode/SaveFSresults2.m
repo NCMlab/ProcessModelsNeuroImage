@@ -12,7 +12,7 @@ cd(SelectedPath)
 if exist('AnalysisParameters.mat')
     load AnalysisParameters
 else
-    errordlg('this folder does not have the required AnalysticParameters.mat file');
+    errordlg('this folder does not have the required AnalysisParameters.mat file');
 end
 
 for i = 1:length(AnalysisParameters.Header)

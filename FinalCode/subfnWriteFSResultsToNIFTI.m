@@ -44,7 +44,8 @@ end
 % Load up the example images
 % These are taken from a single subject and they really shuld be rotated
 % correctly. 
-P = fullfile('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles','raparc+asegROT.nii');
+%P = fullfile('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles','raparc+asegROT.nii');
+P = fullfile('/share/users/js2746_Jason/Studies/ModMedCogRes/FreeSurferFiles','STANDARD_aparc+aseg.nii');
 V = spm_vol(P);
 I = spm_read_vols(V);
 % for all locations in the Freesurfer header file, which comes from
