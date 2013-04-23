@@ -35,11 +35,13 @@ ssfSubset = ssf(:,1:NPCs);
 
 AllMedEffects = zeros(NCombos,1);
 AIC = zeros(NCombos,3);
-Tstats = zeros(N,9);
+
 N = length(data.X);
+Tstats = zeros(N,9);
+
 Yind = find(data.X == 0);
 Oind = find(data.X == 1);
-
+%%
 for j = 1:NCombos
     selected_PCs = find(combo_matrix(j,:));
     X = ssfSubset(:,selected_PCs);
@@ -60,8 +62,10 @@ for j = 1:NCombos
     [H prob CI Stats] = ttest2(fit(Yind),fit(Oind));
     Tstats(j,3) = Stats.tstat;
     % Fits a YOUNG ONLY model
+    
     Y = ones(N,1);
     Y(Oind) = 0;
+    X = [X ones(N,1)];
     beta = inv(X'*X)*X'*Y;
     fit = X*beta;
     r = Y - fit;
@@ -78,6 +82,7 @@ for j = 1:NCombos
     % Fits an OLD ONLY model
     Y = ones(N,1);
     Y(Yind) = 0;
+    X = [X ones(N,1)];
     beta = inv(X'*X)*X'*Y;
     fit = X*beta;
     r = Y - fit;
@@ -154,9 +159,9 @@ else
     SSF_OLD = zeros(N,1);
 end
 
-corr([SSF_YngANDOld_SAME SSF_YngANDOld_DIFF SSF_YNG SSF_OLD  data.Y data.X])
-% Do any of these SSFs relate to performance?
 
+
+% Do any of these SSFs relate to performance?
 S_YngANDOld_SAME = subfnregstats(data.Y,[data.X SSF_YngANDOld_SAME data.COV]);
 S_YngANDOld_SAME.tstat.t
 S_YngANDOld_DIFF = subfnregstats(data.Y,[data.X SSF_YngANDOld_DIFF data.COV]);
@@ -183,10 +188,50 @@ P_YNG{1}.AB1{1}.BCaci
 
 
 %% Look for a moderating pattern
-data_MOD = data;
-data_MOD.M = SSF_YngANDOld_DIFF;
-data_MOD.V = ssfSubset(:,[1 2 3]);
-data_MOD.ModelNum = '14';
+AIC_MOD = zeros(NCombos,1);
+for j = 1:NCombos
+    fprintf(1,'Combo: %d of %d\n',j,NCombos);
+    selected_PCs = find(combo_matrix(j,:));
+    X = ssfSubset(:,selected_PCs);
+    
+    data_MOD = data;
+    data_MOD.M = SSF_YngANDOld_DIFF;
+    data_MOD.V = X;
+    data_MOD.ModelNum = '14';
+    
+    beta = subfnCallRegressPCs(data_MOD);
+    [fit, AIC_MOD(j,1)] = subfnRegressPCs_ModelFit(beta,data_MOD);
+end
+%%
+
+ModSSF = find(combo_matrix(find(AIC_MOD == min(AIC_MOD)),:));
+    X = ssfSubset(:,ModSSF);
+    % Fits a model of ones
+    Y = ones(N,1);
+    beta = inv(X'*X)*X'*Y;
+    SSF_Mod = X*beta;
+    
+    
+    
+
+[r p] = corr([SSF_YngANDOld_SAME SSF_YngANDOld_DIFF SSF_YNG SSF_OLD SSF_Mod data.Y data.X])
+   
+data_MedMod = data;
+data_MedMod.M = SSF_YngANDOld_DIFF;
+data_MedMod.V = SSF_Mod;
+data_MedMod.ModelNum ='14';
+ data_MedMod.names.V = 'SSFs';
+subfnVoxelWiseProcessBatch(data_MedMod);
+
+figure(3)
+clf
+hold on
+plot(data_MOD.Y)
+plot(fit,'r')
+corr(fit,dfata_MOD.Y)
+
+
+
 coef = subfnFitRegressModelPCs(data_MOD)
 NMed = size(data_MOD.M,2);
 NMod = size(data_MOD.V,2);

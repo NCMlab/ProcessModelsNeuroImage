@@ -1,4 +1,4 @@
-function F = subfnRegressPCs(coef,data)
+function [fit, AIC] = subfnRegressPCs_ModelFit(coef,data)
 ModelNum = data.ModelNum;
 switch ModelNum
     case '4'
@@ -43,6 +43,10 @@ switch ModelNum
         else
             fit = ones(N,1)*const + data.M*b' + data.X*cP + data.V*v' + ((data.M*b').*(data.V*v'))*w;
         end
-        err = (data.Y - fit);
-        F = err'*err;
+        r = (data.Y - fit);
+     
+    p = length(coef);
+    dfe = N - p;
+    AIC =  N*log(sum(r.^2)/N) + 2*p*(p+1)/(dfe-1) + 2*p;
+        
 end
