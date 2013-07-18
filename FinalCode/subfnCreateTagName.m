@@ -1,6 +1,12 @@
 function Tag = subfnCreateTagName(AllData)
 
 switch AllData.ModelNum
+     case '1'
+        Tag = sprintf('Model%s_X%s_M%s_Y%s_COV',AllData.ModelNum,AllData.names.X,AllData.names.M{1},AllData.names.Y);
+        for i = 1:length( AllData.names.COV)
+            Tag = sprintf('%s%s_',Tag,AllData.names.COV{i});
+        end
+        Tag = sprintf('%sNboot%d',Tag,AllData.Nboot);
     case '4'
         Tag = sprintf('Model%s_X%s_M%s_Y%s_COV',AllData.ModelNum,AllData.names.X,AllData.names.M{1},AllData.names.Y);
         for i = 1:length( AllData.names.COV)

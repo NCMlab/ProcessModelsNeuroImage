@@ -1,4 +1,4 @@
-function subfnPrintFSResults(SelectedPath,alpha,fid)
+function SelectedPath=subfnPrintFSResults(SelectedPath,alpha,fid)
 % write Fressurfer results to tables
 switch nargin
     case 2
@@ -27,7 +27,7 @@ Nvoxels = AnalysisParameters.Nvoxels;
 % for i = 1:Nvoxels
 %     fprintf(1,'%d\t%s\n',i,AnalysisParameters.Header{i});
 % end
-% 
+%
 
 ModelNum = AnalysisParameters.ModelNum;
 thr = 1.96;
@@ -232,8 +232,42 @@ switch ModelNum
         if isempty(FDRb)
             FDRb = 10^-10;
         end
+    case '1'
+        % Get p values
+        b  = zeros(Nvoxels,1);
+        v = zeros(Nvoxels,1);
+        cP = zeros(Nvoxels,1);
+        
+        for i = 1:Nvoxels
+            P = Parameters{i};
+            % Model 1
+            ScP = getfield(P.Model1,[P.names.X]);
+            cP(i) = ScP.p;
+            Sv = getfield(P.Model1,[P.names.X '_x_' P.names.M{1}]);
+            v(i) = Sv.p;
+            Sb =getfield(P.Model1,[P.names.M{1}]);
+            b(i) = Sb.p;
+        end
+        FDRb = FDR(b,alpha);
+        FDRv = FDR(v,alpha);
+        FDRcP = FDR(cP,alpha);
+        
+        if isempty(FDRb)
+            FDRb = 10^-10;
+        end
+        if isempty(FDRv)
+            FDRv = 10^-10;
+        end
+        if isempty(FDRcP)
+            FDRcP = 10^-10;
+        end
+        if FDRflag
+            vTHR = FDRv;
+        else
+            vTHR = alpha;
+        end
+        
 end
-
 
 
 for i = 1:AnalysisParameters.Nvoxels
@@ -309,7 +343,7 @@ for i = 1:AnalysisParameters.Nvoxels
             % Is the interaction significant?
             if abs(v.p) < vTHR
                 % get the conditional effects
-                CondEffects = zeros(NCondSteps-1,1);   
+                CondEffects = zeros(NCondSteps-1,1);
                 for j = 2:NCondSteps
                     Limits = getfield(P.CondAB1{j}.BCaci,AlphaLimit);
                     if prod(Limits) > 0
@@ -353,7 +387,7 @@ for i = 1:AnalysisParameters.Nvoxels
             % Is the interaction significant?
             if abs(w.p) < wTHR
                 % get the conditional effects
-                CondEffects = zeros(NCondSteps-1,1);   
+                CondEffects = zeros(NCondSteps-1,1);
                 for j = 2:NCondSteps
                     Limits = getfield(P.CondAB1{j}.BCaci,AlphaLimit);
                     if prod(Limits) > 0
@@ -400,9 +434,45 @@ for i = 1:AnalysisParameters.Nvoxels
                 fprintf(fid,'\n');
                 
             end
-            % print out results
-            
+        case '1'
+            NCondSteps = length(Parameters{1}.CondMod);
+            if PrintHeaderFlag
+                fprintf(fid,'Interaction threshold = %0.4f\n',vTHR);
+                fprintf(fid,'%4s,%-40s,%7s,%7s,%7s,','ind','Region','b','v','cP');
+                for j = 2:NCondSteps
+                    fprintf(fid,'%7.3f,',Parameters{1}.CondMod{j}.probeValue);
+                end
+                fprintf(fid,'\n');
+                
+                PrintHeaderFlag = 0;
+            end
+            % Check to make sure both interactions are significant
+            % Model 1
+            cP = getfield(P.Model1,[P.names.X]);
+            b = getfield(P.Model1,[P.names.M{1}]);
+            v = getfield(P.Model1,[P.names.X '_x_' P.names.M{1}]);
+            % Is the interaction significant?
+            if abs(v.p) < vTHR
+                % get the conditional effects
+                CondEffects = zeros(NCondSteps-1,1);
+                for j = 2:NCondSteps
+                    Limits = getfield(P.CondMod{j}.BCaci,AlphaLimit);
+                    if prod(Limits) > 0
+                        CondEffects(j-1) = sign(Limits(1));
+                    end
+                end
+                if ~isempty(find(CondEffects~=0))
+                    % print out results
+                    fprintf(fid,'%4d,%-40s,',i,AnalysisParameters.Header{i});
+                    fprintf(fid,'%7.3f,',b.t);
+                    fprintf(fid,'%7.3f,',v.t);
+                    fprintf(fid,'%7.3f,',cP.t);
+                    for j = 2:NCondSteps
+                        fprintf(fid,'%7d,',CondEffects(j-1));
+                    end
+                    fprintf(fid,'\n');
+                end
+                
+            end
     end
-    
-end
 end

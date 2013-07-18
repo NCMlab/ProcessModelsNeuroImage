@@ -1,12 +1,18 @@
 function subfnRunVoxelwiseProcess(AllData,AnalysisParameters)
 
 %addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
-
-addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
-%addpath /Users/jason/Desktop/ProcessModelsNeuroImage/FinalCode
+if isunix
+    addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
+end
+if ismac 
+    addpath /Users/jason/Desktop/ProcessModelsNeuroImage/FinalCode
+end
+if IsWin
+    addpath C:\Users\steffener\Dropbox\SteffenerColumbia\ProcessModelsNeuroImage\FinalCode
+end
 
 BaseDir = AnalysisParameters.BaseDir;
-Nsub = AnalysisParameters.Nsub;
+NSub = AnalysisParameters.NSub;
 Nmed = AnalysisParameters.Nmed;
 Nvoxels = AnalysisParameters.Nvoxels;
 NJobSplit = AnalysisParameters.NJobSplit;

@@ -8,6 +8,7 @@ function Parameters = subfnVoxelWiseProcessBatch(InData)
 % pulls out one voxel.
 %
 warning off
+
 addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 %
 % Check to see if a path to data is given. If so then load it up
