@@ -6,7 +6,7 @@ function beta = subfnLogisticRegress(Y,design)
 % with bootstrapping. For all stats use the subfnLogisticRegressStats
 % function.
 % 
-% Written: 11/14/20012
+% Written: 11/14/2012
 % Written by: Jason Steffener
 %
 [~, Ncoef] = size(design);

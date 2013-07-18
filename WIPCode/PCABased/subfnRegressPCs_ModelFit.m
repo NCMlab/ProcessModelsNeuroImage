@@ -1,4 +1,4 @@
-function F = subfnRegressPCs(coef,data)
+function [fit, AIC] = subfnRegressPCs_ModelFit(coef,data)
 ModelNum = data.ModelNum;
 switch ModelNum
     case '4'
@@ -41,33 +41,12 @@ switch ModelNum
         if NCov > 0
             fit = ones(N,1)*const + data.M*b + data.X*cP + data.V*v + ((data.M*b).*(data.V*v))*w + data.COV*b_cov;
         else
-            fit = ones(N,1)*const + data.M*b + data.X*cP + data.V*v + ((data.M*b).*(data.V*v))*w;
+            fit = ones(N,1)*const + data.M*b' + data.X*cP + data.V*v' + ((data.M*b').*(data.V*v'))*w;
         end
-        err = (data.Y - fit);
-        F = err'*err;
-    case '74'
-        % get data sizes
-        N = length(data.Y);
-        NMed = size(data.M,2);
-        NCov = size(data.COV,2);
-        % coefficient for the constant term in the model
-        const = coef(1);        
-        % coefficients for the mediator
-        b = coef(1+1:1+NMed);
-        % coefficient for the x effect
-        cP = coef(1+NMed+1);        
-        % coefficients for the interaction term
-        w = coef(1+NMed+1+1);
-        % coefficients for the covariates
-        b_cov = coef(end-NCov+1:end);
-
-        % weighted sum of mediator PCs + X effect + weighted sum of moderator PCs +
-        % interaction effect
-        if NCov > 0
-            fit = ones(N,1)*const + data.M*b + data.X*cP + ((data.M*b).*(data.X))*w + data.COV*b_cov;
-        else
-            fit = ones(N,1)*const + data.M*b + data.X*cP + ((data.M*b).*(data.X))*w;
-        end
-        err = (data.Y - fit);
-        F = err'*err;
+        r = (data.Y - fit);
+     
+    p = length(coef);
+    dfe = N - p;
+    AIC =  N*log(sum(r.^2)/N) + 2*p*(p+1)/(dfe-1) + 2*p;
+        
 end
