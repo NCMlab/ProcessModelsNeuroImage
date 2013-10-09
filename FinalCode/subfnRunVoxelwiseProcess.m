@@ -1,18 +1,12 @@
 function subfnRunVoxelwiseProcess(AllData,AnalysisParameters)
 
 %addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
-if isunix
-    addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
-end
-if ismac 
-    addpath /Users/jason/Desktop/ProcessModelsNeuroImage/FinalCode
-end
-if IsWin
-    addpath C:\Users\steffener\Dropbox\SteffenerColumbia\ProcessModelsNeuroImage\FinalCode
-end
+
+addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
+%addpath /Users/jason/Desktop/ProcessModelsNeuroImage/FinalCode
 
 BaseDir = AnalysisParameters.BaseDir;
-NSub = AnalysisParameters.NSub;
+Nsub = AnalysisParameters.Nsub;
 Nmed = AnalysisParameters.Nmed;
 Nvoxels = AnalysisParameters.Nvoxels;
 NJobSplit = AnalysisParameters.NJobSplit;
@@ -131,6 +125,30 @@ end
 function data = CreateDataChunk(data,VoxelForThisJob,ModelNum)
 
     switch ModelNum
+        case '1'
+            if size(data.X,3) > 1
+                data.X = data.X(:,:,VoxelForThisJob);
+            else
+                data.X = data.X;
+            end
+            % Check the M variable
+            if size(data.M,3) > 1
+                data.M = data.M(:,:,VoxelForThisJob);
+            else
+                data.M = data.M;
+            end
+            % Check the Y variable
+            if size(data.Y,3) > 1
+                data.Y = data.Y(:,:,VoxelForThisJob);
+            else
+                data.Y = data.Y;
+            end
+            % Check the covariates
+            if size(data.COV,3) > 1
+                data.COV = data.COV(:,VoxelForThisJob);
+            else
+                data.COV = data.COV;
+            end
         case '4'
             if size(data.X,3) > 1
                 data.X = data.X(:,:,VoxelForThisJob);

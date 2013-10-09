@@ -27,7 +27,7 @@ Nmed = AnalysisParameters.Nmed;
 Thresholds = AnalysisParameters.Thresholds;
 Nthr = length(Thresholds);
 VoxelIndices = zeros(Nvoxels,1);
-ImageVoxelIndices = zeros(Nvoxels,1);
+ImageVoxelIndices = AnalysisParameters.Indices;%zeros(Nvoxels,1);
 % This creates the structure for the base models that are common to all
 % models
 [OutData index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters);
@@ -109,10 +109,15 @@ switch ModelNum
         
     case '74'
         % Conditional Effects
-        NProbe = length(AllParameters{1}.CondAB1);
+        NProbe = [];
+        count = 1;
+        while isempty(AllParameters{count})
+            count = count + 1;
+        end
+        NProbe = length(AllParameters{count}.CondAB1);       
         for j = 1:Nmed
             for k = 1:NProbe
-                probeValue = AllParameters{1}.CondAB1{k}.probeValue;
+                probeValue = AllParameters{count}.CondAB1{k}.probeValue;
                 for i = 1:Nthr
                     thrStr = num2str(Thresholds(i));
                     OutData{index}.name = sprintf('CondABMed%d_pV%0.2f_sign%0.4f',j,probeValue,Thresholds(i));
@@ -131,29 +136,4 @@ OutData = subfnPutDataIntoOutputStructure(OutData,AllParameters,AnalysisParamete
 
 subfnWriteResultsToImages(VoxelIndices,OutData,OutName,ImageVoxelIndices,V)
 
-
-function subfnWriteResultsToImages(VoxelIndices,OutData,OutName,ImageVoxelIndices,V)
-% write images to file
-tVoxelIndices = find(VoxelIndices);
-tImageVoxelIndices = ImageVoxelIndices(find(ImageVoxelIndices));
-for i = 1:length(OutData)
-    Vo = V;
-    Vo.fname = fullfile(OutputPath,[OutName OutData{i}.name '.nii']);
-    Vo.descrip = '';
-    Vo.n = [1 1];
-    Vo.dt = [OutData{i}.dataType 0];
-    Y = zeros(Vo.dim);
-    Y(tImageVoxelIndices) = OutData{i}.data(tVoxelIndices);
-    spm_write_vol(Vo,Y);
-end
-VoxelsProcessed =  length(tVoxelIndices);
-% write out the mask
-Vo = V;
-Vo.fname = fullfile(OutputPath,['mask.nii']);
-Vo.descrip = '';
-vo.n = [1 1];
-Vo.dt = [2 0];
-Y = zeros(Vo.dim);
-Y(tImageVoxelIndices) = 1;
-spm_write_vol(Vo,Y);
 

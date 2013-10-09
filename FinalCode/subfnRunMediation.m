@@ -1,10 +1,9 @@
 function subfnRunMediation(Xname,X,Yname,Y,Mname,Mcontrast, subid,visitid, ResultsName, Nboot, ModelNum,InDir,OutDir)
 
-BaseDir = '/Volumes/JASONDATA/studies/iLS';
 
 NSubs = length(X);
 SPMVer = 'spm8';
-maskF = fullfile(BaseDir,'GroupAnalyses/masks/mask_grey_p25.nii');
+maskF = '/share/studies/iLS/GroupAnalyses/masks/mask_grey_p25.nii';
 maskI = spm_read_vols(spm_vol(maskF));
 
 VoxelsToInclude = find(maskI);
@@ -27,7 +26,7 @@ end
 
 [m n p] = size(IMGdata);
 Thresholds = [0.05 0.01 0.005];
-NJobSplit = 1;
+NJobSplit = 150;
 AllData = {};
 AllData.names = {};
 AllData.names.Y = Yname;
@@ -37,6 +36,7 @@ AllData.names.V = '';
 AllData.names.W = '';
 AllData.names.Q = '';
 AllData.names.R = '';
+AllData.names.COV='';
 
 AllData.Y = Y;
 %AllData.M = reshape(IMGdata,m,1,n);
@@ -63,7 +63,6 @@ AnalysisParameters = {};
 AnalysisParameters.BaseDir = OutDir;%'/share/studies/iLS/GroupAnalyses/100312_YngOld/Mediation';
 AnalysisParameters.Nsub = Nsub;
 AnalysisParameters.Nmed = Nmed;
-AnalysisParameters.NSub = NSubs;
 AnalysisParameters.Nvoxels = Nvoxels;
 AnalysisParameters.NJobSplit = NJobSplit;
 AnalysisParameters.Nboot = Nboot;
@@ -74,6 +73,6 @@ AnalysisParameters.names = AllData.names;
 AnalysisParameters.V = V;
 AnalysisParameters.V.fname = '';
 AnalysisParameters.V.descrip = '';
-AnalysisParameters.Tag = ['X' Xname '_M' Mname '_Y' Yname];
+AnalysisParameters.Tag = subfnCreateTagName(AllData);
 
 subfnRunVoxelwiseProcess(AllData,AnalysisParameters);
