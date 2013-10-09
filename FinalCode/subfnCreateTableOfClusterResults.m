@@ -1,7 +1,13 @@
-function [posOutStruct negOutStruct] = subfnCreateTableOfClusterResults
+function [posOutStruct, negOutStruct, InputImage] = subfnCreateTableOfClusterResults
 
-Paal = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/raal.nii';
-Pba = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/rbrodmann.nii';
+if ismac
+    BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Papers/MyPapers/InPreparation/ECFTaskMediation/Results';
+elseif ispc
+    BaseDir = '/Users/steffener/Dropbox/SteffenerColumbia/Papers/MyPapers/InPreparation/ECFTaskMediation/Results';
+end
+Paal = fullfile(BaseDir,'masks','raal.nii');
+Pba = fullfile(BaseDir,'masks','rbrodmann.nii');
+
 % load the atlas maps
 Vba = spm_vol(Pba);
 Vaal = spm_vol(Paal);
@@ -10,7 +16,7 @@ Iba = spm_read_vols(Vba);
 
 
 % Select the thresholded image
-InputImage = spm_select(1,'image');
+InputImage = spm_select(1,'image','Select statistic image');
 cd(fileparts(InputImage))
 
 choice = questdlg('Select Mask Image?', ...
@@ -61,7 +67,7 @@ if unique(xSPM.Z) == 1
     end
     xSPM.Z = effectZ;
 end
-posOutStruct = findAALandBAfromTabDat(xSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba);
+posOutStruct = findAALandBAfromTabDat(xSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba,BaseDir);
 posOutStruct.InputImage = InputImage;
 posOutStruct.VoxelsMM = xSPM.XYZmm;
 posOutStruct.VoxelsVOX = xSPM.XYZ;
@@ -84,7 +90,7 @@ negxSPM.XYZmm = negXYZmm(:,1:3)';
 negxSPM.title = 'negative direction';
 
 
-negOutStruct = findAALandBAfromTabDat(negxSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba);
+negOutStruct = findAALandBAfromTabDat(negxSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba,BaseDir);
 negOutStruct.InputImage = InputImage;
 negOutStruct.VoxelsMM = negxSPM.XYZmm;
 negOutStruct.VoxelsVOX = negxSPM.XYZ;
@@ -139,8 +145,8 @@ for i = 1:NCl
 end
 fprintf(fid,'=============================================================\n');
 
-function [AALList BAList HemiList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba)
-[aalCol1 aalCol2 aalCol3] = textread('/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/aal.nii.txt','%d%s%d');
+function [AALList BAList HemiList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba,BaseDir)
+[aalCol1 aalCol2 aalCol3] = textread(fullfile(BaseDir,'masks','aal.nii.txt'),'%d%s%d');
 AALlabels = FormatALLNames(aalCol2);
 NVoxels = size(XYZ,1);
 HemiList = {};
@@ -161,7 +167,7 @@ end
 
 
 
-function OutStruct = findAALandBAfromTabDat(xSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba)
+function OutStruct = findAALandBAfromTabDat(xSPM,NumLocalMaxima,DistancebetweenMaxima,Iaal,Iba,BaseDir)
 TabDat = spm_list('table',xSPM,[NumLocalMaxima,DistancebetweenMaxima,'']);
 % Read the table 
 NClust = size(TabDat.dat,1);
@@ -199,7 +205,7 @@ end
 XYZ = (inv(xSPM.Vspm.mat)*([XYZmm ones(size(XYZmm,1),1)])')';
 % This program finds the AAL and Brodmann Area labels for all XYZ mm
 % coordinates it is passed.
-[AALList BAList HemiList] = subfnLocalFindAALandBA(XYZ(:,1:3),Iaal,Iba);
+[AALList BAList HemiList] = subfnLocalFindAALandBA(XYZ(:,1:3),Iaal,Iba,BaseDir);
 
 OutStruct = {};
 OutStruct.loc = XYZmm;

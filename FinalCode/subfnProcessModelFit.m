@@ -663,7 +663,7 @@ switch data.ModelNum
         if data.ProbeMod
             ParameterToBS.values(1,1) = a.*(tempModel2.beta(2:Nmed+1));
 
-            for k = 2:length(probeX)+1
+            for k = 2:length(probeX)
                 Interaction = zeros(Ndata,Nmed);
                 for j = 1:Nmed
                     Interaction(:,j) = data.M(:,j).*(data.X - probeX(k));

@@ -1,9 +1,10 @@
 function subfnRunMediation(Xname,X,Yname,Y,Mname,Mcontrast, subid,visitid, ResultsName, Nboot, ModelNum,InDir,OutDir)
 
+BaseDir = '/Volumes/JASONDATA/studies/iLS';
 
 NSubs = length(X);
 SPMVer = 'spm8';
-maskF = '/share/studies/iLS/GroupAnalyses/masks/mask_grey_p25.nii';
+maskF = fullfile(BaseDir,'GroupAnalyses/masks/mask_grey_p25.nii');
 maskI = spm_read_vols(spm_vol(maskF));
 
 VoxelsToInclude = find(maskI);
@@ -14,7 +15,7 @@ IMGdata = zeros(NSubs,1,Nvoxels);
 
 count = 1;
 for i = 1:NSubs
-        tempPath = fullfile(InDir,'Subjects',subid(i,:),visitid(i,end-4:end),'fmriStats',SPMVer,ResultsName,sprintf('con_%04d.img',Mcontrast));
+        tempPath = fullfile(InDir,'Subjects',subid{i},visitid{i},'fmriStats',SPMVer,ResultsName,sprintf('con_%04d.img',Mcontrast));
         fprintf(1,'%s\n',tempPath);
 
         %tempPath = fullfile(BaseDir,'Subjects',subid{i},visitid{i}(end-4:end),'pASL',SPMVer,['swmeanCBF_0_mrfix_x1_pASL_' subid{i} '_' visitid{i}(end-4:end) '.img']);
@@ -26,7 +27,7 @@ end
 
 [m n p] = size(IMGdata);
 Thresholds = [0.05 0.01 0.005];
-NJobSplit = 150;
+NJobSplit = 1;
 AllData = {};
 AllData.names = {};
 AllData.names.Y = Yname;
@@ -62,6 +63,7 @@ AnalysisParameters = {};
 AnalysisParameters.BaseDir = OutDir;%'/share/studies/iLS/GroupAnalyses/100312_YngOld/Mediation';
 AnalysisParameters.Nsub = Nsub;
 AnalysisParameters.Nmed = Nmed;
+AnalysisParameters.NSub = NSubs;
 AnalysisParameters.Nvoxels = Nvoxels;
 AnalysisParameters.NJobSplit = NJobSplit;
 AnalysisParameters.Nboot = Nboot;

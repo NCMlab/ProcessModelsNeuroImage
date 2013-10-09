@@ -1,3 +1,5 @@
+clear
+close all
 
 N = 300;
 a = -0.46;
@@ -49,42 +51,14 @@ data.Thresholds = [0.05 0.01 0.005 0.001];
 Parameters = subfnVoxelWiseProcessBatch(data);
 
 S = regstats(data.Y,[data.X]);
-
-%
 voxel = 1;
-fprintf(1,'==========================================================\n');
-fprintf(1,'Model Coefficients\n')
-fprintf('Independent variable=M\n')
-fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n',' ','Effect','se','t','p')
-fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','X',Parameters{voxel}.A{1}.beta,Parameters{voxel}.A{1}.se,Parameters{voxel}.A{1}.t,Parameters{voxel}.A{1}.p)
-fprintf(1,'----------------------------------------------------------\n');
-fprintf(1,'Model Coefficients\n')
-fprintf('Independent variable=Y\n')
-fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n',' ','Effect','se','t','p')
-fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','X',Parameters{voxel}.C.beta,Parameters{voxel}.C.se,Parameters{voxel}.C.t,Parameters{voxel}.C.p)
-fprintf(1,'----------------------------------------------------------\n');
-fprintf(1,'Model Coefficients\n')
-fprintf('Independent variable=Y\n')
-fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n',' ','Effect','se','t','p')
-%fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','Constant',Constant,se(1,1),S.tstat.t(1),S.tstat.pval(1))
-fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','M',Parameters{voxel}.B{1}.beta,Parameters{voxel}.B{1}.se,Parameters{voxel}.B{1}.t,Parameters{voxel}.B{1}.p)
-fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','X',Parameters{voxel}.CP.beta,Parameters{voxel}.CP.se,Parameters{voxel}.CP.t,Parameters{voxel}.CP.p)
-fprintf(1,'----------------------------------------------------------\n');
-fprintf(1,'Indirect Effect, alpha = 0.05\n')
-fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n',' ','Effect','BootSE','BootLower','BootUpper')
-fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','AB',Parameters{voxel}.AB{1}.pointEst,Parameters{voxel}.AB{1}.se,Parameters{voxel}.AB{1}.BCaci.alpha05(1),Parameters{voxel}.AB{1}.BCaci.alpha05(2));
-fprintf(1,'----------------------------------------------------------\n');
-fprintf(1,'Model Coefficients\n')
-fprintf('Independent variable=Y\n')
-fprintf(1,'%10s\t%10s\t%10s\t%10s\t%10s\n',' ','Effect','se','t','p')
-%fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','Constant',Constant,se(1,1),S.tstat.t(1),S.tstat.pval(1))
-fprintf(1,'%10s\t%10.4f\t%10.4f\t%10.4f\t%10.4f\n','M',S.beta(2),S.tstat.se(2),S.tstat.t(2),S.tstat.pval(2));
+subfnPrintResults(Parameters{voxel})
+%
 
-fprintf(1,'----------------------------------------------------------\n');
 
 %%
 
-[C, V, T,r, R2, R2_13, R2_12, R2_23] = subfnCommonality(Y, [Gr M]);
+[C, V, T,r, R2, R2_13, R2_12, R2_23] = subfnCommonality(Y, [Gr M],data.names);
 C
 V
 [error img] = Commonality_2Pred(Y,Gr,M);
