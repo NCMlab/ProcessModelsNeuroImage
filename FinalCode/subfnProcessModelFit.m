@@ -17,7 +17,16 @@ switch data.ModelNum
         %     |
         % X ----- Y
         %
-        probeM = subfnCalculateProbeValues(data.M);
+        % Check to see if the moderator, in this case M, is dicotomous.
+        minM = min(data.M);
+        maxM = max(data.M);
+        rangeM = maxM - minM;
+        if rangeM == 1
+            probeM = [0 1];
+        else           
+            probeM = subfnCalculateProbeValues(data.M);
+        end
+
         ParameterToBS = struct('names','CondMod','values',zeros(1,length(probeM)),'probeValues',zeros(1,length(probeM)),'ProbeMod',0);
         Ndata = size(data.Y,1);
         % First, check to see if the interaction effect is significant or
@@ -630,9 +639,8 @@ switch data.ModelNum
         rangeX = maxX - minX;
         if rangeX == 1
             probeX = [0 1];
-        else
-
-                 probeX = subfnCalculateProbeValues(data.X);       
+        else           
+            probeX = subfnCalculateProbeValues(data.X);
         end
         NameStruct = cell(Nmed,1);
         for j = 1:Nmed

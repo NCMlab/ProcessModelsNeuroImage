@@ -10,25 +10,45 @@ while isempty(AllParameters{count})
     count = count + 1;
 end
 
-for j = 1:Nmed
-    % Model 1
-    Model1FieldNames = fieldnames(AllParameters{count}.Model1{j});
 
+% Model 1
+for j = 1:Nmed
+    % Check to see if there are multiple mediating variables here.
+    if iscell(AllParameters{count}.Model1)
+        Model1FieldNames = fieldnames(AllParameters{count}.Model1{j});
+    else
+        Model1FieldNames = fieldnames(AllParameters{count}.Model1);
+    end
+    
     for k = 1:length(Model1FieldNames)
         if isempty(strmatch(Model1FieldNames(k),'Outcome')) && isempty(strmatch(Model1FieldNames(k),'Model'))
             OutData{index}.name = ['Model1_Med' num2str(j) '_' Model1FieldNames{k} '_beta'];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['Model1{' num2str(j) '}.' Model1FieldNames{k} '.beta'];
+            % This checks to see if the model has multiple mediating
+            % variables or not.
+            if iscell(AllParameters{count}.Model1)
+                OutData{index}.field = ['Model1{' num2str(j) '}.' Model1FieldNames{k} '.beta'];
+            else
+                OutData{index}.field = ['Model1.' Model1FieldNames{k} '.beta'];
+            end
             OutData{index}.dataType = 16;
             index = index + 1;
+            % The two if/else blocks are seperate because of the indexing
+            % of the OutData variable.
             OutData{index}.name = ['Model1_Med' num2str(j) '_' Model1FieldNames{k} '_t'];
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['Model1{' num2str(j) '}.' Model1FieldNames{k} '.t'];
+            if iscell(AllParameters{count}.Model1)
+                OutData{index}.field = ['Model1{' num2str(j) '}.' Model1FieldNames{k} '.t'];
+            else
+                OutData{index}.field = ['Model1.' Model1FieldNames{k} '.t'];
+            end
             OutData{index}.dataType = 16;
             index = index + 1;
         end
     end
 end
+
+
 % Model 2
 Model2FieldNames = fieldnames(AllParameters{count}.Model2);
 
@@ -47,18 +67,22 @@ for k = 1:length(Model2FieldNames)
     end
 end
 % Model 3
-Model3FieldNames = fieldnames(AllParameters{count}.Model3);
-for k = 1:length(Model3FieldNames)
-    if isempty(strmatch(Model3FieldNames(k),'Outcome')) && isempty(strmatch(Model3FieldNames(k),'Model'))
-        OutData{index}.name = ['Model3_' Model3FieldNames{k} '_beta'];
-        OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['Model3.' Model3FieldNames{k} '.beta'];
-        OutData{index}.dataType = 16;
-        index = index + 1;
-        OutData{index}.name = ['Model3_' Model3FieldNames{k} '_t'];
-        OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['Model3.' Model3FieldNames{k} '.t'];
-        OutData{index}.dataType = 16;
-        index = index + 1;
+% Not all process models contain three regression models, e.g. Process
+% model 1.
+if isfield(AllParameters{count},'Model3')
+    Model3FieldNames = fieldnames(AllParameters{count}.Model3);
+    for k = 1:length(Model3FieldNames)
+        if isempty(strmatch(Model3FieldNames(k),'Outcome')) && isempty(strmatch(Model3FieldNames(k),'Model'))
+            OutData{index}.name = ['Model3_' Model3FieldNames{k} '_beta'];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['Model3.' Model3FieldNames{k} '.beta'];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+            OutData{index}.name = ['Model3_' Model3FieldNames{k} '_t'];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['Model3.' Model3FieldNames{k} '.t'];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+        end
     end
 end

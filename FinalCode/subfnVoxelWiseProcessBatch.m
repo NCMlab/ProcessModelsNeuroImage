@@ -10,17 +10,13 @@ function Parameters = subfnVoxelWiseProcessBatch(InData)
 warning off
 
 addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
-%
+
 % Check to see if a path to data is given. If so then load it up
 if ischar(InData)
     load(InData);
     % find out the tag for this batch of data
     [PathName FileName] = fileparts(InData);
     tag = InData(end-3:end);
-    [Nsub] = size(data.M,1);
-    Nmed = size(data.M,2);
-    Nvoxels = length(data.Indices);
-    Parameters = cell(Nvoxels,1);
 
     % If this voxelwise data than try to run in parallel
     
@@ -40,10 +36,23 @@ if ischar(InData)
 % if a structure is passed then just operate on this one data structure
 elseif isstruct(InData)
     data = InData;
-    [Nsub Nmed Nvoxels] = size(data.M);
-    Parameters = cell(Nvoxels,1);
     Nboot = data.Nboot;
 end
+% Check teh dimensions of the data
+% The number of mediators can only be the second dimension of the mediator
+% variable.
+Nmed = size(data.M,2);
+% The number of subjects will always be the first size dimension of any of
+% the variables.
+NSub = size(data.Y,1);
+% take the number of voxels from the length of the indices instead of from
+% the dimensions of the data because any of the variables could be
+% voxel-wise.
+Nvoxels = length(data.Indices);
+% Initialize the cell array to hold the results
+Parameters = cell(Nvoxels,1);
+
+% Initialize the probe flag
 data.ProbeMod = 0;
 
 % Check to see if the variables are named
@@ -82,11 +91,12 @@ for i = 1:Nvoxels
     switch data.ModelNum
         case '1'
             % Set the probeMode flag to TRUE for the first call 
-            if size(data.M,2) ~= 1
+            if Nmed ~= 1
                 errordlg('Only a single variable can be used as a moderator for Model 1');
             end
-            temp.M = data.M(:,:,i);
-            if sum(isnan(temp.M)) == 0
+            temp = CheckVariables(i,data,temp);
+           
+            if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
                 AllDataFlag = 1;
             end
 

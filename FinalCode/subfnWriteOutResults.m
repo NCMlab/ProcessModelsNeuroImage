@@ -39,6 +39,29 @@ OutData{index}.field = ['Model2.Model.rsquare'];
 OutData{index}.dataType = 16;
 
 switch ModelNum
+        case '1'
+        % Conditional Effects
+        NProbe = [];
+        count = 1;
+        while isempty(AllParameters{count})
+            count = count + 1;
+        end
+        NProbe = length(AllParameters{count}.CondMod);       
+        for j = 1:Nmed
+            for k = 1:NProbe
+                probeValue = AllParameters{count}.CondMod{k}.probeValue;
+                for i = 1:Nthr
+                    thrStr = num2str(Thresholds(i));
+                    OutData{index}.name = sprintf('CondMod%d_pV%0.2f_sign%0.4f',j,probeValue,Thresholds(i));
+                    OutData{index}.data = zeros(Nvoxels,1);
+                    OutData{index}.field = ['CondMod{' num2str(k) '}.BCaci.alpha' thrStr(3:end)];
+                    OutData{index}.dataType = 2;
+                    index = index + 1;
+                    
+                end
+            end
+        end
+
     case '4'
         % Conditional Effects
         for j = 1:Nmed

@@ -10,7 +10,20 @@ else
 end
 % Check to see if the process is finished
 F = dir('Results_*.mat');
-if AnalysisParameters.NJobSplit == length(F) 
+if AnalysisParameters.NJobSplit == 1
+    NvoxelsPerJob = ceil(AnalysisParameters.Nvoxels/AnalysisParameters.NJobSplit);
+    % prealocate memory for AllParameters
+    AllParameters = cell(AnalysisParameters.Nvoxels,1);
+    % load up all the data
+
+        clear Parameters
+        load(F(1).name)
+        AllParameters(:) = Parameters;
+    
+
+    [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
+
+elseif AnalysisParameters.NJobSplit == length(F) 
     % the process is finished
     NvoxelsPerJob = ceil(AnalysisParameters.Nvoxels/AnalysisParameters.NJobSplit);
     % prealocate memory for AllParameters
