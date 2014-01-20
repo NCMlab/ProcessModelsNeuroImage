@@ -1,6 +1,10 @@
-function subfnPrintResults(Parameters,fid)
+function subfnPrintResults(Parameters,fid,Thr)
 if nargin == 1
     fid = 1;
+    Thr = 9999;
+elseif nargin == 2
+    Thr = 9999;
+    
 end
 ModelNum = Parameters.ModelNum;
 switch ModelNum
@@ -149,8 +153,15 @@ switch ModelNum
                 Parameters.names.X,Parameters.names.Y,Parameters.names.V);
             fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
                 Parameters.names.V,'Effect','boot se','lowerCI','upperCI');
-            ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
-            ThresholdField = ThresholdField{1};
+            Thr = num2str(Thr);
+            if isfield(Parameters.CondAB1{1}.BCaci,['alpha' Thr(3:end)])
+                ThresholdField = ['alpha' Thr(3:end)];
+                fprintf(1,'>>>>> Using provided alpha: %s <<<<<<<\n',Thr);
+            else
+                ThresholdField = fields(Parameters.CondAB1{1}.BCaci);
+                ThresholdField = ThresholdField{1};
+            end
+            
             for k = 2:length(Parameters.CondAB1)
                 limits = getfield(Parameters.CondAB1{k}.BCaci,ThresholdField);
                 fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',...
@@ -212,7 +223,7 @@ switch ModelNum
         end
         PrintAnalysisNotes(Parameters,fid)
     case '74'
-         PrintModelInfo(Parameters,fid)
+        PrintModelInfo(Parameters,fid)
         % Print out Model 1
         for i = 1:size(Parameters.Model1,2)
             fprintf(fid,'******************************************************\n');
@@ -249,7 +260,7 @@ switch ModelNum
             end
         end
         PrintAnalysisNotes(Parameters,fid)
-
+        
 end % switch ModelNum
 
 function PrintModelInfo(Parameters,fid)
@@ -272,7 +283,7 @@ for i = 1:length(Names)
 end
 fprintf(fid,'Sample size = %d\n\n',Parameters.SampleSize);
 
-function PrintAnalysisNotes(Parameters,fid)
+function PrintAnalysisNotes(Parameters,fid,Thr)
 fprintf(fid,'********* ANALYSIS NOTES ************\n');
 fprintf(fid,'Number of bootstrap resamples for BIAS CORRECTED confidence intervales: \n');
 fprintf(fid,'\t%d\n',Parameters.Nboot);

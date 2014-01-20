@@ -1,10 +1,12 @@
 function subfnWriteFSResultsToNIFTI(OutData,OutFolder,MeasureOfInterest,Header)
 
+CodeFolder = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
 
+CodeFolder = '/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
 % Use the Freesurfer lookup table to map location names to spots in the
 % brain. The file has been cleaned so that it does not have any of the
 % descriptive breaks that are in the original
-D = textread(fullfile('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles','FreeSurferColorLUTclean.txt'),'%s','delimiter',' ');
+D = textread(fullfile(CodeFolder,'FreeSurferColorLUTclean.txt'),'%s','delimiter',' ');
 
 NCol = 6;
 NRow = length(D)/NCol;
@@ -45,7 +47,7 @@ end
 % These are taken from a single subject and they really shuld be rotated
 % correctly. 
 %P = fullfile('/share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FreeSurferFiles','raparc+asegROT.nii');
-P = fullfile('/share/users/js2746_Jason/Studies/ModMedCogRes/FreeSurferFiles','STANDARD_aparc+aseg.nii');
+P = fullfile(CodeFolder,'STANDARD_aparc+aseg.nii');
 V = spm_vol(P);
 I = spm_read_vols(V);
 % for all locations in the Freesurfer header file, which comes from
@@ -84,11 +86,19 @@ for i = 1:length(FSNameAndLabel)
     end
 end
 
-% Create a mapping of the brain regions back to the parameters in teh
+
+
+
+
+
+% Create a mapping of the brain regions back to the parameters in the
 % results.
+%OutData = {};
 index = length(OutData) + 1;
 OutData{index}.name = 'BrainToParameters';
-OutData{index}.data = [1:length(OutData{index-1}.data)];
+OutData{index}.data = ones(84,1);
+OutData{index}.data = data;
+%[1:length(OutData{index-1}.data)];
 OutData{index}.dataType = 4;
 
 % Write the images out

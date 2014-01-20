@@ -37,7 +37,7 @@ OutData{index}.name = 'Model2_Rsq';
 OutData{index}.data = zeros(Nvoxels,1);
 OutData{index}.field = ['Model2.Model.rsquare'];
 OutData{index}.dataType = 16;
-
+index = index + 1;
 switch ModelNum
         case '1'
         % Conditional Effects
@@ -98,18 +98,20 @@ switch ModelNum
         end
         
     case '14'
-        OutData{index}.name = ['ABeffMed' num2str(j)];
+        j=1;
+        OutData{index}.name = ['CondAB' num2str(j)];
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['AB{' num2str(j) '}.pointEst'];
+        OutData{index}.field = ['CondAB' num2str(j) '{' num2str(j) '}.pointEst'];
         index = index + 1;
-        OutData{index}.name = ['ABpValue' num2str(j)];
-        OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['AB{' num2str(j) '}.pValue'];
-        index = index + 1;
+        %OutData{index}.name = ['ConABpValue' num2str(j)];
+        %OutData{index}.data = zeros(Nvoxels,1);
+        %OutData{index}.field = ['CondAB' num2str(j) '{' num2str(j) '}.pValue'];
+        % index = index + 1;
         for i = 1:Nthr
-            OutData{index}.name = ['ABMed' num2str(j) 'sign_' Thresholds{i}];
+            thrStr = num2str(Thresholds(i));
+            OutData{index}.name = sprintf('CondABMed%d_pV000_sign%0.4f', j, Thresholds(i));
             OutData{index}.data = zeros(Nvoxels,1);
-            OutData{index}.field = ['AB{' num2str(j) '}.BCaci.' Thresholds{i}];
+            OutData{index}.field = ['CondAB' num2str(j) '{1}.BCaci.alpha' thrStr(3:end)];
             index = index + 1;
         end
         
@@ -156,6 +158,7 @@ end
 %%
 OutData = subfnPutDataIntoOutputStructure(OutData,AllParameters,AnalysisParameters)
 %%
+
 
 subfnWriteResultsToImages(VoxelIndices,OutData,OutName,ImageVoxelIndices,V)
 

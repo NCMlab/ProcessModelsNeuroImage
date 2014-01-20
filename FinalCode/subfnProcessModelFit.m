@@ -228,7 +228,7 @@ switch data.ModelNum
         % create the interaction terms
         Model1 = cell(Nmed);
         for j = 1:Nmed
-            Model1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X(:,j).*(data.W) data.COV]);
+            Model1{j} = subfnregstats(data.M(:,j),[data.X data.W data.X.*(data.W) data.COV]);
             % check each interaction term and set the flag here for whether
             % to probe the interaction.
             %if Model1{j}.tstat.pval(4) < max(data.Thresholds)
@@ -248,7 +248,7 @@ switch data.ModelNum
             
             for k = 2:length(probeW)
                 for j = 1:Nmed
-                    temp = subfnregress(data.M(:,j),[data.X (data.W-probeW(k)) data.X(:,j).*(data.W - probeW(k)) data.COV]);
+                    temp = subfnregress(data.M(:,j),[data.X (data.W-probeW(k)) data.X.*(data.W - probeW(k)) data.COV]);
                     % this is the conditional parameter
                     ParameterToBS.values(j,k) = temp(2)*Model2(2);
                     ParameterToBS.probeValues(1,k) = probeW(k);
@@ -434,8 +434,8 @@ switch data.ModelNum
             Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1);',data.names.X,data.names.X);
             eval(Str)
             for k = 1:size(data.COV,2)
-                Str = sprintf('Parameters.Model1{j}.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1+k);',data.names.COV{k},data.names.COV{k});
-                eval(Str)
+                 Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+Nmed+1+Nmed+1+k);',data.names.COV{k},data.names.COV{k});
+                 eval(Str)
             end
             for j = 1:Nmed
                 Parameters.Model1{j}.const = subfnSetParameters('const', Model1{j}, 1);

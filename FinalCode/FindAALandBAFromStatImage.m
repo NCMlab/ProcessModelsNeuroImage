@@ -9,9 +9,16 @@ function FindAALandBAFromStatImage(HeightThr, ClusterThr)
 
 % where are the AAL and BA maps that have been converted(resliced) into
 % the data's space
-Flip = inputdlg('Flip Image? (y/n)');
-Paal = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/raal.nii';
-Pba = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/rbrodmann.nii';
+%Flip = inputdlg('Flip Image? (y/n)');
+Flip = 'n';
+if ismac
+    BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks';
+    Paal = fullfile(BaseDir,'raal.nii');
+    Pba = fullfile(BaseDir, 'rbrodmann.nii');
+else
+    Paal = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/raal.nii';
+    Pba = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/rbrodmann.nii';
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % HERE IS A USE OF AN SPM FUNCTION
 P = spm_select(1,'image','Select statistical image');
@@ -194,7 +201,11 @@ fprintf('Data saved to:\n\t%s\n',ClusterOutPutFileName);
 
     
 function [AALList BAList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba)
-[aalCol1 aalCol2 aalCol3] = textread('/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/aal.nii.txt','%d%s%d');
+if ismac
+     [aalCol1 aalCol2 aalCol3] = textread('/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks/aal.nii.txt','%d%s%d');
+else
+    [aalCol1 aalCol2 aalCol3] = textread('/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/aal.nii.txt','%d%s%d');
+end
 NVoxels = size(XYZ,1);
 AALList = {};
 BAList = zeros(NVoxels,1);

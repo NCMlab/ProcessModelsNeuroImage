@@ -2,7 +2,7 @@ function subfnRunVoxelwiseProcess(AllData,AnalysisParameters)
 
 %addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 
-addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
+%addpath /share/users/js2746_Jason/Scripts/ProcessModelsNeuroImage/FinalCode
 %addpath /Users/jason/Desktop/ProcessModelsNeuroImage/FinalCode
 
 BaseDir = AnalysisParameters.BaseDir;
@@ -42,7 +42,7 @@ for i = 1:NJobSplit
     VoxelForThisJob = [(i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob];
     data = AllData;
     data.Nboot = data.Nboot;
-
+    
     data = CreateDataChunk(data,VoxelForThisJob,ModelNum);
     
     data.Indices = AllData.Indices(VoxelForThisJob);
@@ -51,6 +51,7 @@ for i = 1:NJobSplit
     InDataPath = fullfile(OutFolder,InTag);
     Str = ['save ' InDataPath ' data  '];
     eval(Str);
+    
     % If there is only ONE job specified then DO NOT send this to the
     % cluster
     if NJobSplit > 1
@@ -69,7 +70,7 @@ for i = 1:NJobSplit
         fprintf(fid,'EOF\n');
         fclose(fid);
         %    Str = ['! qsub  ' jobPath];
-        Str = ['! qsub -q short.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
+        Str = ['! qsub -q veryshort.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
         unix(Str);
     else
         subfnVoxelWiseProcessBatch(InDataPath);
@@ -104,7 +105,7 @@ if NJobSplit > 1
     fprintf(fid,'exit\n');
     fprintf(fid,'EOF\n');
     fclose(fid);
-    Str = ['! qsub -q short.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
+    Str = ['! qsub -q veryshort.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
     unix(Str);
 end
 %
@@ -123,177 +124,176 @@ end
 % AllParameters((i)*NvoxelsPerJob + 1:Nvoxels) = Parameters;
 
 function data = CreateDataChunk(data,VoxelForThisJob,ModelNum)
-
-    switch ModelNum
-        case '1'
-            if size(data.X,3) > 1
-                data.X = data.X(:,:,VoxelForThisJob);
-            else
-                data.X = data.X;
-            end
-            % Check the M variable
-            if size(data.M,3) > 1
-                data.M = data.M(:,:,VoxelForThisJob);
-            else
-                data.M = data.M;
-            end
-            % Check the Y variable
-            if size(data.Y,3) > 1
-                data.Y = data.Y(:,:,VoxelForThisJob);
-            else
-                data.Y = data.Y;
-            end
-            % Check the covariates
-            if size(data.COV,3) > 1
-                data.COV = data.COV(:,VoxelForThisJob);
-            else
-                data.COV = data.COV;
-            end
-        case '4'
-            if size(data.X,3) > 1
-                data.X = data.X(:,:,VoxelForThisJob);
-            else
-                data.X = data.X;
-            end
-            % Check the M variable
-            if size(data.M,3) > 1
-                data.M = data.M(:,:,VoxelForThisJob);
-            else
-                data.M = data.M;
-            end
-            % Check the Y variable
-            if size(data.Y,3) > 1
-                data.Y = data.Y(:,:,VoxelForThisJob);
-            else
-                data.Y = data.Y;
-            end
-            % Check the covariates
-            if size(data.COV,3) > 1
-                data.COV = data.COV(:,VoxelForThisJob);
-            else
-                data.COV = data.COV;
-            end
-        case '7'
-            if size(data.X,3) > 1
-                data.X = data.X(:,:,VoxelForThisJob);
-            else
-                data.X = data.X;
-            end
-            % Check the M variable
-            if size(data.M,3) > 1
-                data.M = data.M(:,:,VoxelForThisJob);
-            else
-                data.M = data.M;
-            end
-            % Check the Y variable
-            if size(data.Y,3) > 1
-                data.Y = data.Y(:,:,VoxelForThisJob);
-            else
-                data.Y = data.Y;
-            end
-            % Check the W variable
-            if size(data.W,3) > 1
-                data.W = data.W(:,:,VoxelForThisJob);
-            else
-                data.W = data.W;
-            end
-            % Check the covariates
-            if size(data.COV,3) > 1
-                data.COV = data.COV(:,VoxelForThisJob);
-            else
-                data.COV = data.COV;
-            end
-            
-        case '14'
-            if size(data.X,3) > 1
-                data.X = data.X(:,:,VoxelForThisJob);
-            else
-                data.X = data.X;
-            end
-            % Check the M variable
-            if size(data.M,3) > 1
-                data.M = data.M(:,:,VoxelForThisJob);
-            else
-                data.M = data.M;
-            end
-            % Check the Y variable
-            if size(data.Y,3) > 1
-                data.Y = data.Y(:,:,VoxelForThisJob);
-            else
-                data.Y = data.Y;
-            end
-            % Check the V variable
-            if size(data.V,3) > 1
-                data.V = data.V(:,:,VoxelForThisJob);
-            else
-                data.V = data.V;
-            end
-            % Check the covariates
-            if size(data.COV,3) > 1
-                data.COV = data.COV(:,VoxelForThisJob);
-            else
-                data.COV = data.COV;
-            end
-
-        case '58'
-            if size(data.X,3) > 1
-                data.X = data.X(:,:,VoxelForThisJob);
-            else
-                data.X = data.X;
-            end
-            % Check the M variable
-            if size(data.M,3) > 1
-                data.M = data.M(:,:,VoxelForThisJob);
-            else
-                data.M = data.M;
-            end
-            % Check the Y variable
-            if size(data.Y,3) > 1
-                data.Y = data.Y(:,:,VoxelForThisJob);
-            else
-                data.Y = data.Y;
-            end
-            % Check the W variable
-            if size(data.W,3) > 1
-                data.W = data.W(:,:,VoxelForThisJob);
-            else
-                data.W = data.W;
-            end
-            % Check the V variable
-            if size(data.V,3) > 1
-                data.V = data.V(:,:,VoxelForThisJob);
-            else
-                data.V = data.V;
-            end
-            % Check the covariates
-            if size(data.COV,3) > 1
-                data.COV = data.COV(:,VoxelForThisJob);
-            else
-                data.COV = data.COV;
-            end
-            
-        case '74'
-            if size(data.X,3) > 1
-                data.X = data.X(:,:,VoxelForThisJob);
-            else
-                data.X = data.X;
-            end
-            % Check the M variable
-            if size(data.M,3) > 1
-                data.M = data.M(:,:,VoxelForThisJob);
-            else
-                data.M = data.M;
-            end
-            % Check the Y variable
-            if size(data.Y,3) > 1
-                data.Y = data.Y(:,:,VoxelForThisJob);
-            else
-                data.Y = data.Y;
-            end
-            % Check the covariates
-            if size(data.COV,3) > 1
-                data.COV = data.COV(:,VoxelForThisJob);
-            else
-                data.COV = data.COV;
-            end
-    end
+switch ModelNum
+    case '1'
+        if size(data.X,3) > 1
+            data.X = data.X(:,:,VoxelForThisJob);
+        else
+            data.X = data.X;
+        end
+        % Check the M variable
+        if size(data.M,3) > 1
+            data.M = data.M(:,:,VoxelForThisJob);
+        else
+            data.M = data.M;
+        end
+        % Check the Y variable
+        if size(data.Y,3) > 1
+            data.Y = data.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = data.Y;
+        end
+        % Check the covariates
+        if size(data.COV,3) > 1
+            data.COV = data.COV(:,VoxelForThisJob);
+        else
+            data.COV = data.COV;
+        end
+    case '4'
+        if size(data.X,3) > 1
+            data.X = data.X(:,:,VoxelForThisJob);
+        else
+            data.X = data.X;
+        end
+        % Check the M variable
+        if size(data.M,3) > 1
+            data.M = data.M(:,:,VoxelForThisJob);
+        else
+            data.M = data.M;
+        end
+        % Check the Y variable
+        if size(data.Y,3) > 1
+            data.Y = data.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = data.Y;
+        end
+        % Check the covariates
+        if size(data.COV,3) > 1
+            data.COV = data.COV(:,VoxelForThisJob);
+        else
+            data.COV = data.COV;
+        end
+    case '7'
+        if size(data.X,3) > 1
+            data.X = data.X(:,:,VoxelForThisJob);
+        else
+            data.X = data.X;
+        end
+        % Check the M variable
+        if size(data.M,3) > 1
+            data.M = data.M(:,:,VoxelForThisJob);
+        else
+            data.M = data.M;
+        end
+        % Check the Y variable
+        if size(data.Y,3) > 1
+            data.Y = data.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = data.Y;
+        end
+        % Check the W variable
+        if size(data.W,3) > 1
+            data.W = data.W(:,:,VoxelForThisJob);
+        else
+            data.W = data.W;
+        end
+        % Check the covariates
+        if size(data.COV,3) > 1
+            data.COV = data.COV(:,VoxelForThisJob);
+        else
+            data.COV = data.COV;
+        end
+        
+    case '14'
+        if size(data.X,3) > 1
+            data.X = data.X(:,:,VoxelForThisJob);
+        else
+            data.X = data.X;
+        end
+        % Check the M variable
+        if size(data.M,3) > 1
+            data.M = data.M(:,:,VoxelForThisJob);
+        else
+            data.M = data.M;
+        end
+        % Check the Y variable
+        if size(data.Y,3) > 1
+            data.Y = data.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = data.Y;
+        end
+        % Check the V variable
+        if size(data.V,3) > 1
+            data.V = data.V(:,:,VoxelForThisJob);
+        else
+            data.V = data.V;
+        end
+        % Check the covariates
+        if size(data.COV,3) > 1
+            data.COV = data.COV(:,VoxelForThisJob);
+        else
+            data.COV = data.COV;
+        end
+        
+    case '58'
+        if size(data.X,3) > 1
+            data.X = data.X(:,:,VoxelForThisJob);
+        else
+            data.X = data.X;
+        end
+        % Check the M variable
+        if size(data.M,3) > 1
+            data.M = data.M(:,:,VoxelForThisJob);
+        else
+            data.M = data.M;
+        end
+        % Check the Y variable
+        if size(data.Y,3) > 1
+            data.Y = data.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = data.Y;
+        end
+        % Check the W variable
+        if size(data.W,3) > 1
+            data.W = data.W(:,:,VoxelForThisJob);
+        else
+            data.W = data.W;
+        end
+        % Check the V variable
+        if size(data.V,3) > 1
+            data.V = data.V(:,:,VoxelForThisJob);
+        else
+            data.V = data.V;
+        end
+        % Check the covariates
+        if size(data.COV,3) > 1
+            data.COV = data.COV(:,VoxelForThisJob);
+        else
+            data.COV = data.COV;
+        end
+        
+    case '74'
+        if size(data.X,3) > 1
+            data.X = data.X(:,:,VoxelForThisJob);
+        else
+            data.X = data.X;
+        end
+        % Check the M variable
+        if size(data.M,3) > 1
+            data.M = data.M(:,:,VoxelForThisJob);
+        else
+            data.M = data.M;
+        end
+        % Check the Y variable
+        if size(data.Y,3) > 1
+            data.Y = data.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = data.Y;
+        end
+        % Check the covariates
+        if size(data.COV,3) > 1
+            data.COV = data.COV(:,VoxelForThisJob);
+        else
+            data.COV = data.COV;
+        end
+end

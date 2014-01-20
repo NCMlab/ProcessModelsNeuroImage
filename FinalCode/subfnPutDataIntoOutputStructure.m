@@ -25,6 +25,7 @@ for i = 1:Nvoxels
                 
                 % only add the new structures for the probe values if they
                 % have NOT been made before.
+                %fprintf(1,'%d\n',j);
                 if ~isempty(strfind(OutData{j}.name,'000'))
                     
                     % This is a probe measure.

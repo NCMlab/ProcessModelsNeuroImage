@@ -75,11 +75,7 @@ end
 
 tic 
 for i = 1:Nvoxels
-    if Nvoxels > 1
-        t = toc;
-        fprintf(1,'%6d of %6d in %6.2f sec ',i,Nvoxels,t);
-        tic;
-    end
+
     % check to make sure there is data for all subjects at this voxel. 
     Mflag = 0;
     Vflag = 0;
@@ -117,7 +113,7 @@ for i = 1:Nvoxels
             end
             % Calculate the minimum critical t-value for use with the
             % Johnson-Neyman technique.
-            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
+            temp.tcrit = tinv(1 - max(data.Thresholds),NSub - 4);
             % Check each variable and if it is a voxel-wise measure then
             % pull out one voxel. It is also possible to have all varaibles
             % be voxelwise and to have voxelwise covariates.
@@ -136,7 +132,7 @@ for i = 1:Nvoxels
             
             % Calculate the minimum critical t-value for use with the
             % Johnson-Neyman technique.
-            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
+            temp.tcrit = tinv(1 - max(data.Thresholds),NSub - 4);
             temp = CheckVariables(i,data,temp);
             % If there are no not-a-number variables then the data is ready
             % to be processed.
@@ -151,7 +147,7 @@ for i = 1:Nvoxels
             end
             % Calculate the minimum critical t-value for use with the
             % Johnson-Neyman technique.
-            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
+            temp.tcrit = tinv(1 - max(data.Thresholds),NSub - 4);
             temp = CheckVariables(i,data,temp);
             if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)...
                     &(sum(isnan(temp.Y)) == 0)...
@@ -160,7 +156,7 @@ for i = 1:Nvoxels
             end
           
         case '74'
-            temp.tcrit = tinv(1 - max(data.Thresholds),Nsub - 4);
+            temp.tcrit = tinv(1 - max(data.Thresholds),NSub - 4);
             temp = CheckVariables(i,data,temp);
             if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
                 AllDataFlag = 1;
@@ -185,7 +181,11 @@ for i = 1:Nvoxels
     else
         fprintf(1,' << empty\n')
     end
-
+    if Nvoxels > 1
+        t = toc;
+        fprintf(1,'%6d of %6d in %6.2f sec ',i,Nvoxels,t);
+        tic;
+    end
 end
 
 if ischar(InData)

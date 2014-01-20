@@ -2,6 +2,7 @@ function WriteOutFreeSurferResults
 % This function writes out results to CSV files instead of images.
 % As of rigth now it does not write out conditional effects
 BasePath = '/Users/jason/Documents/MyData/ModMedCogRes';
+BasePath = '/share/users/js2746_Jason/Studies/ModMedCogRes/DataFiles';
 load(fullfile(BasePath,'FSheader.mat'));
 
 SelectedPath = spm_select(1,'dir');
@@ -26,14 +27,16 @@ if AnalysisParameters.NJobSplit == length(F)
         AllParameters((i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob) = Parameters;
     end
     clear Parameters
-    load(F(1).name)
-    AllParameters = Parameters;
+    load(F(end).name);
+    AllParameters((length(F)-1)*NvoxelsPerJob+1:end) = Parameters;
+    
 
      [OutData index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters);
         OutData = subfnPutDataIntoOutputStructure(OutData,AllParameters,AnalysisParameters)
 else
     errordlg('This process has not finished')
 end
+
 
 % for i = 1:length(AllParameters)
 %     if ~isempty(AllParameters{i})
