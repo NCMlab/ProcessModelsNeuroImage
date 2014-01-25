@@ -39,14 +39,14 @@ OutData{index}.field = ['Model2.Model.rsquare'];
 OutData{index}.dataType = 16;
 index = index + 1;
 switch ModelNum
-        case '1'
+    case '1'
         % Conditional Effects
         NProbe = [];
         count = 1;
         while isempty(AllParameters{count})
             count = count + 1;
         end
-        NProbe = length(AllParameters{count}.CondMod);       
+        NProbe = length(AllParameters{count}.CondMod);
         for j = 1:Nmed
             for k = 1:NProbe
                 probeValue = AllParameters{count}.CondMod{k}.probeValue;
@@ -61,7 +61,7 @@ switch ModelNum
                 end
             end
         end
-
+        
     case '4'
         % Conditional Effects
         for j = 1:Nmed
@@ -79,6 +79,18 @@ switch ModelNum
         OutData{index}.field = ['k2.pointEst'];
         OutData{index}.dataType = 16;
         index = index + 1;
+    case '6'
+        % Conditional Effects
+        for j = 1:Nmed
+            for i = 1:Nthr
+                thrStr = num2str(Thresholds(i));
+                OutData{index}.name = ['M1M2' 'sign_' num2str(Thresholds(i))];
+                OutData{index}.data = zeros(Nvoxels,1);
+                OutData{index}.field = ['M1M2{1}.BCaci.alpha' thrStr(3:end)];
+                OutData{index}.dataType = 2;
+                index = index + 1;
+            end
+        end
         
     case '7'
         for j = 1:Nmed
@@ -139,7 +151,7 @@ switch ModelNum
         while isempty(AllParameters{count})
             count = count + 1;
         end
-        NProbe = length(AllParameters{count}.CondAB1);       
+        NProbe = length(AllParameters{count}.CondAB1);
         for j = 1:Nmed
             for k = 1:NProbe
                 probeValue = AllParameters{count}.CondAB1{k}.probeValue;
@@ -152,6 +164,22 @@ switch ModelNum
                     index = index + 1;
                     
                 end
+            end
+        end
+    case '75'
+        % Conditional Effects
+        NProbe = length(AllParameters{1}.M1M2);
+        
+        for k = 1:NProbe
+            probeValue = AllParameters{1}.M1M2{k}.probeValue;
+            for i = 1:Nthr
+                thrStr = num2str(Thresholds(i));
+                OutData{index}.name = sprintf('CondM1M2_pV%0.2f_sign%0.4f',probeValue,Thresholds(i));
+                OutData{index}.data = zeros(Nvoxels,1);
+                OutData{index}.field = ['M1M2{1}.BCaci.alpha' thrStr(3:end)];
+                OutData{index}.dataType = 2;
+                index = index + 1;
+                
             end
         end
 end

@@ -107,6 +107,14 @@ for i = 1:Nvoxels
             if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
                 AllDataFlag = 1;
             end
+            
+        case '6'
+            temp = CheckVariables(i,data,temp);
+            % If there are no not-a-number variables then the data is ready
+            % to be processed.
+            if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
+                AllDataFlag = 1;
+            end
         case '7'
             if isempty(data.W)
                 errordlg('The modulator variable is missing');
@@ -158,6 +166,14 @@ for i = 1:Nvoxels
         case '74'
             temp.tcrit = tinv(1 - max(data.Thresholds),NSub - 4);
             temp = CheckVariables(i,data,temp);
+            if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
+                AllDataFlag = 1;
+            end
+            
+        case '75'
+            temp = CheckVariables(i,data,temp);
+            % If there are no not-a-number variables then the data is ready
+            % to be processed.
             if (sum(isnan(temp.X)) == 0)&(sum(isnan(temp.M)) == 0)&(sum(isnan(temp.Y)) == 0)
                 AllDataFlag = 1;
             end

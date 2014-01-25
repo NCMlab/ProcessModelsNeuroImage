@@ -8,8 +8,6 @@ end
 BCaci = cell(Nmed,NParameters);
 PERci = cell(Nmed,NParameters);
 
-
-
 for i = 1:length(data.Thresholds)
     [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst.values,data.Thresholds(i),data);
     temp = num2str(data.Thresholds(i));

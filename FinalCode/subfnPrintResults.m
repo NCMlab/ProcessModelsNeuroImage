@@ -70,6 +70,34 @@ switch ModelNum
         subfnPrintModelSummary(Parameters.Model3.Model,fid)
         subfnPrintModelResults(Parameters.Model3,fid)
         PrintAnalysisNotes(Parameters,fid)
+        
+    case '6'
+        
+        PrintModelInfo(Parameters,fid)
+        % Print out Model 1
+        
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model1.Outcome);
+        subfnPrintModelSummary(Parameters.Model1.Model,fid)
+        subfnPrintModelResults(Parameters.Model1,fid)
+        % Print out Model 2
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model2.Outcome);
+        subfnPrintModelSummary(Parameters.Model2.Model,fid)
+        subfnPrintModelResults(Parameters.Model2,fid)
+        % Print out Model 3
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model3.Outcome);
+        subfnPrintModelSummary(Parameters.Model3.Model,fid)
+        subfnPrintModelResults(Parameters.Model3,fid)
+        % Print out Model 4
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model4.Outcome);
+        subfnPrintModelSummary(Parameters.Model4.Model,fid)
+        subfnPrintModelResults(Parameters.Model4,fid)
+        PrintAnalysisNotes(Parameters,fid)
+        fprintf(fid,'******************************************************\n');
+        
     case '7'
         % MODEL 7
         %
@@ -255,6 +283,48 @@ switch ModelNum
                     Parameters.CondAB1{k}.probeValue,...
                     Parameters.CondAB1{k}.pointEst,...
                     Parameters.CondAB1{k}.bootSE,...
+                    limits(1),...
+                    limits(2));
+            end
+        end
+        PrintAnalysisNotes(Parameters,fid)
+    case '75'
+        PrintModelInfo(Parameters,fid)
+        % Print out Model 1
+        
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model1.Outcome);
+        subfnPrintModelSummary(Parameters.Model1.Model,fid)
+        subfnPrintModelResults(Parameters.Model1,fid)
+        % Print out Model 2
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model2.Outcome);
+        subfnPrintModelSummary(Parameters.Model2.Model,fid)
+        subfnPrintModelResults(Parameters.Model2,fid)
+        % Print out Model 3
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model3.Outcome);
+        subfnPrintModelSummary(Parameters.Model3.Model,fid)
+        subfnPrintModelResults(Parameters.Model3,fid)
+        % Print out Model 4
+        fprintf(fid,'******************************************************\n');
+        fprintf(fid,'Outcome: %s\n\n',Parameters.Model4.Outcome);
+        subfnPrintModelSummary(Parameters.Model4.Model,fid)
+        subfnPrintModelResults(Parameters.Model4,fid)
+        fprintf(fid,'******************************************************\n');
+        for i = 1:length(Parameters.Model1)
+            fprintf(fid,'Conditional effect of %s on %s at values of the moderator (%s):\n',...
+                Parameters.names.X,Parameters.names.Y,Parameters.names.M{2});
+            fprintf(fid,'%8s\t%8s\t%8s\t%8s\t%8s\n',...
+                Parameters.names.M{2},'Effect','boot se','lowerCI','upperCI');
+            ThresholdField = fields(Parameters.M1M2{1}.BCaci);
+            ThresholdField = ThresholdField{1};
+            for k = 1:length(Parameters.M1M2)
+                limits = getfield(Parameters.M1M2{k}.BCaci,ThresholdField);
+                fprintf(fid,'%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\n',...
+                    Parameters.M1M2{k}.probeValue,...
+                    Parameters.M1M2{k}.pointEst,...
+                    Parameters.M1M2{k}.bootSE,...
                     limits(1),...
                     limits(2));
             end
