@@ -1,4 +1,4 @@
-function [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,OutputPath)
+function subfnWriteOutResults(AllParameters,AnalysisParameters,OutputPath)
 % The aim is to break this up into pieces so that it can be modular and
 % work with voxel-based analyses or Freesurfer based analyses
 % 1) create a structure with the thre model results
@@ -33,11 +33,37 @@ ImageVoxelIndices = AnalysisParameters.Indices;%zeros(Nvoxels,1);
 [OutData index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters);
 
 % write out Model 2 R-squared
-OutData{index}.name = 'Model2_Rsq';
-OutData{index}.data = zeros(Nvoxels,1);
-OutData{index}.field = ['Model2.Model.rsquare'];
-OutData{index}.dataType = 16;
-index = index + 1;
+if isfield(AllParameters{1},'Model1')
+    OutData{index}.name = 'Model1_Rsq';
+    OutData{index}.data = zeros(Nvoxels,1);
+    OutData{index}.field = ['Model1.Model.rsquare'];
+    OutData{index}.dataType = 16;
+    index = index + 1;
+end
+% write out Model 2 R-squared
+if isfield(AllParameters{1},'Model2')
+    OutData{index}.name = 'Model2_Rsq';
+    OutData{index}.data = zeros(Nvoxels,1);
+    OutData{index}.field = ['Model2.Model.rsquare'];
+    OutData{index}.dataType = 16;
+    index = index + 1;
+end
+% write out Model 3 R-squared
+if isfield(AllParameters{1},'Model3')
+    OutData{index}.name = 'Model3_Rsq';
+    OutData{index}.data = zeros(Nvoxels,1);
+    OutData{index}.field = ['Model3.Model.rsquare'];
+    OutData{index}.dataType = 16;
+    index = index + 1;
+end
+% write out Model 4 R-squared
+if isfield(AllParameters{1},'Model4')
+    OutData{index}.name = 'Model4_Rsq';
+    OutData{index}.data = zeros(Nvoxels,1);
+    OutData{index}.field = ['Model4.Model.rsquare'];
+    OutData{index}.dataType = 16;
+    index = index + 1;
+end
 switch ModelNum
     case '1'
         % Conditional Effects
@@ -81,15 +107,18 @@ switch ModelNum
         index = index + 1;
     case '6'
         % Conditional Effects
-        for j = 1:Nmed
-            for i = 1:Nthr
-                thrStr = num2str(Thresholds(i));
-                OutData{index}.name = ['M1M2' 'sign_' num2str(Thresholds(i))];
-                OutData{index}.data = zeros(Nvoxels,1);
-                OutData{index}.field = ['M1M2{1}.BCaci.alpha' thrStr(3:end)];
-                OutData{index}.dataType = 2;
-                index = index + 1;
-            end
+        OutData{index}.name = 'M1M2pointEst';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = 'M1M2{1}.pointEst';
+        OutData{index}.dataType = 16;
+        index = index + 1;
+        for i = 1:Nthr
+            thrStr = num2str(Thresholds(i));
+            OutData{index}.name = ['M1M2' 'sign_' num2str(Thresholds(i))];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['M1M2{1}.BCaci.alpha' thrStr(3:end)];
+            OutData{index}.dataType = 2;
+            index = index + 1;
         end
         
     case '7'
@@ -172,11 +201,18 @@ switch ModelNum
         
         for k = 1:NProbe
             probeValue = AllParameters{1}.M1M2{k}.probeValue;
+            
+            OutData{index}.name = sprintf('CondM1M2_pV%0.2f_pointEst',probeValue);
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['M1M2{' num2str(k) '}.pointEst'];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+            
             for i = 1:Nthr
                 thrStr = num2str(Thresholds(i));
                 OutData{index}.name = sprintf('CondM1M2_pV%0.2f_sign%0.4f',probeValue,Thresholds(i));
                 OutData{index}.data = zeros(Nvoxels,1);
-                OutData{index}.field = ['M1M2{1}.BCaci.alpha' thrStr(3:end)];
+                OutData{index}.field = ['M1M2{' num2str(k) '}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
                 index = index + 1;
                 

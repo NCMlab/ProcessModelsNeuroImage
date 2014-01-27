@@ -3,12 +3,12 @@ if nargin == 0
     SelectedPath = spm_select(1,'dir');
 end
 cd(SelectedPath)
-
 if exist('AnalysisParameters.mat')
     load AnalysisParameters
 else
     errordlg('this folder does not have the required AnalysticParameters.mat file');
 end
+cd('Results')
 % Check to see if the process is finished
 F = dir('Results_*.mat');
 if AnalysisParameters.NJobSplit == 1
@@ -22,7 +22,7 @@ if AnalysisParameters.NJobSplit == 1
         AllParameters(:) = Parameters;
     
 
-    [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
+    subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
 
 elseif AnalysisParameters.NJobSplit == length(F) 
     % the process is finished
@@ -39,7 +39,7 @@ elseif AnalysisParameters.NJobSplit == length(F)
     load(F(i+1).name)
     AllParameters(i*NvoxelsPerJob+1:end) = Parameters;
 
-    [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
+    subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
 else
     errordlg('This process has not finished')
 end

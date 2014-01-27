@@ -86,3 +86,25 @@ if isfield(AllParameters{count},'Model3')
         end
     end
 end
+
+fprintf(1,'Hello...\n');
+
+% Model 4
+% Not all process models contain four regression models
+if isfield(AllParameters{count},'Model4')
+    Model4FieldNames = fieldnames(AllParameters{count}.Model4);
+    for k = 1:length(Model4FieldNames)
+        if isempty(strmatch(Model4FieldNames(k),'Outcome')) && isempty(strmatch(Model4FieldNames(k),'Model'))
+            OutData{index}.name = ['Model4_' Model4FieldNames{k} '_beta'];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['Model4.' Model4FieldNames{k} '.beta'];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+            OutData{index}.name = ['Model4_' Model4FieldNames{k} '_t'];
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['Model4.' Model4FieldNames{k} '.t'];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+        end
+    end
+end

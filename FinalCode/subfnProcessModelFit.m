@@ -242,7 +242,7 @@ switch data.ModelNum
         % the indirect effect which will be bootstrapped
         % X - M1 - M2 - Y
         ParameterToBS.values(1) = tempModel1(2)*tempModel2(2)*tempModel3(2);
-        ParameterToBS.values(2) = tempModel1(2)*tempModel3(2);
+        ParameterToBS.values(2) = tempModel1(2)*tempModel2(2)*tempModel3(2);
         ParameterToBS.k2 = 0;
         if PointEstFlag
             Model1 = subfnregstats(data.M(:,1),[data.X data.COV]);
@@ -917,17 +917,21 @@ switch data.ModelNum
 
         if data.ProbeMod
             % Where the moderating variable X has a value of zero.
-            ParameterToBS.values(:,1) = tempModel1(2)*tempModel2(2)*tempModel3(2);
-
+            ParameterToBS.values(1,1) = tempModel1(2)*tempModel2(2)*tempModel3(2);
+            ParameterToBS.values(2,1) = tempModel1(2)*tempModel2(2)*tempModel3(2);
             for k = 2:length(probeX)
                 Interaction = data.M(:,2).*(data.X - probeX(k));
                 Model3 = subfnregstats(data.Y,[Interaction data.M(:,2) data.M(:,1) data.X data.COV]);
-                ParameterToBS.values(:,k) = tempModel1(2)*tempModel2(2)*Model3.beta(3) + ...
+                ParameterToBS.values(1,k) = tempModel1(2)*tempModel2(2)*Model3.beta(3) + ...
                     tempModel1(2)*tempModel2(2)*Model3.beta(2)*probeX(k);
+                ParameterToBS.values(2,k) = tempModel1(2)*tempModel2(2)*Model3.beta(3) + ...
+                    tempModel1(2)*tempModel2(2)*Model3.beta(2)*probeX(k);
+             
             end
             ParameterToBS.probeValues = probeX;
         else
-            ParameterToBS.values(:,1) = tempModel1(2)*tempModel2(2)*tempModel3(3);
+            ParameterToBS.values(1,1) = tempModel1(2)*tempModel2(2)*tempModel3(3);
+            ParameterToBS.values(2,1) = tempModel1(2)*tempModel2(2)*tempModel3(3);
             ParameterToBS.probeValues(1) = 0;
         end
         ParameterToBS.k2 = 0;

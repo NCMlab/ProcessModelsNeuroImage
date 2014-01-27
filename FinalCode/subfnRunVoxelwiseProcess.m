@@ -80,7 +80,7 @@ for i = 1:NJobSplit
         fclose(fid);
         %    Str = ['! qsub  ' jobPath];
         Str = ['! qsub -q veryshort.q -p -10 -e ' JobOutputFolder ' -o ' JobOutputFolder ' -l mem_free=500M ' jobPath];
-      %  unix(Str);
+        unix(Str);
     else
         subfnVoxelWiseProcessBatch(InDataPath);
     end
@@ -115,7 +115,7 @@ if NJobSplit > 1
     fprintf(fid,'EOF\n');
     fclose(fid);
     Str = ['! qsub -q veryshort.q -e ' JobOutputFolder ' -o ' JobOutputFolder ' -l mem_free=500M ' jobPath];
-   % unix(Str);
+    unix(Str);
 end
 
 %

@@ -16,8 +16,9 @@ if ischar(InData)
     load(InData);
     % find out the tag for this batch of data
     [PathName FileName] = fileparts(InData);
-    ResultsFolder = fullfile(PathName,'Results');
-    if ~exists(ResultsFolder)
+    [PathName2 FileName2] = fileparts(PathName)
+    ResultsFolder = fullfile(PathName2,'Results');
+    if ~exist(ResultsFolder)
         mkdir(ResultsFolder);
     end
     
