@@ -19,14 +19,23 @@ NvoxelsPerJob = ceil(Nvoxels/NJobSplit);
 c = clock;
 OutFolderName = sprintf('%s_%s_%02d-%02d',AnalysisParameters.Tag,date,c(4),c(5))
 OutFolder = fullfile(BaseDir,OutFolderName);
-JobFolder = fullfile(OutFolder,'jobs');
+JobOutputFolder = fullfile(OutFolder,'JobOutput');
+InJobFolder = fullfile(OutFolder,'JobFiles');
 if ~exist(OutFolder)
     mkdir(OutFolder);
 end
 % create a folder for all the cluster job files
-if ~exist(JobFolder)
-    mkdir(JobFolder);
+if ~exist(JobOutputFolder)
+    mkdir(JobOutputFolder);
 end
+if ~exist(InJobFolder)
+    mkdir(InJobFolder);
+end
+DataFolder = fullfile(OutFolder,'data');
+if ~exist(DataFolder)
+    mkdir(DataFolder);
+end
+
 
 % save the analysis parameters
 Str = ['save ' fullfile(OutFolder,'AnalysisParameters') ' AnalysisParameters'];
@@ -48,14 +57,14 @@ for i = 1:NJobSplit
     data.Indices = AllData.Indices(VoxelForThisJob);
     %Parameters = subfnVoxelWiseProcessBatch(temp,ModelNum,Nboot,Thresholds);
     InTag = sprintf('data_%04d',i);
-    InDataPath = fullfile(OutFolder,InTag);
+    InDataPath = fullfile(DataFolder,InTag);
     Str = ['save ' InDataPath ' data  '];
     eval(Str);
     
     % If there is only ONE job specified then DO NOT send this to the
     % cluster
     if NJobSplit > 1
-        jobPath = fullfile(OutFolder,sprintf('job_%04d.sh',i));
+        jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
         fid = fopen(jobPath,'w');
         fprintf(fid,'#!/bin/bash\n');
         fprintf(fid,'#PBS -N Matlab\n');
@@ -70,8 +79,8 @@ for i = 1:NJobSplit
         fprintf(fid,'EOF\n');
         fclose(fid);
         %    Str = ['! qsub  ' jobPath];
-        Str = ['! qsub -q veryshort.q -p -10 -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
-        unix(Str);
+        Str = ['! qsub -q veryshort.q -p -10 -e ' JobOutputFolder ' -o ' JobOutputFolder ' -l mem_free=500M ' jobPath];
+      %  unix(Str);
     else
         subfnVoxelWiseProcessBatch(InDataPath);
     end
@@ -91,7 +100,7 @@ if NJobSplit > 1
     Str = ['save ' InDataPath ' data '];
     eval(Str);
     
-    jobPath = fullfile(OutFolder,sprintf('job_%04d.sh',i));
+    jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
     fid = fopen(jobPath,'w');
     fprintf(fid,'#!/bin/bash\n');
     fprintf(fid,'#PBS -N Matlab\n');
@@ -105,8 +114,8 @@ if NJobSplit > 1
     fprintf(fid,'exit\n');
     fprintf(fid,'EOF\n');
     fclose(fid);
-    Str = ['! qsub -q veryshort.q -e ' JobFolder ' -o ' JobFolder ' -l mem_free=500M ' jobPath];
-    unix(Str);
+    Str = ['! qsub -q veryshort.q -e ' JobOutputFolder ' -o ' JobOutputFolder ' -l mem_free=500M ' jobPath];
+   % unix(Str);
 end
 %
 % % Once it is all done put the data back together
@@ -150,6 +159,30 @@ switch ModelNum
             data.COV = data.COV;
         end
     case '4'
+        if size(data.X,3) > 1
+            data.X = data.X(:,:,VoxelForThisJob);
+        else
+            data.X = data.X;
+        end
+        % Check the M variable
+        if size(data.M,3) > 1
+            data.M = data.M(:,:,VoxelForThisJob);
+        else
+            data.M = data.M;
+        end
+        % Check the Y variable
+        if size(data.Y,3) > 1
+            data.Y = data.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = data.Y;
+        end
+        % Check the covariates
+        if size(data.COV,3) > 1
+            data.COV = data.COV(:,VoxelForThisJob);
+        else
+            data.COV = data.COV;
+        end
+    case '6'
         if size(data.X,3) > 1
             data.X = data.X(:,:,VoxelForThisJob);
         else
@@ -273,6 +306,30 @@ switch ModelNum
         end
         
     case '74'
+        if size(data.X,3) > 1
+            data.X = data.X(:,:,VoxelForThisJob);
+        else
+            data.X = data.X;
+        end
+        % Check the M variable
+        if size(data.M,3) > 1
+            data.M = data.M(:,:,VoxelForThisJob);
+        else
+            data.M = data.M;
+        end
+        % Check the Y variable
+        if size(data.Y,3) > 1
+            data.Y = data.Y(:,:,VoxelForThisJob);
+        else
+            data.Y = data.Y;
+        end
+        % Check the covariates
+        if size(data.COV,3) > 1
+            data.COV = data.COV(:,VoxelForThisJob);
+        else
+            data.COV = data.COV;
+        end
+    case '75'
         if size(data.X,3) > 1
             data.X = data.X(:,:,VoxelForThisJob);
         else

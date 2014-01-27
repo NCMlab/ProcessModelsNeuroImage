@@ -203,6 +203,127 @@ switch data.ModelNum
             Parameters.Model3.Outcome = data.names.Y;
             
         end
+    case '6'
+       %    M1--M2
+       %   /      \
+       %  /        \
+       % X          Y
+       %
+%        Model 1: X to M1
+%        Model 2: X and M1 to M2
+%        Model 3: X, M1 and M2 to Y
+%        Model 4: X to Y
+%        Only the full indirect path is being testing with bootstraping. I
+%        am not sure if I should put in the shorter paths as well. They are
+%        actually calculable with tests of Model 4.
+
+        Nmed = size(data.M,2);
+        Ndata = size(data.Y,1);
+
+        NameStruct = {'M1' 'M1M2'};
+
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(Nmed,1),'probeValues',zeros(1,1),'ProbeMod',0);
+        % redo the setup so that results are organized based on models
+        % =================================================================
+        % Model 1
+        tempModel1 = subfnregress(data.M(:,1),[data.X data.COV]);
+        % =================================================================
+        % Model 2
+        tempModel2 = subfnregress(data.M(:,2),[data.M(:,1) data.X data.COV]);
+        % =================================================================
+        % Model 3
+        tempModel3 = subfnregress(data.Y,[data.M(:,2) data.M(:,1) data.X data.COV]);
+        % =================================================================
+        % Model 4
+        tempModel4 = subfnregress(data.Y,[data.X data.COV]);
+
+        % =================================================================
+        % Bootstrap values
+        % the indirect effect which will be bootstrapped
+        % X - M1 - M2 - Y
+        ParameterToBS.values(1) = tempModel1(2)*tempModel2(2)*tempModel3(2);
+        ParameterToBS.values(2) = tempModel1(2)*tempModel3(2);
+        ParameterToBS.k2 = 0;
+        if PointEstFlag
+            Model1 = subfnregstats(data.M(:,1),[data.X data.COV]);
+            Model2 = subfnregstats(data.M(:,2),[data.M(:,1) data.X data.COV]);
+            Model3 = subfnregstats(data.Y,[data.M(:,2) data.M(:,1) data.X data.COV]);
+            Model4 = subfnregstats(data.Y,[data.X data.COV]);
+            Parameters = {};
+
+            % Fill in the Parameters structure with all results
+            % Model 1
+            Parameters.Model1.const = subfnSetParameters('const', Model1, 1);
+            Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,2);',data.names.X,data.names.X);
+            eval(Str)
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,2+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str)
+            end
+            Parameters.Model1.Model = subfnSetModelParameters(Model1);
+            Parameters.Model1.Outcome = data.names.M{1};
+            % Model 2
+            Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,2);',data.names.X,data.names.X);
+            eval(Str)
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,2+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str)
+            end
+            Parameters.Model1.Model = subfnSetModelParameters(Model1);
+            Parameters.Model1.Outcome = data.names.M{1};            
+            
+            
+            % Fill in the Parameters structure with all results
+            % from Model 2
+            Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+
+            Str = sprintf('Parameters.Model2.%s%d=subfnSetParameters(''%s'',Model2,1+1);',data.names.M{1},1,data.names.M{1});
+            eval(Str);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+2);',data.names.X,data.names.X);
+            eval(Str);
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+2+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str);
+            end
+            Parameters.Model2.Model = subfnSetModelParameters(Model2);
+            Parameters.Model2.Outcome = data.names.M{2};
+            
+            % Fill in the Parameters structure with all results
+            % from Model 3
+            Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
+            Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+1);',data.names.M{2},data.names.M{2});
+            eval(Str);            
+            Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+2);',data.names.M{1},data.names.M{1});
+            eval(Str);
+            Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+3);',data.names.X,data.names.X);
+            eval(Str);
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+3+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str);
+            end
+            Parameters.Model3.Model = subfnSetModelParameters(Model3);
+            Parameters.Model3.Outcome = data.names.Y;
+            % Fill in the Parameters structure with all results
+            % Model 4
+            Parameters.Model4.const = subfnSetParameters('const', Model4, 1);
+            Str = sprintf('Parameters.Model4.%s=subfnSetParameters(''%s'',Model4,2);',data.names.X,data.names.X);
+            eval(Str)
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model4,2+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str)
+            end
+            Parameters.Model4.Model = subfnSetModelParameters(Model4);
+            Parameters.Model4.Outcome = data.names.Y;
+           
+            % Fill in the Parameters structure with all results
+            % from the bootstrapped values
+
+            Str = sprintf('Parameters.%s.pointEst = ParameterToBS.values(1);',ParameterToBS.names(1,:));
+            eval(Str);
+            Parameters.JohnsonNeyman = -99;
+            Parameters.Model3.Outcome = data.names.Y;
+        end
         
     case '7'
         %
@@ -745,6 +866,159 @@ switch data.ModelNum
                 eval(Str)
             end
         end           
+    case '75'
+       %    M1--M2
+       %   /      \
+       %  /       /\
+       % X--------  Y        
+       %
+       % Model 1: X to M1
+       % Model 2: X and M1 to M2
+       % Model 3: X, M1, M2 and X*M2 to Y
+       % Model 4: X to Y
+       
+       
+        [Ndata Nmed] = size(data.M);
+        % Check to see if the moderator, in this case X, is dicotomous.
+        minX = min(data.X);
+        maxX = max(data.X);
+        rangeX = maxX - minX;
+        if rangeX == 1
+            probeX = [0 1];
+        else           
+            probeX = subfnCalculateProbeValues(data.X);
+        end
+        
+        NameStruct = {'M1M2' 'M1M2'};
+        
+        ParameterToBS = struct('names',char(NameStruct),'values',zeros(2,length(probeX)),'probeValues',zeros(1,length(probeX)),'ProbeMod',0);
+        
+        % =================================================================
+        % Model 1
+        tempModel1 = subfnregress(data.M(:,1),[data.X data.COV]);
+        % =================================================================
+        % Model 2
+        tempModel2 = subfnregress(data.M(:,2),[data.M(:,1) data.X data.COV]);
+        % =================================================================
+        % Model 3
+        Interaction = data.X.*data.M(:,2);
+        tempModel3 = subfnregress(data.Y,[Interaction data.M(:,2) data.M(:,1) data.X data.COV]);
+        % =================================================================
+        % Model 4
+        tempModel4 = subfnregress(data.Y,[data.X data.COV]);
+       
+        
+        % =================================================================
+        % Bootstrap values
+        % the indirect effect which will be bootstrapped
+        % X - M1 - M2 - Y
+        ParameterToBS.ProbeMod = 1;
+        ParameterToBS.k2 = 0;
+
+        if data.ProbeMod
+            % Where the moderating variable X has a value of zero.
+            ParameterToBS.values(:,1) = tempModel1(2)*tempModel2(2)*tempModel3(2);
+
+            for k = 2:length(probeX)
+                Interaction = data.M(:,2).*(data.X - probeX(k));
+                Model3 = subfnregstats(data.Y,[Interaction data.M(:,2) data.M(:,1) data.X data.COV]);
+                ParameterToBS.values(:,k) = tempModel1(2)*tempModel2(2)*Model3.beta(3) + ...
+                    tempModel1(2)*tempModel2(2)*Model3.beta(2)*probeX(k);
+            end
+            ParameterToBS.probeValues = probeX;
+        else
+            ParameterToBS.values(:,1) = tempModel1(2)*tempModel2(2)*tempModel3(3);
+            ParameterToBS.probeValues(1) = 0;
+        end
+        ParameterToBS.k2 = 0;
+        Parameters = {};
+        
+        if PointEstFlag
+            Model1 = subfnregstats(data.M(:,1),[data.X data.COV]);
+            Model2 = subfnregstats(data.M(:,2),[data.M(:,1) data.X data.COV]);
+            Interaction = data.X.*data.M(:,2);
+            Model3 = subfnregstats(data.Y,[Interaction data.M(:,2) data.M(:,1) data.X data.COV]);
+            Model4 = subfnregstats(data.Y,[data.X data.COV]);
+            Parameters = {};
+
+            % Fill in the Parameters structure with all results
+            % Model 1
+            Parameters.Model1.const = subfnSetParameters('const', Model1, 1);
+            Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,2);',data.names.X,data.names.X);
+            eval(Str)
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,2+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str)
+            end
+            Parameters.Model1.Model = subfnSetModelParameters(Model1);
+            Parameters.Model1.Outcome = data.names.M{1};
+            % Model 2
+            Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,2);',data.names.X,data.names.X);
+            eval(Str)
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model1,2+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str)
+            end
+            Parameters.Model1.Model = subfnSetModelParameters(Model1);
+            Parameters.Model1.Outcome = data.names.M{1};            
+            
+            
+            % Fill in the Parameters structure with all results
+            % from Model 2
+            Parameters.Model2.const = subfnSetParameters('const', Model2, 1);
+
+            Str = sprintf('Parameters.Model2.%s%d=subfnSetParameters(''%s'',Model2,1+1);',data.names.M{1},1,data.names.M{1});
+            eval(Str);
+            Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+2);',data.names.X,data.names.X);
+            eval(Str);
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model2.%s=subfnSetParameters(''%s'',Model2,1+2+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str);
+            end
+            Parameters.Model2.Model = subfnSetModelParameters(Model2);
+            Parameters.Model2.Outcome = data.names.M{2};
+            
+            % Fill in the Parameters structure with all results
+            % from Model 3
+            Parameters.Model3.const = subfnSetParameters('const', Model3, 1);
+            Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+2);',data.names.M{2},data.names.M{2});
+            eval(Str);            
+            Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+3);',data.names.M{1},data.names.M{1});
+            eval(Str);
+            Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+4);',data.names.X,data.names.X);
+            eval(Str);
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model3.%s=subfnSetParameters(''%s'',Model3,1+4+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str);
+            end
+            
+            Str = sprintf('Parameters.Model3.%s_x_%s=subfnSetParameters(''%s_x%s'',Model3,2);',data.names.M{2},data.names.X,data.names.M{2},data.names.X);
+            eval(Str)
+            
+            Parameters.Model3.Model = subfnSetModelParameters(Model3);
+            Parameters.Model3.Outcome = data.names.Y;
+            
+            % Fill in the Parameters structure with all results
+            % Model 4
+            Parameters.Model4.const = subfnSetParameters('const', Model4, 1);
+            Str = sprintf('Parameters.Model4.%s=subfnSetParameters(''%s'',Model4,2);',data.names.X,data.names.X);
+            eval(Str)
+            for j = 1:size(data.COV,2)
+                Str = sprintf('Parameters.Model1.%s=subfnSetParameters(''%s'',Model4,2+j);',data.names.COV{j},data.names.COV{j});
+                eval(Str)
+            end
+            Parameters.Model4.Model = subfnSetModelParameters(Model4);
+            Parameters.Model4.Outcome = data.names.Y;
+           
+            % Fill in the Parameters structure with all results
+            % from the bootstrapped values
+
+            Str = sprintf('Parameters.%s.pointEst = ParameterToBS.values(1);',ParameterToBS.names(1,:));
+            eval(Str);
+            Parameters.JohnsonNeyman = -99;
+            Parameters.Model3.Outcome = data.names.Y;
+        end
 
 
 

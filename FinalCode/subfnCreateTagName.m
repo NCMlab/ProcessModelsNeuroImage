@@ -15,7 +15,7 @@ switch AllData.ModelNum
         end
         Tag = sprintf('%sNboot%d',Tag,AllData.Nboot);
     case '6'
-        Tag = sprintf('Model%s_X%s_M%s_M%s_Y%s_COV',AllData.ModelNum,AllData.names.X,AllData.names.M{1},AllData.names{2},AllData.names.Y);
+        Tag = sprintf('Model%s_X%s_M%s_M%s_Y%s_COV',AllData.ModelNum,AllData.names.X,AllData.names.M{1},AllData.names.M{2},AllData.names.Y);
         for i = 1:length( AllData.names.COV)
             Tag = sprintf('%s%s_',Tag,AllData.names.COV{i});
         end
@@ -45,7 +45,7 @@ switch AllData.ModelNum
         end
         Tag = sprintf('%sNboot%d',Tag,AllData.Nboot);
     case '75'
-        Tag = sprintf('Model%s_X%s_M%s_M%s_Y%s_COV',AllData.ModelNum,AllData.names.X,AllData.names.M{1},AllData.names{2},AllData.names.Y);
+        Tag = sprintf('Model%s_X%s_M%s_M%s_Y%s_COV',AllData.ModelNum,AllData.names.X,AllData.names.M{1},AllData.names.M{2},AllData.names.Y);
         for i = 1:length( AllData.names.COV)
             Tag = sprintf('%s%s_',Tag,AllData.names.COV{i});
         end
