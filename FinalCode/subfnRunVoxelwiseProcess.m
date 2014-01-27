@@ -96,7 +96,7 @@ if NJobSplit > 1
     data.Indices = AllData.Indices(VoxelForThisJob);
     %Parameters = subfnVoxelWiseProcessBatch(temp,ModelNum,Nboot,Thresholds);
     InTag = sprintf('data_%04d',i);
-    InDataPath = fullfile(OutFolder,InTag);
+    InDataPath = fullfile(DataFolder,InTag);
     Str = ['save ' InDataPath ' data '];
     eval(Str);
     
@@ -117,6 +117,7 @@ if NJobSplit > 1
     Str = ['! qsub -q veryshort.q -e ' JobOutputFolder ' -o ' JobOutputFolder ' -l mem_free=500M ' jobPath];
    % unix(Str);
 end
+
 %
 % % Once it is all done put the data back together
 % AllDoneFlag = 0;

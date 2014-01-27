@@ -1,6 +1,7 @@
-function WriteOutResults
-
-SelectedPath = spm_select(1,'dir');
+function WriteOutResults(SelectedPath)
+if nargin == 0
+    SelectedPath = spm_select(1,'dir');
+end
 cd(SelectedPath)
 
 if exist('AnalysisParameters.mat')

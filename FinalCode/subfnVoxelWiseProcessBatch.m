@@ -16,6 +16,11 @@ if ischar(InData)
     load(InData);
     % find out the tag for this batch of data
     [PathName FileName] = fileparts(InData);
+    ResultsFolder = fullfile(PathName,'Results');
+    if ~exists(ResultsFolder)
+        mkdir(ResultsFolder);
+    end
+    
     tag = InData(end-3:end);
 
     % If this voxelwise data than try to run in parallel
@@ -208,7 +213,7 @@ end
 
 if ischar(InData)
     % save the results to a mat file so that the main program can load them up
-    Str = ['save ' fullfile(PathName,['Results_' tag]) ' Parameters'];
+    Str = ['save ' fullfile(ResultsFolder,['Results_' tag]) ' Parameters'];
     eval(Str);
     fprintf(1,'Done!');
 end
