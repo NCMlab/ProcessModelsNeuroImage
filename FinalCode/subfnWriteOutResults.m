@@ -34,11 +34,21 @@ ImageVoxelIndices = AnalysisParameters.Indices;%zeros(Nvoxels,1);
 
 % write out Model 2 R-squared
 if isfield(AllParameters{1},'Model1')
-    OutData{index}.name = 'Model1_Rsq';
-    OutData{index}.data = zeros(Nvoxels,1);
-    OutData{index}.field = ['Model1.Model.rsquare'];
-    OutData{index}.dataType = 16;
-    index = index + 1;
+    if iscell(AllParameters{1}.Model1)
+        for j = 1:length(AllParameters{1}.Model1)
+            OutData{index}.name = sprintf('Model1_Med%d_Rsq',j);
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = [sprintf('Model1{%d}.Model.rsquare',j)];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+        end
+    else
+        OutData{index}.name = 'Model1_Rsq';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = [sprintf('Model1.Model.rsquare',j)];
+        OutData{index}.dataType = 16;
+        index = index + 1;
+    end
 end
 % write out Model 2 R-squared
 if isfield(AllParameters{1},'Model2')
@@ -95,16 +105,18 @@ switch ModelNum
                 thrStr = num2str(Thresholds(i));
                 OutData{index}.name = ['ABMed' num2str(j) 'sign_' num2str(Thresholds(i))];
                 OutData{index}.data = zeros(Nvoxels,1);
-                OutData{index}.field = ['AB' num2str(j) '{' num2str(j) '}.BCaci.alpha' thrStr(3:end)];
+                OutData{index}.field = ['AB' num2str(j) '{1}.BCaci.alpha' thrStr(3:end)];
                 OutData{index}.dataType = 2;
                 index = index + 1;
             end
         end
-        OutData{index}.name = 'k2';
-        OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = ['k2.pointEst'];
-        OutData{index}.dataType = 16;
-        index = index + 1;
+        if isfield(AllParameters{1},'k2')
+            OutData{index}.name = 'k2';
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['k2.pointEst'];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+        end
     case '6'
         % Conditional Effects
         OutData{index}.name = 'M1M2pointEst';
