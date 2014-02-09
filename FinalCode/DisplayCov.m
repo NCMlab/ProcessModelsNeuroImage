@@ -1,4 +1,5 @@
 function [SPM xSPM] = DisplayCov(varargin)
+spm('defaults','FMRI')
 %clear classes
 if nargin == 3
     HeightThr = varargin{2};
@@ -31,6 +32,9 @@ Data = spm_read_vols(spm_vol(P));
 % Select direction of inference and calculate the max and min values
 MinRange = round(min(min(min(Data)))*100)/100;
 MaxRange = round(max(max(max(Data)))*100)/100;
+fprintf(1,'Min: %0.6f\t, Max %0.6f\n',min(Data(find(Data))),max(Data(find(Data))));
+
+
 if isempty(HeightThr) 
     DirectionStr = ['Display:' '[range:' num2str(MinRange) ':' num2str(MaxRange) ']']
     str = 'positive|negative';
@@ -46,19 +50,23 @@ else
 end
 
 %
-% do some error checking to make sure values are within range
-if ~isempty(strmatch(direction,'negative'))
-    while ~((u<=0)&(u>MinRange))
-        warndlg('Please enter a value within range','','modal')
-        u  = spm_input(['threshold {',STAT,' or p value}'],'+1','r',3.09,1);
-    end
+if u < MinRange
+    u = min(Data(find(Data)))+0.0001;
+    direction = 'positive';
 else
-    while ~((u>=0)&(u<MaxRange))
-        warndlg('Please enter a value within range','','modal')
-        u  = spm_input(['threshold {',STAT,' or p value}'],'+1','r',3.09,1);
+    % do some error checking to make sure values are within range
+    if ~isempty(strmatch(direction,'negative'))
+        while ~((u<=0)&(u>MinRange))
+            warndlg('Please enter a value within range','','modal')
+            u  = spm_input(['threshold {',STAT,' or p value}'],'+1','r',3.09,1);
+        end
+    else
+        while ~((u>=0)&(u<MaxRange))
+            warndlg('Please enter a value within range','','modal')
+            u  = spm_input(['threshold {',STAT,' or p value}'],'+1','r',3.09,1);
+        end
     end
 end
-
 thresDesc = [STAT '=' num2str(u) ];
 
 DIM = V.dim;
@@ -68,6 +76,7 @@ DIM = V.dim;
 if strmatch(direction,'negative')
     Data = Data.*-1;
 end
+
 F  = find(Data > abs(u));
 ZValues = zeros(1,length(F));
 %

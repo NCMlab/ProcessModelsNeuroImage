@@ -134,9 +134,18 @@ function [AALList BAList] = subfnFindAALandBA(XYZmm)
 Paal = '/share/data/data9/DARPA2_LS_SPM5/raal.nii';
 Pba = '/share/data/data9/DARPA2_LS_SPM5/rbrodmann.nii';
 %Pcort = '/share/data/data5/locally_written_m_files/templates/rHarvardOxford-cort-prob-2mm.nii'
+if ismac
+    BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks';
+    Paal = fullfile(BaseDir,'raal.nii');
+    Pba = fullfile(BaseDir, 'rbrodmann.nii');
+    [aalCol1 aalCol2 aalCol3] = textread(fullfile(BaseDir,'aal.nii.txt'),'%d%s%d');
 
+else
+    Paal = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/raal.nii';
+    Pba = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/rbrodmann.nii';
 
-[aalCol1 aalCol2 aalCol3] = textread('/share/data/data9/DARPA2_LS_SPM5/aal.nii.txt','%d%s%d');
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Vba = spm_vol(Pba);
@@ -149,7 +158,7 @@ Iba = spm_read_vols(Vba);
 VMat = Vaal.mat;
 VMat(1,1) = -VMat(1,1);
 VMat(1,4) = -VMat(1,4);
-NVoxels = length(XYZmm);
+NVoxels = size(XYZmm,1);
 AALList = {};
 BAList = {};
 for i = 1:NVoxels

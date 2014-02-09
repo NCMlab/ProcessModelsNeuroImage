@@ -31,9 +31,9 @@ if isempty(DataIndex)
 end
 DataFileIndex = ceil(DataIndex/NVoxPerChunk);
 % Load the data file
-load(fullfile(SelectedPath,[sprintf('data_%04d',DataFileIndex)]))
+load(fullfile(SelectedPath,'data',[sprintf('data_%04d',DataFileIndex)]))
 % Load the results file
-load(fullfile(SelectedPath,[sprintf('Results_%04d',DataFileIndex)]))
+load(fullfile(SelectedPath,'Results',[sprintf('Results_%04d',DataFileIndex)]))
 % Find the indeex in the data file
 dataChunkIndex = find(data.Indices == index);
 data1 = data;
