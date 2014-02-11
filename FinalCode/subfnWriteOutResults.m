@@ -45,7 +45,7 @@ if isfield(AllParameters{1},'Model1')
     else
         OutData{index}.name = 'Model1_Rsq';
         OutData{index}.data = zeros(Nvoxels,1);
-        OutData{index}.field = [sprintf('Model1.Model.rsquare',j)];
+        OutData{index}.field = [sprintf('Model1.Model.rsquare')];
         OutData{index}.dataType = 16;
         index = index + 1;
     end

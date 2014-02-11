@@ -1,4 +1,4 @@
-function FindAALandBAForSPMResults(xSPM, hReg,Title, Num,Dis, OtherImage)
+function [XYZmm ClList] = FindAALandBAForSPMResults(xSPM, hReg,Title, Num,Dis, OtherImage)
 % Usage:
 % After results have been estimated and the glass brains are displayed in
 % the Graphics window. 
@@ -131,20 +131,24 @@ function [AALList BAList] = subfnFindAALandBA(XYZmm)
 % Paal = '/mnt/data6/Brady/mricro/aal.img';
 % [aalCol1 aalCol2 aalCol3] = textread('/mnt/data6/Brady/mricro/aal.txt','%d%s%d');
 % Pba = '/mnt/data6/Brady/mricro/brodmann.img';
-Paal = '/share/data/data9/DARPA2_LS_SPM5/raal.nii';
-Pba = '/share/data/data9/DARPA2_LS_SPM5/rbrodmann.nii';
+CodePath = fileparts(mfilename('fullpath'));
+
+MaskPath = fullfile(fileparts(CodePath),'masks');
+% Paal = '/share/data/data9/DARPA2_LS_SPM5/raal.nii';
+% Pba = '/share/data/data9/DARPA2_LS_SPM5/rbrodmann.nii';
 %Pcort = '/share/data/data5/locally_written_m_files/templates/rHarvardOxford-cort-prob-2mm.nii'
-if ismac
-    BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks';
-    Paal = fullfile(BaseDir,'raal.nii');
-    Pba = fullfile(BaseDir, 'rbrodmann.nii');
-    [aalCol1 aalCol2 aalCol3] = textread(fullfile(BaseDir,'aal.nii.txt'),'%d%s%d');
+% if ismac
+%     BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks';
 
-else
-    Paal = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/raal.nii';
-    Pba = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/rbrodmann.nii';
+    Paal = fullfile(MaskPath,'raal.nii');
+    Pba = fullfile(MaskPath, 'rbrodmann.nii');
+    [aalCol1 aalCol2 aalCol3] = textread(fullfile(MaskPath,'aal.nii.txt'),'%d%s%d');
 
-end
+% else
+%     Paal = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/raal.nii';
+%     Pba = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/rbrodmann.nii';
+% 
+% end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

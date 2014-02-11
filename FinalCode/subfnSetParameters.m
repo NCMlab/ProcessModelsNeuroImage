@@ -12,3 +12,6 @@ str = [name ' = setfield(' name ',''p'', ' num2str(statsStruct.tstat.pval(index)
 eval(str)
 str = ['outStruct = ' name ';'];
 eval(str)
+% Add standardized beta
+str = [name ' = setfield(' name ',''B'', ' num2str(statsStruct.beta(index)*sqrt(statsStruct.covb(index,index))/sqrt(statsStruct.covb(1,1))) ');'];
+eval(str)
