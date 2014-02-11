@@ -10,28 +10,34 @@ Direct([1 2],3) = 1;
 % Interactions
 Inter = zeros(M,M);
 %Inter([4 5],3,1) = 1;
-%Inter([1 2 3],2,1) = 1;
+Inter([1 2 ],2,1) = 1;
 
 % Estimate the paths
 Paths = zeros(M,M,1);
 Paths(1,2,1) = 1;
 Paths(2,3,1) = 2;
 
+
 Direct
 Inter
 Paths
-%%
+%
 MaxNumberInter = 0;
 if ~isempty(find(Inter))
     MaxNumberInter = size(Inter,3);
 end
-MaxNumberInter
+
 % Make sure the interaction matrix contains all the main effects
 %if isempty(find(Inter ~= Direct.*Inter))
 % The interaction terms are good
 %end
 % Fit the regression equations for direct effects
 beta = zeros(M+1+MaxNumberInter,M);
+B = zeros(M+1+MaxNumberInter,M);
+t = zeros(M+1+MaxNumberInter,M);
+se = zeros(M+1+MaxNumberInter,M);
+p = zeros(M+1+MaxNumberInter,M);
+df = zeros(M+1+MaxNumberInter,M);
 for i = 1:M
     Col = find(Direct(:,i));
     if ~isempty(Col)
@@ -39,17 +45,28 @@ for i = 1:M
         Interaction = [];
         if ~isempty(find(Inter(:,i,:)))
             Interaction = zeros(N,MaxNumberInter);
-            
             for j = 1:MaxNumberInter
                 InterCol = find(Inter(:,i,j));
                 Interaction(:,j) = prod(Data(:,InterCol),2);
             end
         end
-        b = subfnregress(Data(:,i),[Data(:,Col) Interaction]);
-        beta([1; 1+find(Direct(:,i))],i) = b(1:length(Col)+1);
+       % b = subfnregress(Data(:,i),[Data(:,Col) Interaction]);
+        S = subfnregstats(Data(:,i),[Data(:,Col) Interaction]);
+        beta([1; 1+find(Direct(:,i))],i) = S.beta(1:length(Col)+1);
+        B([1; 1+find(Direct(:,i))],i) = S.beta(1:length(Col)+1);
+        t([1; 1+find(Direct(:,i))],i) = S.tstat.t(1:length(Col)+1);
+        se([1; 1+find(Direct(:,i))],i) = S.tstat.se(1:length(Col)+1);
+        p([1; 1+find(Direct(:,i))],i) = S.tstat.pval(1:length(Col)+1);
+       % df([1; 1+find(Direct(:,i))],i) = S.tstat.dfe;
         if ~isempty(Interaction)
             % Add the interaction terms
-            beta(M+2:end,i) = b(length(Col)+2:end);
+            beta(M+2:end,i) = S.beta(length(Col)+2:end);
+            %B(M+2:end,i) = B(length(Col)+2:end);
+            t(M+2:end,i) = S.tstat.t(length(Col)+2:end);
+            se(M+2:end,i) = S.tstat.se(length(Col)+2:end);
+            p(M+2:end,i) = S.tstat.pval(length(Col)+2:end);
+        %    df(M+2:end,i) = S.tstat.dfe;
+            
         end
     end
 end
@@ -87,7 +104,7 @@ for j = 1:NumberOfPaths
                         tempInter(Row) = 0;
                         % find the probe values,this even works for higher
                         % order interactions, I think
-                        IndirectEffect{j} = IndirectEffect{j}.*beta(index) + beta(M+1+k,Col).*[0; prod(prctile(Data(:,find(tempInter)),[10:10:90]),2)];
+                        IndirectEffect{j} = IndirectEffect{j}.*beta(index) + beta(M+1+k,Col).*[0; prod(prctile(Data(:,find(tempInter)),[10:10:90]),1)'];
                     end
                 end
             
@@ -109,7 +126,8 @@ data.M = Data(:,2);
 data.Y = Data(:,3);
 data.COV = [];
 data.V = [];
-data.ModelNum = '4'
+data.ModelNum = '74'
+data.ProbeMod=1
 PointEstFlag = 1;
 [ParameterToBS Parameters] = subfnProcessModelFit(data,PointEstFlag)
 
