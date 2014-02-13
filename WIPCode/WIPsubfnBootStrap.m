@@ -1,0 +1,39 @@
+function WIPsubfnBootStrap(data,Nboot)
+
+PointEstResults = WIPsubfnFitModel(data);
+% initialize bootstrap values based on the size of the results structure.
+
+FieldNames = fieldnames(PointEstResults)
+%%
+BootStrap = {}
+for i = 1:length(FieldNames)
+    BootStrap = setfield(BootStrap,FieldNames{i},zeros([size(getfield(PointEstResults,FieldNames{1})) Nboot]))
+end
+%%
+% find the number of groups if stratified resampling will be done
+if ~isempty(data.STRAT)
+    Gr1 = find(data.STRAT == 0);
+    NGr1 = length(Gr1);
+    Gr2 = find(data.STRAT == 1);
+    NGr2 = length(Gr2);
+else
+    NGr1 = [];
+    NGr2 = [];
+end
+% start the bootstrap loop using parallel processing
+
+for i = 1:Nboot
+    % this is needed for the parallel processing to work
+    temp = data;
+    % create the resamples
+    if isempty(temp.STRAT)
+        Samp =  floor(N*rand(N,1))+1;
+    else
+        Samp1 = floor(NGr1*rand(NGr1,1))+1;
+        Samp2 = floor(NGr2*rand(NGr2,1))+1+NGr1;
+        Samp = [Samp1; Samp2];
+    end
+    temp.data = temp.data(Samp,:);
+    Results = WIPsubfnFitModel(temp)
+    
+    bstat(i,:,:) = tParam.values;
