@@ -29,9 +29,10 @@ for i = 1:M
             end
         end
         % b = subfnregress(Data(:,i),[Data(:,Col) Interaction]);
+        
         S = subfnregstats(data.data(:,i),[data.data(:,Col) Interaction]);
         Results.beta([1; 1+find(data.Direct(:,i))],i) = S.beta(1:length(Col)+1);
-        Results.B([1; 1+find(data.Direct(:,i))],i) = S.beta(1:length(Col)+1);
+        Results.B([1; 1+find(data.Direct(:,i))],i) = S.B(1:length(Col)+1);
         Results.t([1; 1+find(data.Direct(:,i))],i) = S.tstat.t(1:length(Col)+1);
         Results.se([1; 1+find(data.Direct(:,i))],i) = S.tstat.se(1:length(Col)+1);
         Results.p([1; 1+find(data.Direct(:,i))],i) = S.tstat.pval(1:length(Col)+1);

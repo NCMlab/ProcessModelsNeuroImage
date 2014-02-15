@@ -37,6 +37,7 @@ else
     pval = 2*(tcdf(-abs(t), dfe));
     S = {};
     S.beta = beta;
+    S.B = beta.*(std(design)./std(y))';
     S.covb = covb;
     S.tstat = {};
     S.tstat.t = t;
