@@ -1,5 +1,5 @@
 function WIPsubfnBootStrap(data,Nboot)
-
+Nboot = 100;
 PointEstResults = WIPsubfnFitModel(data);
 % initialize bootstrap values based on the size of the results structure.
 
@@ -35,5 +35,6 @@ for i = 1:Nboot
     end
     temp.data = temp.data(Samp,:);
     Results = WIPsubfnFitModel(temp)
-    
-    bstat(i,:,:) = tParam.values;
+    BootStrap.beta(:,:,i) = Results.beta;
+    BootStrap.IndirectEffect(:,:,i) = Results.IndirectEffect{1};
+end

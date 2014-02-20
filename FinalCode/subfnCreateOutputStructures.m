@@ -1,4 +1,7 @@
-function OutData = subfnWriteOutResults(AllParameters,AnalysisParameters,OutputPath)
+function OutData = subfnCreateOutputStructures(AllParameters,AnalysisParameters,OutputPath,OutThresholds)
+if nargin == 3
+    OutThresholds = -9999;
+end
 % The aim is to break this up into pieces so that it can be modular and
 % work with voxel-based analyses or Freesurfer based analyses
 % 1) create a structure with the thre model results
@@ -21,17 +24,24 @@ count = 1;
 while isempty(AllParameters{count})
     count = count + 1;
 end
-Nvoxels = length(AllParameters);
+Nvoxels = AnalysisParameters.Nvoxels;
 Nmed = AnalysisParameters.Nmed;
 
 Thresholds = AnalysisParameters.Thresholds;
+if OutThresholds > 0
+    if ~isempty(find(Thresholds == OutThresholds))
+        Thresholds = OutThresholds;
+    else
+        error('Entered threshold was not tested.\n');
+    end
+end
 Nthr = length(Thresholds);
 VoxelIndices = zeros(Nvoxels,1);
 ImageVoxelIndices = AnalysisParameters.Indices;%zeros(Nvoxels,1);
 % This creates the structure for the base models that are common to all
 % models
 [OutData index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters);
-fprintf(1,'Creating the model specific structures...\n');
+%fprintf(1,'Creating the model specific structures...\n');
 % write out Model 2 R-squared
 if isfield(AllParameters{1},'Model1')
     if iscell(AllParameters{1}.Model1)

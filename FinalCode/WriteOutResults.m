@@ -31,6 +31,7 @@ elseif AnalysisParameters.NJobSplit == length(F)
     AllParameters = cell(AnalysisParameters.Nvoxels,1);
     % load up all the data
     for i = 1:length(F)-1
+        fprintf(1,'Loading data: %d of %d\n',i, length(F));
         clear Parameters
         load(F(i).name)
         AllParameters((i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob) = Parameters;
@@ -38,7 +39,7 @@ elseif AnalysisParameters.NJobSplit == length(F)
     clear Parameters
     load(F(i+1).name)
     AllParameters(i*NvoxelsPerJob+1:end) = Parameters;
-
+    fprintf(1,'Done Loading data\n');
     subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
 else
     errordlg('This process has not finished')

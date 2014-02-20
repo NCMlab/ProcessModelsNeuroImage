@@ -1,7 +1,8 @@
 function [OutData, index] = subfnCreateOutDataStructureForModels(AllParameters,AnalysisParameters)
+fprintf(1,'Making the simple model structures...\n');
 index = 1;
 Nmed = AnalysisParameters.Nmed;
-Nvoxels = length(AllParameters);
+Nvoxels = AnalysisParameters.Nvoxels;
 OutData = {};
 
 % Find the first non-empty parameter set
@@ -86,8 +87,6 @@ if isfield(AllParameters{count},'Model3')
         end
     end
 end
-
-fprintf(1,'Hello...\n');
 
 % Model 4
 % Not all process models contain four regression models

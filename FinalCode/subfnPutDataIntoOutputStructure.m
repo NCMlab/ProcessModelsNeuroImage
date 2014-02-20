@@ -1,16 +1,12 @@
-function OutData = subfnPutDataIntoOutputStructure(OutData,AllParameters,AnalysisParameters)
-fprintf(1,'Hello\n');
+function OutData = subfnPutDataIntoOutputStructure(OutData,Parameters,AnalysisParameters,IndicesForDataChunk)
 % put the data into the output structure
-Nvoxels = AnalysisParameters.Nvoxels;
+
+Nvoxels = length(IndicesForDataChunk);
 OutDataForProbesFlag = 0;
 for i = 1:Nvoxels
-    if mod(i,1000) == 0
-        fprintf(1,'Working on voxel: %d of %d\n',i,Nvoxels);
-    end
-
-    if ~isempty(AllParameters{i})
+    if ~isempty(Parameters{i})
         VoxelIndices(i) = 1;
-        ImageVoxelIndices(i) = AnalysisParameters.Indices(i);
+        ImageVoxelIndices(i) = AnalysisParameters.Indices(IndicesForDataChunk(i));
         % this limit for the length of OutData maye change due to the
         % discovery of significant probe values in the results. Therefore, %
         % it must remain as a check of the length.
@@ -33,13 +29,13 @@ for i = 1:Nvoxels
                     % replaced with a structure, replicating itself for each of
                     % the probeValues.
                     % How many probe values are there for this voxel?
-                    Nprobe = length(AllParameters{i}.CondAB1);
+                    Nprobe = length(Parameters{i}.CondAB1);
                     if Nprobe > 1
                         OutDataForProbesFlag = 1;
                     end
                     probeValues = zeros(Nprobe,1);
                     for k = 1:Nprobe
-                        probeValues(k) = AllParameters{i}.CondAB1{k}.probeValue;
+                        probeValues(k) = Parameters{i}.CondAB1{k}.probeValue;
                     end
                     tempOutData = {};
                     index = 1;
@@ -72,7 +68,7 @@ for i = 1:Nvoxels
          % remove the OutData cell and add the new structure to
                     % the end.
                     
-                OutData = OutData(~cellfun('isempty',OutData));
+        OutData = OutData(~cellfun('isempty',OutData));
                     
         % This double checking may be slow, but it is done so that if you
         % are in the first voxel with probe values that the new additions
@@ -85,9 +81,9 @@ for i = 1:Nvoxels
                 % skipped. But this assumes that we know that there are
                 % saved probe values.
                 try
-                    thresholds = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
+                    thresholds = eval(['Parameters{' num2str(i) '}.' OutData{j}.field]);
                     if prod(thresholds)>0
-                        OutData{j}.data(i) = 1;
+                        OutData{j}.data(IndicesForDataChunk(i)) = 1;
                         OutData{j}.dataType = 2;
                         
                     end
@@ -95,9 +91,9 @@ for i = 1:Nvoxels
                 end
                 
             else
-                % fprintf(1,'%s\n', ['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                % fprintf(1,'%s\n',['AllParameters{' num2str(i) '}.' OutData{j}.field]);
-                OutData{j}.data(i) = eval(['AllParameters{' num2str(i) '}.' OutData{j}.field]);
+                % fprintf(1,'%s\n', ['Parameters{' num2str(i) '}.' OutData{j}.field]);
+                % fprintf(1,'%s\n',['Parameters{' num2str(i) '}.' OutData{j}.field]);
+                OutData{j}.data(IndicesForDataChunk(i)) = eval(['Parameters{' num2str(i) '}.' OutData{j}.field]);
             end
         end
     end
