@@ -53,12 +53,14 @@ end
 
 
 NumberOfPaths = size(data.Paths,3);
-Results.IndirectEffect = cell(size(data.Paths,3),1);
-% add a row of zeros so that the indexing matchs with the beta matrix
+Results.Paths = cell(NumberOfPaths,1);
+Results.ProbeValues = cell(MaxNumberInter,MaxNumberInter);
+%% add a row of zeros so that the indexing matchs with the beta matrix
 Paths = [zeros(1,M,NumberOfPaths); data.Paths];
 for j = 1:NumberOfPaths
     % cycle over the steps in this path
-    Results.IndirectEffect{j} = 1;
+    Results.Paths{j} = 1;
+    
     IndirectEffect2D = 1;
     for i = 1:max(max(data.Paths(:,:,j)))
         
@@ -67,33 +69,50 @@ for j = 1:NumberOfPaths
         
         % are there any interactions at this point in the path?
         % cycle over all interactions in model
-        for k = 1:MaxNumberInter
-            
-            if ~isempty(find(data.Inter(:,Col,k)))
+        if MaxNumberInter
+            for k = 1:MaxNumberInter
+                
+                
                 % yes there is an interaction
                 % probe the interaction
                 
                 % find the OTHER terms that interact with the path of
                 % interest
                 tempInter = data.Inter(:,Col,k);
-                tempInter(Row) = 0;
-                % find the probe values,this even works for higher
-                % order interactions, I think
-                ThisStepInter = Results.beta(Row,Col) + Results.beta(M+1+k,Col).*[0; prod(prctile(data.data(:,find(tempInter)),[10:10:90]),2)];
-                if length(IndirectEffect2D) == 1
-                    IndirectEffect2D=ThisStepInter;
-                else
-                    IndirectEffect2D = IndirectEffect2D*ThisStepInter';
+                if ~isempty(find(tempInter))
+                    tempInter(Row) = 0;
+                    % find the probe values,this even works for higher
+                    % order interactions, I think
+                    F = find(tempInter);
+                    Fpred = Row - 1;
+                    Fmod = F;
+                    Fmod(Row-1)=0;
+                    Fmod = F(find(Fmod));
+                    Predictor = data.data(:,Fpred);
+                    Moderators = data.data(:,Fmod);
+                    probeMod = prctile(Moderators,[10:10:90]);
+                    % probePre = [0; prctile(Predictor,[10:10:90])'];
+                    probeValues = [zeros(1,size(probeMod,2)); probeMod];
+                    probeValues = probeValues(:,1)*probeValues(:,2)';
+                    
+                    %       probeValues = [0; prod(prctile(data.data(:,find(tempInter)),[10:10:90]),2)];
+                    ThisStepInter = Results.beta(Row,Col) + Results.beta(M+1+k,Col).*probeValues;
+                    if length(IndirectEffect2D) == 1
+                        IndirectEffect2D = ThisStepInter;
+                    else
+                        IndirectEffect2D = IndirectEffect2D*ThisStepInter';
+                    end
+                    Results.ProbeValues{j,k} = probeValues;
+                    Results.Paths{j} = Results.Paths{j}.*ThisStepInter;
                 end
-                Results.IndirectEffect{j} = Results.IndirectEffect{j}.*ThisStepInter;
-            else
-                % no interaction at this step
-                Results.IndirectEffect{j} = Results.IndirectEffect{j}.*Results.beta(Row,Col);
-                IndirectEffect2D = IndirectEffect2D.*Results.beta(Row,Col);
             end
-            
-            
+        else
+            % no interaction at this step
+            Results.Paths{j} = Results.Paths{j}.*Results.beta(Row,Col);
+            %IndirectEffect2D = IndirectEffect2D.*Results.beta(Row,Col);
         end
         
+        
     end
+    
 end

@@ -1,4 +1,5 @@
 function WIPWriteOutResults(SelectedPath)
+%%
 if nargin == 0
     SelectedPath = spm_select(1,'dir');
 end
@@ -52,7 +53,7 @@ end
 
 
  
-%%
+%
 % Write out the images
 V = AnalysisParameters.V;
 WIPsubfnWriteResultsToImages(OutData,AnalysisParameters.Indices,V,SelectedPath)

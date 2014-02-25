@@ -1,13 +1,18 @@
-function WIPsubfnBootStrap(data,Nboot)
-Nboot = 100;
+function BootStrap = WIPsubfnBootStrap(data,Nboot)
 PointEstResults = WIPsubfnFitModel(data);
 % initialize bootstrap values based on the size of the results structure.
-
-FieldNames = fieldnames(PointEstResults)
+% FieldNames to bootstrap
+FieldNames = {'beta' 'B' 'Paths'}
 %%
-BootStrap = {}
+BootStrap = {};
 for i = 1:length(FieldNames)
-    BootStrap = setfield(BootStrap,FieldNames{i},zeros([size(getfield(PointEstResults,FieldNames{1})) Nboot]))
+    Value = getfield(PointEstResults,FieldNames{i});
+    if iscell(Value)
+        BlankValue = cell(size(Value),Nboot);
+    else
+        BlankValue = zeros([size(Value) Nboot]);
+    end
+    BootStrap = setfield(BootStrap,FieldNames{i},BlankValue);
 end
 %%
 % find the number of groups if stratified resampling will be done
@@ -34,7 +39,8 @@ for i = 1:Nboot
         Samp = [Samp1; Samp2];
     end
     temp.data = temp.data(Samp,:);
-    Results = WIPsubfnFitModel(temp)
+    Results = WIPsubfnFitModel(temp);
     BootStrap.beta(:,:,i) = Results.beta;
-    BootStrap.IndirectEffect(:,:,i) = Results.IndirectEffect{1};
+    BootStrap.B(:,:,i) = Results.B;
+    BootStrap.Paths{i} = Results.Paths;
 end

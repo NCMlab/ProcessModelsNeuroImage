@@ -1,26 +1,32 @@
 % THe idea is to create random fields, then smooth them.
 m = 100;
 n = 100;
+p = 100;
+[X Y Z]=meshgrid(1:n,1:m,1:p);
+a = randn(m,n,p);
 
-a = randn(m,n);
+b = randn(m,n,p);
 
-b = randn(m,n);
-
-c = randn(m,n);
-
+c = randn(m,n,p);
+% smooth images
+Sa = zeros(size(a));
+Sb = zeros(size(b));
+Sc = zeros(size(c));
+spm_smooth(a,Sa,[8 8 8]);
+spm_smooth(b,Sb,[8 8 8]);
+spm_smooth(c,Sc,[8 8 8]);
 
 alpha = 0.005;
 % multiply them
-ab = a.*b;
-abc = a.*b.*c;
+
+abc = Sa.*Sb.*Sc;
 % threshold them
-Sabc = sort(reshape(abc,m*n,1));
-Lower = Sabc(m*n*alpha);
-Upper = Sabc(m*n*(1-alpha));
+Sabc = sort(reshape(abc,m*n*p,1));
+Lower = Sabc(m*n*p*alpha);
+Upper = Sabc(m*n*p*(1-alpha));
 
 % find the clusters above the thresholds
-XY = [X(find(abc<Lower | abc>Upper)) Y(find(abc<Lower | abc>Upper))];
-XYZ = [XY ones(length(XY),1)];
+XYZ = [X(find(abc<Lower | abc>Upper)) Y(find(abc<Lower | abc>Upper)) Z(find(abc<Lower | abc>Upper))];
 A = spm_clusters(XYZ');
 NCluster = max(A);
 ClusterSize = zeros(NCluster,1);
@@ -28,6 +34,13 @@ for i = 1:NCluster
     ClusterSize(i) = length(find(A == i));
 end
 max(ClusterSize)
+AllClusterSizes = unique(ClusterSize);
+NumClusters = zeros(length(AllClusterSizes),1);
+for i = 1:length(AllClusterSizes)
+    NumClusters(i) = length(find(ClusterSize == AllClusterSizes(i)));
+end
+[AllClusterSizes NumClusters]    
+    
 % find the number of clusters at different sizes and different thresholds
 %%
 
@@ -40,10 +53,4 @@ hist(abc,20)
 
 
 
-        zh0 = norminv(length(find(bstat(:,j,k) < pointEst(j,k)))/nboot);
-        zA = norminv(alpha/2);
-        z1mA = norminv(1 - alpha/2);
-        ThetaDiff = (sum(theta(:,j))/N) - theta(:,j);
-        acc = (sum(ThetaDiff.^3))/(6*(sum(ThetaDiff.^2))^(3/2));
-        Alpha1(j,k) = normcdf(zh0 + (zh0+zA)/(1 - acc*(zh0 + zA)));
-        Alpha2(j,k) = normcdf(zh0 + (zh0+z1mA)/(1 - acc*(zh0 + z1mA)));
+     
