@@ -1,4 +1,4 @@
-function [BCaci PERci] = subfnFindConfidenceIntervals(data,bstat,pointEst,Thresholds)
+function [BCaci PERci p Z] = subfnFindConfidenceIntervals(data,bstat,pointEst,Thresholds)
 Sbstat = sort(bstat);
 [nboot Nmed NParameters] = size(bstat);
 % Find the number of non-zero bstat values
@@ -9,7 +9,9 @@ BCaci = cell(Nmed,NParameters);
 PERci = cell(Nmed,NParameters);
 
 for i = 1:length(data.Thresholds)
-    [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst.values,data.Thresholds(i),data);
+    % The p and Z addition does not need to be recalculated at each
+    % threshold tested but it is for now.
+    [Alpha1 Alpha2 p Z] = subfnFindBCaLimits(bstat,pointEst.values,data.Thresholds(i),data);
     temp = num2str(data.Thresholds(i));
 
     if ~isnan(Alpha1) | ~isnan(Alpha2)

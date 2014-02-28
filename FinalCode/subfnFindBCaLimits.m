@@ -1,4 +1,4 @@
-function [Alpha1 Alpha2] = subfnFindBCaLimits(bstat,pointEst,alpha,data)
+function [Alpha1 Alpha2 p Z] = subfnFindBCaLimits(bstat,pointEst,alpha,data)
 %
 [N Nmed] = size(data.M);
 NParameters = size(bstat,3);
@@ -23,6 +23,9 @@ if isfield(data,'ProbeMod')
 end
 Alpha1 = zeros(Nmed,NParameters);
 Alpha2 = zeros(Nmed,NParameters);
+p = zeros(Nmed,NParameters);
+Z = zeros(Nmed,NParameters);
+% Here is the jack-knife step
 for i = 1:N
     Values = ones(N,1);
     Values(i) = 0;
@@ -44,6 +47,7 @@ for i = 1:N
     theta(i,:,:) = tParam.values;
 end
 
+
 % 
 for k = 1:NParameters
     for j = 1:Nmed
@@ -51,8 +55,32 @@ for k = 1:NParameters
         zA = norminv(alpha/2);
         z1mA = norminv(1 - alpha/2);
         ThetaDiff = (sum(theta(:,j))/N) - theta(:,j);
+        % Calculate the acceleration factor
         acc = (sum(ThetaDiff.^3))/(6*(sum(ThetaDiff.^2))^(3/2));
         Alpha1(j,k) = normcdf(zh0 + (zh0+zA)/(1 - acc*(zh0 + zA)));
         Alpha2(j,k) = normcdf(zh0 + (zh0+z1mA)/(1 - acc*(zh0 + z1mA)));
+        % Find percentile of the distribution below the null value
+        PCTlower = sum(bstat(:,j,k) < pointEst(j,k))./nboot;
+        PCTupper = sum(bstat(:,j,k) > pointEst(j,k))./nboot;
+        % Check to make sure the tails are not zero
+        PCTlower = min(PCTlower,1-1/nboot);
+        PCTupper = max(PCTupper,1/nboot);
+        % Z-score
+        ZPCTlower = norminv(PCTlower) - zh0;
+        ZPCTupper = norminv(PCTupper) - zh0;
+        % adjust for acceleration
+        Zlower = (ZPCTlower.*(1-acc.*zh0)-zh0)./(1+acc.*ZPCTlower);
+        Zupper = (ZPCTupper.*(1-acc.*zh0)-zh0)./(1+acc.*ZPCTupper);
+        % which tail are we in?
+        IsLower = PCTlower < PCTupper;
+        ZTemp = Zupper;
+        ZTemp(IsLower) = -ZTemp(IsLower);
+        Z(j,k) = ZTemp;
+        
+        pTemp = normcdf(ZTemp);
+        pTemp = [pTemp; 1 - pTemp];
+        p(j,k) = 2.*min(pTemp);
+        
+        
     end
 end

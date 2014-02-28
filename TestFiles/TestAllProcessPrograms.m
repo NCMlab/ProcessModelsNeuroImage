@@ -1,34 +1,4 @@
-
-% functions
-% bootSE
-% subfnBootStrp
-% subfnFindConfidenceIntervals
-% subfnProcessModelFit
-
-
-clear
-% Test new mediation code
-N = 500;
-AonB = 0.5;
-BonC = 0.5;
-AonC = 0.0;
-sC = 0.5;
-sB = 0.5;
-
-A = round(rand(N,1));
-B = A.*AonB + randn(N,1).*sB;
-C = A.*AonC + B.*BonC + randn(N,1).*sC;
-A = (A - mean(A))./std(A);
-B = (B - mean(B))./std(B);
-C = (C - mean(C))./std(C);
-corr([A B C])
-
-%Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
-
-V = randn(N,1); 
-W = randn(N,1); 
-
-
+% 
 % % functions
 % % bootSE
 % % subfnBootStrp
@@ -36,6 +6,36 @@ W = randn(N,1);
 % % subfnProcessModelFit
 % 
 % 
+% clear
+% % Test new mediation code
+% N = 500;
+% AonB = 0.5;
+% BonC = 0.5;
+% AonC = 0.0;
+% sC = 0.5;
+% sB = 0.5;
+% 
+% A = round(rand(N,1));
+% B = A.*AonB + randn(N,1).*sB;
+% C = A.*AonC + B.*BonC + randn(N,1).*sC;
+% A = (A - mean(A))./std(A);
+% B = (B - mean(B))./std(B);
+% C = (C - mean(C))./std(C);
+% corr([A B C])
+% 
+% %Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
+% 
+% V = randn(N,1); 
+% W = randn(N,1); 
+% 
+% 
+% % % functions
+% % % bootSE
+% % % subfnBootStrp
+% % % subfnFindConfidenceIntervals
+% % % subfnProcessModelFit
+% % 
+% % 
 clear
 
 % Test new mediation code
@@ -53,6 +53,9 @@ end
 
 Y = 0.25*M(:,1) + randn(N,1)*0.15 + 0.5.*X.*M(:,1);
 
+% X = randn(N,1);
+% M = randn(N,1);
+% Y = randn(N,1);
 
 %corr([X M V W Y])
 %corr([X M Y])
@@ -67,8 +70,8 @@ data.names = {};
 data.names.X = 'A';
 data.names.M = {'B'};
 data.names.Y = 'C';
-data.names.V = 'V';
-data.names.W = 'W';
+data.names.V = '';
+data.names.W = '';
 data.names.Q = '';
 data.names.R = '';
 data.names.COV = {};
@@ -78,12 +81,12 @@ data.names.COV = {};
 
 data.STRAT = [];
 data.COV = [];%randn(N,2);
-data.W = W;
+data.W = [];
 data.Q = [];
 data.R = [];
+data.V = [];
 
-
-data.ModelNum = '58';
+data.ModelNum = '4';
 data.Thresholds = [0.05];
 data.Indices = 1;
 data.Nboot = 2000;
@@ -92,7 +95,7 @@ data.Nboot = 2000;
 data.X = X;
 data.Y = Y;
 data.M = M;
-data.V = V;
+%data.V = V;
 % Add the bootstrap resamples to the input data
 NSub = length(data.X);
 
@@ -100,6 +103,7 @@ NSub = length(data.X);
 
 Parameters = subfnVoxelWiseProcessBatch(data);
 
+subfnPrintResults(Parameters{1})
 %%
 
 

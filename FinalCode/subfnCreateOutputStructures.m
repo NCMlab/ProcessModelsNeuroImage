@@ -230,6 +230,12 @@ switch ModelNum
             OutData{index}.dataType = 16;
             index = index + 1;
             
+            OutData{index}.name = sprintf('CondM1M2_pV%0.2f_bootSE',probeValue);
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['M1M2{' num2str(k) '}.bootSE'];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+            
             for i = 1:Nthr
                 thrStr = num2str(Thresholds(i));
                 OutData{index}.name = sprintf('CondM1M2_pV%0.2f_sign%0.4f',probeValue,Thresholds(i));
