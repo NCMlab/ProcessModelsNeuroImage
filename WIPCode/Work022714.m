@@ -63,13 +63,13 @@ for i = 1:NVox
     end
 end
 
-
-BSPaths = zeros(NPaths,NVox);
-for i = 1:NVox
-    for j = 1:NPaths
-        BSPaths(j,i) = BootParameters{i}.Paths{j};
-    end
-end
+%
+%BSPaths = zeros(NPaths,NVox);
+%for i = 1:NVox
+ %   for j = 1:NPaths
+  %      BSPaths(j,i) = BootParameters{i}.Paths{j};
+   % end
+%end
 
 
 a = 0.05;

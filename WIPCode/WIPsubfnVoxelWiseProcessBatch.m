@@ -26,22 +26,6 @@ if ischar(InData)
     end
     
     tag = InData(end-3:end);
-
-    % If this voxelwise data than try to run in parallel
-    
-%     try
-%         NumOpen = matlabpool('size');
-%         MaxPool = 8;
-%         if NumOpen < MaxPool
-%             Str = ['matlabpool open ' num2str(MaxPool - NumOpen)];
-%             eval(Str)
-%         end
-%         OpenPoolFlag = 1;
-%     catch
-%         OpenPoolFlag = 0;
-%     end
-    
-    
 % if a structure is passed then just operate on this one data structure
 elseif isstruct(InData)
     data = InData;

@@ -1,4 +1,18 @@
+%% NOTES
+% The program can split the data along voxels or along resamples. Splitting
+% along voxels creates much smaller chunks of data and result files.
+% Splitting along resamples creates data chunks of the entire brain which
+% can be quite large and "clog" the memory of a computer. The problem is
+% that it may be of interest to perform resampling the same way for every
+% voxel. In that case the resamples can be determined before the data is
+% split into chunks of voxels then this same resampling can be used across
+% all data chunks.
 
+
+
+
+
+%%
 %BaseDir = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/Model75_XAgeGroup_MpGM_MfMRI_YPerf_COVNboot0_25-Feb-2014_11-46';
 SelectedDir = spm_select(1,'dir');
 Nboot = 5000;

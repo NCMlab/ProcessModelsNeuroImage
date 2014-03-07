@@ -49,6 +49,7 @@ end
 
 
 % 
+testValue = 0;
 for k = 1:NParameters
     for j = 1:Nmed
         zh0 = norminv(length(find(bstat(:,j,k) < pointEst(j,k)))/nboot);
@@ -60,11 +61,18 @@ for k = 1:NParameters
         Alpha1(j,k) = normcdf(zh0 + (zh0+zA)/(1 - acc*(zh0 + zA)));
         Alpha2(j,k) = normcdf(zh0 + (zh0+z1mA)/(1 - acc*(zh0 + z1mA)));
         % Find percentile of the distribution below the null value
-        PCTlower = sum(bstat(:,j,k) < pointEst(j,k))./nboot;
-        PCTupper = sum(bstat(:,j,k) > pointEst(j,k))./nboot;
+        PCTlower = sum(bstat(:,j,k) < testValue)./nboot;
+        PCTupper = sum(bstat(:,j,k) > testValue)./nboot;
+        IsLower = PCTlower < PCTupper;
+        
+        
         % Check to make sure the tails are not zero
-        PCTlower = min(PCTlower,1-1/nboot);
+        PCTlower = max(PCTlower,1./nboot);
+        PCTupper = min(PCTupper, 1-1./nboot);
+        
         PCTupper = max(PCTupper,1/nboot);
+        PCTlower = min(PCTlower,1-1/nboot);
+        
         % Z-score
         ZPCTlower = norminv(PCTlower) - zh0;
         ZPCTupper = norminv(PCTupper) - zh0;
@@ -72,9 +80,9 @@ for k = 1:NParameters
         Zlower = (ZPCTlower.*(1-acc.*zh0)-zh0)./(1+acc.*ZPCTlower);
         Zupper = (ZPCTupper.*(1-acc.*zh0)-zh0)./(1+acc.*ZPCTupper);
         % which tail are we in?
-        IsLower = PCTlower < PCTupper;
+        
         ZTemp = Zupper;
-        ZTemp(IsLower) = -ZTemp(IsLower);
+        ZTemp(IsLower) = -Zlower(IsLower);
         Z(j,k) = ZTemp;
         
         pTemp = normcdf(ZTemp);

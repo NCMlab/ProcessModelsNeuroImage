@@ -95,7 +95,7 @@ OutPutFileName(findstr(OutPutFileName, '<')) = 'l';
 OutPutFileName(findstr(OutPutFileName, '>')) = 'g';
 OutPutFileName = [OutPutFileName '_AALandBA.csv'];
 OutPutFile = fullfile(xSPM.swd,[OutPutFileName]);
- fid = fopen(OutPutFile, 'w');
+fid = fopen(OutPutFile, 'w');
 % Write all data to file
 fprintf(fid,'%s,Hemi.,B.A.,x,y,z,Z,k\n','Region');
 for i = 1:NClust

@@ -119,6 +119,22 @@ switch ModelNum
                 OutData{index}.dataType = 2;
                 index = index + 1;
             end
+            OutData{index}.name = sprintf('M%dpointEst',j);
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = sprintf('AB%d{1}.pointEst',j);
+            OutData{index}.dataType = 16;
+            index = index + 1;
+            OutData{index}.name = sprintf('M%dp',j);
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = sprintf('AB%d{1}.p',j);
+            OutData{index}.dataType = 16;
+            index = index + 1;
+            OutData{index}.name = sprintf('M%dZ',j);
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = sprintf('AB%d{1}.Z',j);
+            OutData{index}.dataType = 16;
+            index = index + 1;            
+          
         end
         if isfield(AllParameters{1},'k2')
             OutData{index}.name = 'k2';
@@ -132,6 +148,16 @@ switch ModelNum
         OutData{index}.name = 'M1M2pointEst';
         OutData{index}.data = zeros(Nvoxels,1);
         OutData{index}.field = 'M1M2{1}.pointEst';
+        OutData{index}.dataType = 16;
+        index = index + 1;
+        OutData{index}.name = 'M1M2p';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = 'M1M2{1}.p';
+        OutData{index}.dataType = 16;
+        index = index + 1;
+        OutData{index}.name = 'M1M2Z';
+        OutData{index}.data = zeros(Nvoxels,1);
+        OutData{index}.field = 'M1M2{1}.Z';
         OutData{index}.dataType = 16;
         index = index + 1;
         for i = 1:Nthr
@@ -229,6 +255,16 @@ switch ModelNum
             OutData{index}.field = ['M1M2{' num2str(k) '}.pointEst'];
             OutData{index}.dataType = 16;
             index = index + 1;
+            OutData{index}.name = sprintf('CondM1M2_pV%0.2f_p',probeValue);
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['M1M2{' num2str(k) '}.p'];
+            OutData{index}.dataType = 16;
+            index = index + 1;
+            OutData{index}.name = sprintf('CondM1M2_pV%0.2f_Z',probeValue);
+            OutData{index}.data = zeros(Nvoxels,1);
+            OutData{index}.field = ['M1M2{' num2str(k) '}.Z'];
+            OutData{index}.dataType = 16;
+            index = index + 1;            
             
             OutData{index}.name = sprintf('CondM1M2_pV%0.2f_bootSE',probeValue);
             OutData{index}.data = zeros(Nvoxels,1);

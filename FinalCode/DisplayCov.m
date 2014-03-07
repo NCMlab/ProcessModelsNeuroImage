@@ -133,7 +133,8 @@ M = V.mat;
 DIM = V.dim';
 %    hMIPax = spm_mip_ui(xSPM.Z,xSPM.XYZmm,xSPM.M,xSPM.DIM,hMIPax,xSPM.units);
 xSPM = {};
-xSPM.swd = pwd;%fileparts(P);
+
+xSPM.swd = fileparts(P);
 xSPM.Z = ZValues;
 xSPM.n = 1;
 xSPM.STAT = STAT;
