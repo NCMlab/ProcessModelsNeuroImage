@@ -59,67 +59,45 @@ Results.ProbeValues = cell(MaxNumberInter,MaxNumberInter);
 Paths = [zeros(1,M,NumberOfPaths); data.Paths];
 
 for j = 1:NumberOfPaths
-    % cycle over the steps in this path
-    Results.Paths{j} = 1;
-    
-    IndirectEffect2D = 1;
-    for i = 1:max(max(data.Paths(:,:,j)))
-        
+    % step through the path
+    ResultPath = 1;
+    for i = 1:max(max(Paths(:,:,j)))
         index = find(Paths(:,:,j)==i);
         [Row Col] = ind2sub(size(Paths),index);
+        % is there an interaction on this step?
+        tempInter = data.Inter(:,Col);
         
-        % are there any interactions at this point in the path?
-        % cycle over all interactions in model
-        
-        
-        
-        % yes there is an interaction
-        % probe the interaction
-        
-        % find the OTHER terms that interact with the path of
-        % interest
-        if MaxNumberInter
-            for k = 1:MaxNumberInter
-                tempInter = data.Inter(:,Col,k);
-                if ~isempty(find(tempInter))
-                    
-                    
-                    tempInter(Row-1) = 0;
-                    % find the probe values,this even works for higher
-                    % order interactions, I think
-                    F = find(tempInter);
-                    Fpred = Row - 1;
-                    Fmod = F;
-                    Fmod(Row-1)=0;
-                    Fmod = F(find(Fmod));
-                    Predictor = data.data(:,Fpred);
-                    Moderators = data.data(:,Fmod);
-                    if length(unique(Moderators)) == 2
-                        probeMod = unique(Moderators);
-                        probeValues = probeMod;
-                    else
-                        probeMod = prctile(Moderators,[10:10:90]);
-                        probeValues = [zeros(1,size(probeMod,2)); probeMod];
-                        probeValues = probeValues(:,1)*probeValues(:,2)';
-                    end
-                    
-                    %       probeValues = [0; prod(prctile(data.data(:,find(tempInter)),[10:10:90]),2)];
-                    ThisStepInter = Results.beta(Row,Col) + Results.beta(M+1+k,Col).*probeValues;
-                    if length(IndirectEffect2D) == 1
-                        IndirectEffect2D = ThisStepInter;
-                    else
-                        IndirectEffect2D = IndirectEffect2D*ThisStepInter';
-                    end
-                    Results.ProbeValues{j,k} = probeValues;
-                    Results.Paths{j} = Results.Paths{j}.*ThisStepInter;
-                    
-                end
-            end
+        if isempty(find(tempInter))
+            probeValues = [];
+            ResultPath = ResultPath.*Results.beta(Row,Col);
         else
-            % no interaction at this step
-            Results.Paths{j} = Results.Paths{j}.*Results.beta(Row,Col);
-            %IndirectEffect2D = IndirectEffect2D.*Results.beta(Row,Col);
+            % There is an interaction here
+            InteractionComponent = Results.beta(Row,Col);
+            % which variable do you probe?
+            
+            % find the probe values,this even works for higher
+            % order interactions, I think
+            F = find(tempInter) + 1;
+            % probe the one NOT in the path
+            F(find(F == Col)) = 0;
+            Fmod = F(find(F)) - 1;
+            Moderators = data.data(:,Fmod);
+            if length(unique(Moderators)) == 2
+                probeMod = unique(Moderators);
+                probeValues = probeMod;
+            else
+                probeMod = prctile(Moderators,[10:10:90]);
+                probeValues = [zeros(size(probeMod,1),1) probeMod];
+                %  probeValues = probeValues(:,1)*probeValues(:,2)';
+            end
+            
+            InteractionComponent = InteractionComponent + Results.beta(M+1+1,Col).*probeMod;
+            ResultPath = ResultPath.*InteractionComponent;
+            
         end
     end
-
+    Results.ProbeValues{j} = probeValues;
+    Results.Paths{j} = ResultPath;
+    
+    
 end

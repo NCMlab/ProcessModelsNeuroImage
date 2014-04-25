@@ -2,7 +2,7 @@ function Samp = WIPBootStrap(STRAT,N)
 % For each cluster chunk it is creating the EXACT same set of bootstrap
 % resamples ... this is bad. The following line attempts to avoid that by
 % resetting the random seed.
-RandStream.setDefaultStream(RandStream('mt19937ar','seed',sum(100*clock)));
+RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
 if ~isempty(STRAT)
     Gr1 = find(STRAT == 0);
     NGr1 = length(Gr1);

@@ -22,7 +22,7 @@ function varargout = Work_030514(varargin)
 
 % Edit the above text to modify the response to help Work_030514
 
-% Last Modified by GUIDE v2.5 06-Mar-2014 20:22:32
+% Last Modified by GUIDE v2.5 19-Mar-2014 21:48:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,7 +57,11 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
-
+% User defined variables
+handles.PathData = [];
+% Store these new values into the GUI data so they can be retrieved
+% elsewhere in the program
+guidata(hObject,handles);
 % UIWAIT makes Work_030514 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -137,7 +141,7 @@ if Nvar>0
     set(handles.Interactions,'ColumnEditable',logical(ones(1,Nvar+1)));
     set(handles.Paths,'ColumnName',ColNames);
     set(handles.Paths,'RowName',RowNames);
-    
+    set(handles.Paths,'Data',zeros(Nvar+1,Nvar+1))
     PathSteps = {};
     for i = 1:Nvar+1
         temp = {'0'};
@@ -148,7 +152,7 @@ if Nvar>0
     end
     PathSteps
     set(handles.Paths,'ColumnFormat',PathSteps);
-    set(handles.Paths,'ColumnEditable',num2cell(logical(ones(Nvar+1,1))));
+%    set(handles.Paths,'ColumnEditable',num2cell(logical(ones(Nvar+1,1))));
   %  set(handles.Paths,'Data',PathSteps);
     ColFormat = get(handles.Direct,'ColumnFormat');
     ColFormat{Nvar+1} = 'logical';
@@ -171,6 +175,7 @@ else
    % set(handles.Paths,'Data',num2cell(logical(0)));
     set(handles.Paths,'ColumnName',Name);
     set(handles.Paths,'RowName',Name);
+    set(handles.Paths,'Data',[0])
     PathSteps = {};
     for i = 1:Nvar+1
         temp = {'0'};
@@ -201,19 +206,21 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on selection change in popupmenu3.
-function popupmenu3_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu3 (see GCBO)
+% --- Executes on selection change in PathSelector.
+function PathSelector_Callback(hObject, eventdata, handles)
+% hObject    handle to PathSelector (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu3 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu3
-
+% Hints: contents = cellstr(get(hObject,'String')) returns PathSelector contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from PathSelector
+SelectedPath = get(handles.PathSelector,'value')
+set(handles.Paths,'Data',handles.PathData(:,:,SelectedPath));
+%handles.Paths(:,:,SelectedPath) = get(hObject,'Data');
 
 % --- Executes during object creation, after setting all properties.
-function popupmenu3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu3 (see GCBO)
+function PathSelector_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to PathSelector (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -222,3 +229,218 @@ function popupmenu3_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes when entered data in editable cell(s) in Paths.
+function Paths_CellEditCallback(hObject, eventdata, handles)
+% hObject    handle to Paths (see GCBO)
+% eventdata  structure with the following fields (see UITABLE)
+%	Indices: row and column indices of the cell(s) edited
+%	PreviousData: previous data for the cell(s) edited
+%	EditData: string(s) entered by the user
+%	NewData: EditData or its converted form set on the Data property. Empty if Data was not changed
+%	Error: error string when failed to convert EditData to appropriate value for Data
+% handles    structure with handles and user data (see GUIDATA)
+fprintf(1,'Hello\n');
+size(handles.PathData,3)
+% Which path is being edited?
+SelectedPath = get(handles.PathSelector,'value')
+% get the updated data from this path and add it to the handles
+handles.PathData(:,:,SelectedPath) = get(hObject,'Data');
+guidata(hObject,handles);
+
+% --- Executes on button press in AddPath.
+function AddPath_Callback(hObject, eventdata, handles)
+% hObject    handle to AddPath (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+fprintf(1,'Hello\n')
+
+Nvar = length(get(handles.InputData,'String'));
+NumberOfPaths = str2num(get(handles.NumberOfPaths,'String'))+1;
+
+handles.PathData(:,:,NumberOfPaths+1) = zeros(Nvar,Nvar);
+guidata(hObject,handles);
+
+set(handles.NumberOfPaths,'String',num2str(NumberOfPaths))
+% Add the new path number to the path selector piece
+PathSelectorString = {};
+for j = 1:NumberOfPaths
+    PathSelectorString{j} = num2str(j);
+end
+set(handles.Paths,'Data',handles.PathData(:,:,NumberOfPaths+1));
+set(handles.PathSelector,'String',PathSelectorString)
+set(handles.PathSelector,'value',NumberOfPaths)
+
+
+
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over AddPath.
+function AddPath_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to AddPath (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit1_Callback(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit1 as text
+%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in SelectMask.
+function SelectMask_Callback(hObject, eventdata, handles)
+% hObject    handle to SelectMask (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+P = spm_select(1,'image','Select Mask image');
+set(handles.MaskImage,'String',P)
+
+
+
+function MaskImage_Callback(hObject, eventdata, handles)
+% hObject    handle to MaskImage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of MaskImage as text
+%        str2double(get(hObject,'String')) returns contents of MaskImage as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function MaskImage_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to MaskImage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit3_Callback(hObject, eventdata, handles)
+% hObject    handle to edit3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit3 as text
+%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit4_Callback(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit4 as text
+%        str2double(get(hObject,'String')) returns contents of edit4 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function BaseFolder_Callback(hObject, eventdata, handles)
+% hObject    handle to BaseFolder (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of BaseFolder as text
+%        str2double(get(hObject,'String')) returns contents of BaseFolder as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function BaseFolder_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to BaseFolder (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in SelectBaseFolder.
+function SelectBaseFolder_Callback(hObject, eventdata, handles)
+% hObject    handle to SelectBaseFolder (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+P = spm_select(1,'dir');
+set(handles.BaseFolder,'String',P);
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over SelectMask.
+function SelectMask_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to SelectMask (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over MaskImage.
+function MaskImage_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to MaskImage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

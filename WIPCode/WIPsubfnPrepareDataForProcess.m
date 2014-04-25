@@ -5,7 +5,7 @@ BaseDir = ModelInfo.BaseDir;
 Nvoxels = length(ModelInfo.Indices);
 NJobSplit = ModelInfo.NJobSplit;
 NSub = size(ModelInfo.data{1},1);
-
+Nboot = ModelInfo.Nboot;
 % how many jobs to split this into
 NvoxelsPerJob = ceil(Nvoxels/NJobSplit);
 

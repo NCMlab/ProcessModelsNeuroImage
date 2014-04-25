@@ -81,9 +81,7 @@ end
 
 tic 
 for i = 1:Nvoxels
-if i== 1000
-    fprintf(1,'Hello')';
-end
+
     % check to make sure there is data for all subjects at this voxel. 
     Mflag = 0;
     Vflag = 0;
@@ -201,7 +199,7 @@ end
         Parameters{i} = tempParameters{:};
         Parameters{i}.Nboot = data.Nboot;
         Parameters{i}.Thresholds = data.Thresholds;
-        fprintf(1,'\n')
+        %fprintf(1,'\n')
     else
         fprintf(1,' << empty\n')
     end
