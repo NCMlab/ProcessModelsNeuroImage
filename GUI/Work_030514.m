@@ -22,7 +22,7 @@ function varargout = Work_030514(varargin)
 
 % Edit the above text to modify the response to help Work_030514
 
-% Last Modified by GUIDE v2.5 19-Mar-2014 21:48:19
+% Last Modified by GUIDE v2.5 28-Apr-2014 15:15:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -108,20 +108,65 @@ function DataSelector_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns DataSelector contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from DataSelector
-fprintf(1,'Hello\n');
+
 Values = get(hObject,'String');
 SelectionValue = get(hObject,'Value');
 Selection = Values{SelectionValue};
+% Determine if the data structure has been initialized
+if ~isfield(handles,'data')
+        handles.data = {};
+        guidata(hObject,handles);
+end
+CurrentNSub = str2num(get(handles.NSub,'String'));
 switch Selection
     case  'Load data from text file'
-        fprintf(1,'Loading data from text file\n');
+        % Check to see what the current number of subjects is set to
+        
+        % select a text file of data having one or more variables
+        P = spm_select(1,'txt','Select text file');
+        data = textread(P);
+        [m n] = size(data);
+        
+        if m < n
+            % rotate so that rows are "subjects"
+            data = data';
+        end
+        % find out how many subjects are in the file
+        [NSub ~] = size(data);
+        if isempty(CurrentNSub) || CurrentNSub == NSub
+            % update the GUI front panel
+            set(handles.NSub,'String',num2str(NSub));
+            Name = inputdlg('Please enter a name for this variable');
+            Ndata = length(handles.data);
+            % Add this data to the data structure held by the GUI
+            handles.data{Ndata + 1} = data;
+            fprintf(1,'Loading data from text file\n');
+        else
+            % Input data has different number of subjects as existing data
+            errordlg('Input data does not have the correct number of subjects');
+        end
     case  'Load images'
         fprintf(1,'Loading images\n');
-        P = spm_select(Inf,'images');
+        P = spm_select(Inf,'image');
+        V = spm_vol(P);
+        NSub = length(V);
+        if isempty(CurrentNSub) || CurrentNSub == NSub
+            data = spm_read_vols(V);
+            Name = inputdlg('Please enter a name for this variable');
+            Ndata = length(handles.data);
+            % Add this data to the data structure held by the GUI
+            handles.data{Ndata + 1} = data;
+            
+            clear data
+        else
+            errordlg('Input data does not have the correct number of subjects');
+        end
+            
         Name = inputdlg('Please enter a name for this variable');
     case  'Load data from workspace'
         fprintf(1,'Loading workspace variables\n');
 end
+guidata(hObject,handles);
 InputDataList = get(handles.InputData,'String');
 
 Nvar = length(InputDataList);
@@ -284,12 +329,20 @@ function AddPath_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
+% --- Executes on button press in Save.
+function Save_Callback(hObject, eventdata, handles)
+% hObject    handle to Save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+Model = {};
+Model.Direct = cell2mat(get(handles.Direct,'Data'));
+Model.Interact = cell2mat(get(handles.Interactions,'Data'));
+Model.Paths = handles.PathData;
+Model.names = get(handles.InputData,'String');
+Model.BaseFolder = get(handles.BaseFolder,'String');
+Model.MaskImage = get(handles.MaskImage,'String');
+Model.ModelName = get(handles.ModelName,'String');
+fprintf(1,'Save Pressed\n');
 
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
@@ -299,18 +352,18 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 
 
 
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function ModelName_Callback(hObject, eventdata, handles)
+% hObject    handle to ModelName (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+% Hints: get(hObject,'String') returns contents of ModelName as text
+%        str2double(get(hObject,'String')) returns contents of ModelName as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function ModelName_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to ModelName (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -442,5 +495,13 @@ function SelectMask_ButtonDownFcn(hObject, eventdata, handles)
 % --- Otherwise, executes on mouse press in 5 pixel border or over MaskImage.
 function MaskImage_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to MaskImage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over Save.
+function Save_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to Save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

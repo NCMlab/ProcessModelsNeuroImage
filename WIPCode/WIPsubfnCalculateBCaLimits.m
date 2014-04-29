@@ -1,5 +1,5 @@
-function [Alpha1 Alpha2 Z p] = WIPsubfnCalculateBCaci(JackKnifeData,PointEstimate, BootStrapData,alpha)    
-% for beta
+function [Alpha1 Alpha2 Z p] = WIPsubfnCalculateBCaLimits(JackKnifeData,PointEstimate, BootStrapData,alpha)    
+
     [m n] = size(PointEstimate);
     N = size(JackKnifeData,3);
     Nboot = size(BootStrapData,3);
@@ -13,6 +13,8 @@ function [Alpha1 Alpha2 Z p] = WIPsubfnCalculateBCaci(JackKnifeData,PointEstimat
     for i = 1:m
         for j = 1:n
             if PointEstimate(i,j) ~= 0
+                % For diagnostic purposes
+                % fprintf(1,'i = %d,j = %d\n',i,j);
                 zh0 = norminv(length(find(BootStrapData(i,j,:) < PointEstimate(i,j)))/Nboot);
                 ThetaDiff = (sum(JackKnifeData(i,j,:))/N) - squeeze(JackKnifeData(i,j,:));
                 acc = (sum(ThetaDiff.^3))/(6*(sum(ThetaDiff.^2))^(3/2));

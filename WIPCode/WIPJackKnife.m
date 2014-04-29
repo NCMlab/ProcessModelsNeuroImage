@@ -1,14 +1,15 @@
-function JackKnife = WIPJackKnife(Model,Results)
+function JackKnife = WIPJackKnife(Model,Results,FieldNames)
+% Perform the Jack-Knife procedure for the data in model at the specified
+% field names. The Results input is only used for determination of the
+% correct size of the output data.
 tempModel = Model;
 tempModel.N = Model.N - 1;
-FieldNames = {'beta' 'B' 'Paths'};
-
 % create a structure to hold the jack-knife calculations
 JackKnife = {};
 for i = 1:length(FieldNames)
     Value = getfield(Results,FieldNames{i});
     if iscell(Value)
-        BlankValue = cell(size(Value),Model.N);
+        BlankValue = cell(size(Value,1),Model.N);
     else
         BlankValue = zeros([size(Value) Model.N]);
     end

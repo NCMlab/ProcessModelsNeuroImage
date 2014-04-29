@@ -4,11 +4,14 @@ MaxNumberInter = 0;
 if ~isempty(find(data.Inter))
     MaxNumberInter = size(data.Inter,3);
 end
+% There should ideally be a model checking function to ensure that the the
+% model is appropriate and can be estimated.
+% TO DO
 
 % Make sure the interaction matrix contains all the main effects
-%if isempty(find(Inter ~= Direct.*Inter))
+% if isempty(find(Inter ~= Direct.*Inter))
 % The interaction terms are good
-%end
+
 % Fit the regression equations for direct effects
 Results.beta = zeros(M+1+MaxNumberInter,M);
 Results.B = zeros(M+1+MaxNumberInter,M);
@@ -28,8 +31,10 @@ for i = 1:M
                 Interaction(:,j) = prod(data.data(:,InterCol),2);
             end
         end
-        % b = subfnregress(Data(:,i),[Data(:,Col) Interaction]);
-        
+        % perform the regression. For maximization of speed this
+        % sub-function would need to be optimized. This could be done be
+        % eliminating all the regression metrics/tests that are performed
+        % and only leave the absolute minimum.
         S = subfnregstats(data.data(:,i),[data.data(:,Col) Interaction]);
         Results.beta([1; 1+find(data.Direct(:,i))],i) = S.beta(1:length(Col)+1);
         Results.B([1; 1+find(data.Direct(:,i))],i) = S.B(1:length(Col)+1);
@@ -51,7 +56,14 @@ for i = 1:M
 end
 
 
-
+% The paths are stored in an array of cells. This is incovnetient for any
+% other processes, but for now it works. The reason this was chosen was
+% because the size of indirect effects all depend on the model and the
+% number of paths requested. Some of the paths could have interactions
+% along them. For a second order interaction this is an array of probed
+% values stored in the path. If the interaction is third order then the
+% probed path becomes a plane. Therefore, to accomodate this variability in
+% the number of dimensions an array of cells was chosen. 
 NumberOfPaths = size(data.Paths,3);
 Results.Paths = cell(NumberOfPaths,1);
 Results.ProbeValues = cell(MaxNumberInter,MaxNumberInter);
@@ -76,10 +88,11 @@ for j = 1:NumberOfPaths
             % which variable do you probe?
             
             % find the probe values,this even works for higher
-            % order interactions, I think
+            % order interactions, I think.
             F = find(tempInter) + 1;
             % probe the one NOT in the path
             F(find(F == Col)) = 0;
+            % do not probe a 
             Fmod = F(find(F)) - 1;
             Moderators = data.data(:,Fmod);
             if length(unique(Moderators)) == 2
@@ -96,8 +109,7 @@ for j = 1:NumberOfPaths
             
         end
     end
+    % Store the probe values and the resultant path values.
     Results.ProbeValues{j} = probeValues;
     Results.Paths{j} = ResultPath;
-    
-    
 end

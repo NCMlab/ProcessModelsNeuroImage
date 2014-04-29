@@ -1,37 +1,29 @@
 function Results = WIPsubfnProcessData(Model)
+% reset the random number generator. This is EXTREMEMLY important when
+% deploying these analyses to a cluster. Without this resetting then each
+% node of the cluster CAN choose the exact same random numbers.
 RandStream.setDefaultStream(RandStream('mt19937ar','Seed',sum(100*clock)));
+
 % Fit the model
+% The indirect paths (the Paths cell) is set to be an array of cells. This
+% is rather a pain in the neck for everything else. 
 Results = WIPsubfnFitModel(Model);
 % perform bootstrap
+FieldNames = {'beta' 'B' 'Paths'};
 if Model.Nboot > 0
     Model.STRAT = [];
-    BootStrap = WIPsubfnBootStrap(Model,Model.Nboot);
-    % Calculate BCaci for each beta and the path
-    
-    % Perform the jack-knife step
+    % The bootstrap propcedure returns the bootstrap distributions from the
+    % field names stated above. These same effects are then run through
+    % the Jack-Knife procedure.
+    BootStrap = WIPsubfnBootStrap(Model,Model.Nboot,FieldNames);
 
-    JackKnife = WIPJackKnife(Model,Results);
-    
+    % Perform the jack-knife step
+    JackKnife = WIPJackKnife(Model,Results,FieldNames);
     
     % Calculate the BCaci values for each parameter
-    % beta
-    BootStrapData = BootStrap.beta;
-    JackKnifeData = JackKnife.beta;
-    PointEstimate = Results.beta;
-    [Alpha1 Alpha2 Z p] = WIPsubfnCalculateBCaci(JackKnifeData,PointEstimate, BootStrapData,alpha);
-    % To Do: [Sbstat(ceil(Alpha1(j,k)*nboot),j,k) Sbstat(ceil(Alpha2(j,k)*nboot),j,k)]
-    % indirect effects
-    [m n] = size(BootStrap.Paths{1});
-    BootStrapData = zeros(m,n,Model.Nboot);
-    for i = 1:Model.Nboot
-        BootStrapData(:,:,i) = BootStrap.Paths{i}{:};
-    end
-    JackKnifeData = zeros(m,n,Model.N);
-    for i = 1:Model.N
-        JackKnifeData(:,:,i) = JackKnife.Paths{i}{:};
-    end
-    PointEstimate = Results.Paths{:};
-    [Alpha1 Alpha2 Z p] = WIPsubfnCalculateBCaci(JackKnifeData,PointEstimate, BootStrapData,alpha);
-
+    Results.BCaCI = WIPsubfnCreateBCaCI(Results,BootStrap,JackKnife,Model.Thresh);
+  
 end
-% perform permutation
+
+
+%% TO DO: unflatten the path BCaCI results

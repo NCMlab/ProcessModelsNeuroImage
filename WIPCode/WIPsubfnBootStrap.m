@@ -1,14 +1,14 @@
-function BootStrap = WIPsubfnBootStrap(data,Nboot)
+function BootStrap = WIPsubfnBootStrap(data,Nboot,FieldNames)
 PointEstResults = WIPsubfnFitModel(data);
 % initialize bootstrap values based on the size of the results structure.
 % FieldNames to bootstrap
-FieldNames = {'beta' 'B' 'Paths'};
+
 %%
 BootStrap = {};
 for i = 1:length(FieldNames)
     Value = getfield(PointEstResults,FieldNames{i});
     if iscell(Value)
-        BlankValue = cell(size(Value),Nboot);
+        BlankValue = cell(size(Value,1),Nboot);
     else
         BlankValue = zeros([size(Value) Nboot]);
     end
