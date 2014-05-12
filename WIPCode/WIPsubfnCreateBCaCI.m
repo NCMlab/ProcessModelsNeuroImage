@@ -33,7 +33,7 @@
                     [Alpha1 Alpha2 Z p] = WIPsubfnCalculateBCaLimits(JackKnifeData,PointEstimate, BootStrapData,CurrentAlpha);
                     % find the confidence intervals for these adjusted
                     % alpha limits
-                    CurrentBCaCI(:,:,:,j,t) = WIPsubfnCalculateBCaCI(BootStrapData,Alpha1,Alpha2,PointEstimate);
+                    CurrentBCaCI(:,:,:,j,t) = WIPsubfnCalculateBCaci(BootStrapData,Alpha1,Alpha2,PointEstimate);
                 end
             end
             % put the confidence interval data back into the structure
@@ -48,7 +48,7 @@
                 PointEstimate = getfield(Results,FieldNames{i});
                 [Alpha1 Alpha2 Z p] = WIPsubfnCalculateBCaLimits(JackKnifeData,PointEstimate, BootStrapData,CurrentAlpha);
                 % find the confidence intervals
-                CurrentBCaCI(:,:,:,t) = WIPsubfnCalculateBCaCI(BootStrapData,Alpha1,Alpha2,PointEstimate);
+                CurrentBCaCI(:,:,:,t) = WIPsubfnCalculateBCaci(BootStrapData,Alpha1,Alpha2,PointEstimate);
             end
             BCaCI = setfield(BCaCI,FieldNames{i},CurrentBCaCI);
         end

@@ -148,9 +148,11 @@ switch Selection
     case  'Load images'
         fprintf(1,'Loading images\n');
         P = spm_select(Inf,'image');
+        % Read the header information 
         V = spm_vol(P);
         NSub = length(V);
         if isempty(CurrentNSub) || CurrentNSub == NSub
+            % read the data
             data = spm_read_vols(V);
             Name = inputdlg('Please enter a name for this variable');
             Ndata = length(handles.data);
@@ -161,8 +163,7 @@ switch Selection
         else
             errordlg('Input data does not have the correct number of subjects');
         end
-            
-        Name = inputdlg('Please enter a name for this variable');
+           
     case  'Load data from workspace'
         fprintf(1,'Loading workspace variables\n');
 end
@@ -334,14 +335,63 @@ function Save_Callback(hObject, eventdata, handles)
 % hObject    handle to Save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Is a mask file loaded?
+if isempty(get(handles.Nvoxels,'String'))
+    errordlg('Select a mask image');
+end
+% are there any paths specified?
+if isempty(handles.PathData)
+    errordlg('Enter at least one path');
+else
+    % are they all non empty
+    for i = 1:size(handles.PathData,3)-1
+        if isempty(find(handles.PathData(:,:,i)))
+            errordlg('Enter values into the path');
+        end
+    end
+end
+% Is an output folder specified?
+if isempty(get(handles.BaseFolder,'String'))
+    errordlg('Specify a basefolder for the model.');
+end
+% Is an output name specified?
+if isempty(get(handles.ModelName,'String'))
+    errordlg('Specify a name for the model.');
+end
+% Check the data for neuroimaging data and apply the mask
+for i = 1:size(handles.data,2);
+    [m n o p ] = size(handles.data{i});
+    if p > 1
+        % found 4-D data
+        data = zeros(handles.NVox,p);
+        for j = 1:p
+            tempData = handles.data{i}(:,:,:,j);
+            data(:,j) = tempData(handles.Indices);
+        end
+        handles.data{i} = data;
+    end
+end
+    
 Model = {};
+Model.data = handles.data;
 Model.Direct = cell2mat(get(handles.Direct,'Data'));
-Model.Interact = cell2mat(get(handles.Interactions,'Data'));
+Model.Inter = cell2mat(get(handles.Interactions,'Data'));
 Model.Paths = handles.PathData;
 Model.names = get(handles.InputData,'String');
 Model.BaseFolder = get(handles.BaseFolder,'String');
 Model.MaskImage = get(handles.MaskImage,'String');
 Model.ModelName = get(handles.ModelName,'String');
+% Check to see of the model folder exists
+OutPath = fullfile(get(handles.BaseFolder,'String'),get(handles.ModelName,'String'));
+if exist(OutPath)
+    warndlg('Folder exists, overwriting contents');
+    rmdir(OutPath)
+end
+    mkdir(OutPath)
+    Str = sprintf('save %s Model',fullfile(OutPath,'Model'));
+    eval(Str);
+
 fprintf(1,'Save Pressed\n');
 
 % --- Executes on button press in pushbutton3.
@@ -380,7 +430,26 @@ function SelectMask_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 P = spm_select(1,'image','Select Mask image');
-set(handles.MaskImage,'String',P)
+Vm = spm_vol(P);
+mask = spm_read_vols(Vm);
+U = unique(mask);
+if length(U) ~= 2
+    errordlg('Selected mask is not binary.');
+else
+    % save the included voxel indices
+    handles.Indices = find(mask);
+    % save the number of voxels in the mask
+    handles.NVox = length(handles.Indices);
+    % save the header structure of the mask
+    Vm.descrip = '';
+    Vm.fname = '';
+    handles.V = Vm;
+    
+    set(handles.Nvoxels,'String',num2str(handles.NVox));
+    guidata(hObject,handles);
+    set(handles.MaskImage,'String',P)
+    
+end
 
 
 
