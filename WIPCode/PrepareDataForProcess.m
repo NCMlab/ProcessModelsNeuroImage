@@ -8,6 +8,7 @@ function PrepareDataForProcess(ModelInfo)
 % of passing data to each function call on the cluster, only the paths are
 % passed.
 % 
+% TO DO
 % The programs are also smart enough to know that if actual data is passed,
 % instead of a parth, then the data is considered pre-loaded and processed.
 
@@ -72,9 +73,20 @@ else
     % This analysis is run on the host computer
     switch ModelType
         case 'bootstrap'
-            subfnVoxelWiseProcessBatch(ModelInfo);
+            Results = VoxelWiseProcessBootstrap(ModelInfo);
+            
         case 'permutation'
-            VoxelWiseProcessPermute(InDataPath,count,Nperm)
+            % The permutation analysis requires calculation of the point
+            % estimate and then calculation of all of the permutations. The
+            % point estimate is a full set of results and the permutations
+            % only require a smaller subset to be calculated. Therefore,
+            % the permutation test requires the saving of data to file. 
+            % The permutation test is also used to calculate the multiple
+            % comparison corrected results across voxels. Thereofre, it
+            % does not make sense to run this type of analysis on a single
+            % point data set.
+            
+            VoxelWiseProcessPermute(InDataPath,1,ModelInfor.Nperm)
             
     end
 end

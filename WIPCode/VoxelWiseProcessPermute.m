@@ -1,69 +1,128 @@
 function VoxelWiseProcessPermute(InDataPath,count,Nperm)
-% Add a check to determine if a path or a data structure is passed.
-
+% Make sure the random number seed is reset for every function call. This
+% avoids each cluster node starting with the same seed and producing the
+% same results. An alternative futur direction is a precalculation of the permutations for
+% storage in the ModelInfo structure. 
 RandStream.setDefaultStream(RandStream('mt19937ar','Seed',sum(100*clock)));
+
 fprintf(1,'Started at: %s\n',datestr(now));
 tic
+
 % load data
 if nargin == 3
-    % Load the 
+    % Load the data and other variables
     load(InDataPath)
     count = str2num(count);
     Nperm = str2num(Nperm);
 elseif nargin == 2
+    % If the number of permutations field is left blank then assume that
+    % only point estimate is being calculated.
     load(InDataPath)
     count = str2num(count);
     Nperm = 0;
+elseif nargin == 1
+    % point estimate
+    load(InDataPath)
+    count = 0;
+    Nperm = 0;
 else
-    error('Expected two inputs');
+    error('Expected at least one input.');
 end
+% Ensure that the InDataPath actually contained the ModelInfo structure
+if ~exist('ModelInfo','var')
+    errordlg('The data passed does not contain the ModelInfo structure.');
+end
+
+% extract the number of subjects
 NSub = ModelInfo.NSub;
+
+% Determine the sample order. This is where the permutation occurs.
 if Nperm == 0
     % This is the point estimate
     Samp = [1:NSub]';
 else
+    % all permutations for this function call are specified here as
+    % seperate columns.
     Samp = zeros(NSub,Nperm);
     for i = 1:Nperm
         Samp(:,i) = randperm(NSub)';
     end
 end
-Nvox = length(ModelInfo.Indices);
+
+% How many voxels 
+Nvoxels = length(ModelInfo.Indices);
 %%
 if Nperm > 0
     
-    % create the structure to hold the permutation resample results
-    % test one voxel to make sure the output structure is the correct size
-    % for this voxel
+    % Create the structure to hold the permutation resample results.
+    % Test one voxel to determine the correct size for all of the results.
+    % The importance of this is because the user can specify any number of
+    % paths to test. SOme of these paths may be simple, have no moderating
+    % variables, while some may be more complex having interaction terms
+    % which need to be probed.
     tempData = ModelInfo;
+    
+    % Since the data may contain multiple voxels for any of the nodes in
+    % the path model this extracts only a single voxel and runs the process
+    % modeling on it.
     tempData.data = zeros(ModelInfo.NSub,ModelInfo.Nvar);
+    
+    % Cycle over each data variable and pulls out the first column whether
+    % it is multi-column of only has a single column.
     % extract the data
     for j = 1:ModelInfo.Nvar
+        % CHeck to see if this variable has more then one column
         if size(ModelInfo.data{j},2) > 1
-            tempData.data(:,j) = ModelInfo.data{j}(:,i);
+            tempData.data(:,j) = ModelInfo.data{j}(:,1);
         else
             tempData.data(:,j) = ModelInfo.data{j};
         end
     end
+    % Fit the model for this test data
+    TestResults = FitProcessModel(tempData);
     
-    TestResults = WIPsubfnFitModel(tempData);
-    % create the structure to hold the permutation results
+    % Once the test results are calculated a structure is created to hold
+    % the path results.
     PermResults = {};
+    % Here any number of fields can be extracted by adding their names to
+    % this list of Field Names. This would allow permutation tests on any
+    % of the other results. Our main interest however is to apply
+    % permutation testing to just the Paths.
     FieldNames = {'Paths'};
     for k = 1:length(FieldNames)
         Value = getfield(TestResults,FieldNames{k});
         if iscell(Value)
-            BlankValue = cell(size(Value,1),Nvox);
+            BlankValue = cell(size(Value,1),Nvoxels);
         else
-            BlankValue = zeros([size(Value) Nvox]);
+            BlankValue = zeros([size(Value) Nvoxels]);
         end
         PermResults = setfield(PermResults,FieldNames{k},BlankValue);
     end
+    % determine the size of the matrix of regression parameters. The reason
+    % this is not simply the number of variables entered is because there
+    % can be any number of interactions in the model.
+    [Mbeta, Nbeta] = size(TestResults.B);
     
-    [Mbeta Nbeta] = size(TestResults.B);
-    PermResults.beta = zeros(Mbeta, Nbeta, Nvox, Nperm);
+    % Create the empty array to hold the parameter estimates
+    PermResults.beta = zeros(Mbeta, Nbeta, Nvoxels, Nperm);
     
+    % Determine the size of the calculated path values
     [PathSize1 PathSize2] = size(TestResults.Paths{1});
+    
+    % Determine the number of paths
     NPaths = length(TestResults.Paths);
+    
+    % THe permutation analysis uses the minimum statistic method for
+    % correcting for multiple comparisons. This approach creates a matrix
+    % of maximum and minimum values for each permutation.
+    %
+    % Nichols TE, Holmes AP. Nonparametric permutation tests for functional neuroimaging: 
+    % a primer with examples.  Hum Brain Mapp. Department of Biostatistics, 
+    % University of Michigan, Ann Arbor, Michigan; Robertson Centre for Biostatistics, 
+    % Department of Statistics, University of Glasgow, Scotland, United Kingdom; 
+    % Wellcome Department of Cognitive Neurology, Institute of Neurology, London, 
+    % United Kingdom; 2002 Jan;15(1):1?25. 
+    
     MaxB = zeros([size(TestResults.B) Nperm]);
     MinB = zeros([size(TestResults.B) Nperm]);
     MaxPaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
@@ -71,14 +130,16 @@ if Nperm > 0
 end
 %%
 
-
+% How long did it take to prepare the data
 fprintf(1,'Data prepared in %0.2f s.\n',toc);
+
+% Feedback for the user
 fprintf(1,'Starting first permutation at: %s\n',datestr(now));
 
-
+% Cycle over 
 for k = 1:size(Samp,2)
     tic
-    for i = 1:Nvox
+    for i = 1:Nvoxels
         % for this voxel
         tempData = ModelInfo;
         tempData.data = zeros(ModelInfo.NSub,ModelInfo.Nvar);
@@ -112,8 +173,8 @@ for k = 1:size(Samp,2)
         clear Parameters
         % Find the max and min values from the permutation
         for i = 1:NPaths
-            ThisPath = zeros(PathSize1,PathSize2,Nvox);
-            for j = 1:Nvox
+            ThisPath = zeros(PathSize1,PathSize2,Nvoxels);
+            for j = 1:Nvoxels
                 ThisPath(:,:,j) = PermResults.Paths{j}{i};
             end
             for j = 1:PathSize1
