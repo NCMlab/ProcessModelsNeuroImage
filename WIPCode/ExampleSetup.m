@@ -1,29 +1,3 @@
-addpath /share/studies/CogRes/Scripts/ProcessModelsNeuroImage/FinalCode
-clear
-BaseDir = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/SampleSize140';
-cd(BaseDir)
-load('Age_GM_ECF_PERF_LargerSample');
-
-Nsub = length(AgeGroup1old);
-
-Pmask = fullfile(BaseDir,'mask','maskIncGrey50.nii');
-Vmask = spm_vol(Pmask);
-Imask = spm_read_vols(Vmask);
-Indices = find(Imask);
-Nvoxels = length(Indices);
-
-% Load up Functional Data
-fprintf(1,'Loading fMRI data...\n');
-FMRI = zeros(Nsub,1,Nvoxels);
-for i = 1:Nsub
-    CurrentPath = FMRIPATHS{i};
-    CurrentPath = strrep(CurrentPath,'spmT_','con_');
-    
-    V = spm_vol(CurrentPath);
-    I = spm_read_vols(V);
-    FMRI(i,1,:) = I(Indices);
-end
-
 %% The aim of this example is to demonstrate a setup of this software.
 % This will be an incremental step example. 
 % First, will be a simple mediation analysis where the effect of age group
@@ -31,63 +5,77 @@ end
 % of grey matter density.
 
 % To begin, start by loading up the brain data. 
-% This can be done by selecting the images using the spm_image function for
-% file selection.  Or as below by loading up a structure of file paths.
-% Determine the numner of subjects selected.
-% NSUB
+P = spm_select(Inf,'image','Select the imaging data which will serve as the mediator.');
+V = spm_vol(P);
+I = spm_read_vols(V);
 
 % A mask image is needed. From this mask image the indices of voxels to
 % include is determined.
 % MASK
-
-% Load up Structural Data
-fprintf(1,'Loading structural data...\n');
-% allocate memory for storing the image data
-STRUCTURE = zeros(Nsub,1,Nvoxels);
-% cycle over the number of subjects
-for i = 1:Nsub
-    % read each header
-    V = spm_vol(STRUCTUREPATHS{i});
-    % read each image
-    I = spm_read_vols(V);
-    
-    STRUCTURE(i,1,:) = I(Indices);
+Pmask = spm_select(1,'image','Select the mask image');
+Vmask = spm_vol(Pmask);
+Imask = spm_read_vols(Vmask);
+% make sure the selected mask has the same dimensions as the data
+if false(Vmask.dim == V(1).dim)
+    errordlg('The mask is not the same size as the selected data');
 end
+% make sure the mask image is really a mask image
+if length(unique(Imask)) > 2
+    errordlg('The mask image selected has more then two unique values.');
+else
+    % Find the indices of the voxels included inthe mask
+    Indices = find(Imask);
+    clear Imask Vmask
+end
+% determine the size of the data
+Nvoxels = length(Indices);
+Nsub = size(I,4);
+% restructure the imaging data to be a Nvoxels X NSub matrix
+NIData = zeros(Nvoxels,Nsub);
+for i = 1:Nsub
+    temp = I(:,:,:,i);
+    NIData(:,i) = temp(Indices);
+end
+% Clean up the memory
+clear temp I 
 
 % For this example the behavioral data is a single number per person.
 % Behavioral Data
-BEHAVIOR = ECFDualCORmedRT - ECFSingCORmedRT;
-
+BEHAVIOR = randn(Nsub,1);
+AgeGroup = round(rand(Nsub,1));
 
 fprintf(1,'Done prepapring data.\n');
 
 %% General Setup
+% The base directory is the folder containg the folder of results. The
+% results for a specific analysis will all be in folders contained within
+% this base directory. The output folders are named according to a
+% user specified "Tag" name.
+BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode';
+
 % Create a structure where each cell is a node in the path diagram. This
 % could be a voxel-wise matrix or a vector.
 data = {};
-data{1} = AgeGroup1old;
-data{2} = squeeze(STRUCTURE);
-data{3} = squeeze(FMRI);
-data{4} = BEHAVIOR;
-data{5} = nWBV;
-data{6} = Sex;
+data{1} = AgeGroup;
+data{2} = NIData;
+data{3} = BEHAVIOR;
+
 % Create a structure of corresponding names for each cell in the data
 % structure
 Names = {};
 Names{1} = 'AgeGr';
-Names{2} = 'pGM';
-Names{3} = 'fMRI';
-Names{4} = 'medRTSC';
-Names{5} = 'nWBV';
-Names{6} = 'Sex';
+Names{2} = 'Brain';
+Names{3} = 'Behavior';
 
 % How many variables were entered
 Nvar = length(data);
+
 % Right now the statistics can be performed at the voxel-level using bias
 % correctsed accelerated confidence intervals determined from bootstrap
 % resampling.
 % Are there any voxel-wise bootstrap resamplings?
 Nboot = 0;
+
 % An alternative to voxel-wise statistics is a map-wise statistics based
 % off of the maximum statistic approach from a series of permutation
 % resamples. This approach performs the voxel-wise calculations, then
@@ -96,16 +84,19 @@ Nboot = 0;
 % statistical values. These values are sorted and the percentiles are
 % determined based onthe number of permutations and the thresholds. Note,
 % two-tailed thresholds are used.
-%
 % Are there any permutaion resamples to perform?
-Nperm = 5000;
+Nperm = 200;
+
 % The job split variable is how many jobs this analysis is split into for
 % sending to a comuputer cluster environment. Note that the more splits
 % does not mean faster computing because there is a limitationon the number
 % of available cluster nodes. When the number of job splits exceeds the
-% number of available jobs then jobs are placed inthe queue and need to
+% number of available jobs then jobs are placed in the queue and need to
 % wait.
-NJobSplit = 500;
+% If you are running this on a single (non-cluster environment) computer
+% then set this to equal 1.
+NJobSplit = 1;
+
 % Specify the thresholds used in the analysis. 
 % Some of the images and results in the mediation analysis perform
 % parametric tests where the threshold can be more dynamically changed.
@@ -113,6 +104,7 @@ NJobSplit = 500;
 % methods are required and the probabilities need to be calculated at the
 % time of the bootstrapping and therefore, made a prior.
 Thresh = [0.025 0.005];
+
 % Create a structure which will contain all information for this analysis.
 ModelInfo = {};
 ModelInfo.Names = Names;
@@ -130,13 +122,20 @@ ModelInfo.Thresholds = Thresh;
 % number of subjects as in the stratification parameter. This is most
 % applicable when there are multiple groups with different sample sizes.
 ModelInfo.STRAT = [];
-ModelInfo.NSub = size(data{1},1);
+ModelInfo.Nsub = size(data{1},1);
 ModelInfo.Nvar = Nvar;
 
-%% Model Specific
-% Model 75
-Model75 = ModelInfo;
-Model75.Tag = 'Model75_WithCov';
+%% Model Setup
+Model1 = ModelInfo;
+
+% Name of the output folder
+Tag = 'ExampleModel1';
+Model1.Tag = Tag;
+
+% The first model is a basic mediation model testing whether the effect of age
+% group on behavior is mediated by the voxel-wise brain measures.
+
+
 % The modeling is specified using a series of matrices. The first is the
 % DIRECT matrix. This matrix is square with dimension based onthe number of
 % variables in the model. The rows and columns refer to the variabvles in
@@ -151,15 +150,20 @@ Model75.Tag = 'Model75_WithCov';
 
 Direct = zeros(Nvar);
 Direct(1,[2 3]) = 1;
-Direct(2,[3]) = 1;
+Direct(2,3) = 1;
+
 % To specify interactions in the model create another matrix the same size
 % as the DIRECT matrix.
 % An interaction between two variables in predicting a third, the rows
 % of the interacting variables will both have a value of one within the
-% column of the variable they are predicting. BE sure to include in the
+% column of the variable they are predicting. Be sure to include in the
 % DIRECT matrix the main effects for each of these variables on the
 % predicted variable.
+
+% For this model there are no interactions so this is kept as a zero
+% matrix.
 Inter = zeros(Nvar);
+
 % The paths to be tested are included in another matrix the same size of
 % the DIRECT matrix. One difference here is that the PATHS matrix may have
 % a third dimension to test multiple paths within a single model. The steps
@@ -169,31 +173,14 @@ Paths(1,2) = 1;
 Paths(2,3) = 2;
 Paths(3,4) = 3;
 
-Model75.Direct = Direct;
-Model75.Inter = Inter;
-Model75.Paths = Paths;
+Model1.Direct = Direct;
+Model1.Inter = Inter;
+Model1.Paths = Paths;
 
-WIPsubfnPrepareDataForProcessPERMUTE(Model75)
+WIPsubfnPrepareDataForProcessPERMUTE(Model1)
 
-% Model 6
-Model6 = ModelInfo;
-Model6.Tag = 'Model6_WithCov';
-Direct = zeros(Nvar);
-Direct(1,[2 3 4]) = 1;
-Direct(2,[3 4]) = 1;
-Direct(3,[4]) = 1;
-Direct([5 6],[2 3 4]) = 1;
-Inter = zeros(Nvar);
-%Inter([1 3],4) = 1;
-Paths = zeros(Nvar);
-Paths(1,2) = 1;
-Paths(2,3) = 2;
-Paths(3,4) = 3;
 
-Model6.Direct = Direct;
-Model6.Inter = Inter;
-Model6.Paths = Paths;
-WIPsubfnPrepareDataForProcessPERMUTE(Model6)
+%%
 
 % TODO 
 % The program that prepares the data to be submitted to the cluster also
