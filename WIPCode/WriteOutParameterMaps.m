@@ -1,27 +1,28 @@
-function WriteOutParameterMaps(Tag)
+function WriteOutParameterMaps(Tag,Parameters,ModelInfo)
 
+% create an array to hold the data of interest
+% The Tag defines which parameter measure to save out.
 
-temp = zeros([size(Parameters{1}.beta) Nvoxels]);
-for i =1:Nvoxels
+temp = zeros([size(getfield(Parameters{1},Tag)) ModelInfo.Nvoxels]);
+for i =1:ModelInfo.Nvoxels
     temp(:,:,i) = getfield(Parameters{i},Tag);
 end
-
-for i = 1:Nvar % COLUMNS
+% cycle over the columns in the model
+for i = 1:ModelInfo.Nvar 
     if sum(ModelInfo.Direct(:,i))
-        %         % CONSTANT TERMS ARE ROW 1
-        %         FileName = sprintf('Model%d_DEP%s_INDconst_%s.nii',i,ModelInfo.Names{i},Tag);
-        %         I = zeros(V.dim);
-        %         I(ModelInfo.Indices) = squeeze(temp(1,i,:));
-        %         Vo = V;
-        %         Vo.fname = fullfile(fileparts(pwd),FileName);
-        %         spm_write_vol(Vo,I);
-        for j = 1:Nvar % ROWS
+        % CONSTANT TERMS ARE ROW 1
+        % cycle over the rows in the model
+        for j = 1:ModelInfo.Nvar 
             if ModelInfo.Direct(j,i)
+                % create the filename describing the dependent and
+                % independent effects
                 FileName = sprintf('Model%d_DEP%s_IND%s_%s.nii',i,ModelInfo.Names{i},ModelInfo.Names{j},Tag);
-                I = zeros(V.dim);
+                
+                I = zeros(ModelInfo.DataHeader.dim);
                 I(ModelInfo.Indices) = squeeze(temp(j+1,i,:));
-                Vo = V;
-                Vo.fname = fullfile(fileparts(pwd),FileName);
+                % Create the header for this image
+                Vo = ModelInfo.DataHeader;
+                Vo.fname = fullfile(ModelInfo.ResultsPath,FileName);
                 spm_write_vol(Vo,I);
             end
         end
@@ -33,10 +34,11 @@ for i = 1:Nvar % COLUMNS
                 FileName = sprintf('%s%sX',FileName,ModelInfo.Names{InterVar(j)});
             end
             FileName = sprintf('%s_%s.nii',FileName(1:end-1),Tag);
-            I = zeros(V.dim);
+            I = zeros(ModelInfor.DataHeader.dim);
             I(ModelInfo.Indices) = squeeze(temp(Nvar+2,i,:));
-            Vo = V;
-            Vo.fname = fullfile(fileparts(pwd),FileName);
+            % Create the header for this image
+            Vo = ModelInfo.DataHeader;
+            Vo.fname = fullfile(ModelInfo.ResultsPath,FileName);
             spm_write_vol(Vo,I);
         end
     end

@@ -1,4 +1,4 @@
-function PrepareDataForProcess(ModelInfo)
+function OutFolder = PrepareDataForProcess(ModelInfo)
 % In order for this program to work in both a cluster environment and a
 % single computer environment the data is saved and the analysis programs
 % are given a path name. The data specified by the path is then loaded, the

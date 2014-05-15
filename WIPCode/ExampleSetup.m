@@ -136,6 +136,7 @@ ModelInfo.Thresholds = Thresh;
 ModelInfo.STRAT = [];
 ModelInfo.Nsub = size(data{1},1);
 ModelInfo.Nvar = Nvar;
+ModelInfo.Nvoxels = Nvoxels;
 
 % Prepare the output data header
 DataHeader.fname = '';
@@ -195,9 +196,9 @@ Model1.Direct = Direct;
 Model1.Inter = Inter;
 Model1.Paths = Paths;
 %%
-PrepareDataForProcess(Model1)
+ResultsFolder = PrepareDataForProcess(Model1);
 
-WriteOutImages
+WriteOutResults(ResultsFolder)
 
 %%
 
