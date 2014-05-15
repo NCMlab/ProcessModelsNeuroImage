@@ -27,7 +27,7 @@ c = clock;
 OutFolderName = sprintf('%s_%s_%02d-%02d',ModelInfo.Tag,date,c(4),c(5));
 
 % Create the full output folder name
-OutFolder = fullfile(BaseDir,OutFolderName);
+OutFolder = fullfile(ModelInfo.BaseDir,OutFolderName);
 
 
 % Actually create the folders if they do not exist already. 
@@ -85,8 +85,16 @@ else
             % comparison corrected results across voxels. Thereofre, it
             % does not make sense to run this type of analysis on a single
             % point data set.
+            % 
+            % Save the data 
+            InDataPath = fullfile(DataFolder,'ModelInfo');
+            Str = ['save ' InDataPath ' ModelInfo '];
+            eval(Str);
             
-            VoxelWiseProcessPermute(InDataPath,1,ModelInfor.Nperm)
+            % Perform the point estimate calculation
+            VoxelWiseProcessPermute(InDataPath,0,0)
+            % Perform the permutation tests
+            VoxelWiseProcessPermute(InDataPath,1,ModelInfo.Nperm)
             
     end
 end

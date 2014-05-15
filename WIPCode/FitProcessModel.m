@@ -1,15 +1,22 @@
 function Results = FitProcessModel(data)
-% This is the program that fits the muleiple regression models defined by
+% This is the program that fits the multiple regression models defined by
 % this analysis.
+% For the direct effects the unstandardized parameter estimates are
+% calculated as beta. 
+% The standardized parameter estimates are calculated as B.
+% Additionally, the following are also calculated:
+% t: t-statistic
+% se: standard error
+% p: p-value
+% df: degrees of freedom for the t-test
+
 
 [N M] = size(data.data);
 MaxNumberInter = 0;
 if ~isempty(find(data.Inter))
     MaxNumberInter = size(data.Inter,3);
 end
-% There should ideally be a model checking function to ensure that the the
-% model is appropriate and can be estimated.
-% TO DO
+
 
 % Make sure the interaction matrix contains all the main effects
 % if isempty(find(Inter ~= Direct.*Inter))
@@ -29,30 +36,32 @@ for i = 1:M
         Interaction = [];
         if ~isempty(find(data.Inter(:,i,:)))
             Interaction = zeros(N,MaxNumberInter);
+            % Calculate the interaction regressor as the multiplication of
+            % the regressors comprising the interaction
             for j = 1:MaxNumberInter
                 InterCol = find(data.Inter(:,i,j));
                 Interaction(:,j) = prod(data.data(:,InterCol),2);
             end
         end
-        % perform the regression. For maximization of speed this
+        % Perform the regression. For maximization of speed, this
         % sub-function would need to be optimized. This could be done be
         % eliminating all the regression metrics/tests that are performed
         % and only leave the absolute minimum.
-        S = subfnregstats(data.data(:,i),[data.data(:,Col) Interaction]);
+        S = ProcessRegStats(data.data(:,i),[data.data(:,Col) Interaction]);
+        % Once the regression model is fit, extract the required estimated
+        % values.
         Results.beta([1; 1+find(data.Direct(:,i))],i) = S.beta(1:length(Col)+1);
         Results.B([1; 1+find(data.Direct(:,i))],i) = S.B(1:length(Col)+1);
         Results.t([1; 1+find(data.Direct(:,i))],i) = S.tstat.t(1:length(Col)+1);
         Results.se([1; 1+find(data.Direct(:,i))],i) = S.tstat.se(1:length(Col)+1);
         Results.p([1; 1+find(data.Direct(:,i))],i) = S.tstat.pval(1:length(Col)+1);
-        % df([1; 1+find(Direct(:,i))],i) = S.tstat.dfe;
         if ~isempty(Interaction)
             % Add the interaction terms
             Results.beta(M+2:end,i) = S.beta(length(Col)+2:end);
-            %B(M+2:end,i) = B(length(Col)+2:end);
+            Results.B(M+2:end,i) = S.B(length(Col)+2:end);
             Results.t(M+2:end,i) = S.tstat.t(length(Col)+2:end);
             Results.se(M+2:end,i) = S.tstat.se(length(Col)+2:end);
             Results.p(M+2:end,i) = S.tstat.pval(length(Col)+2:end);
-            %    df(M+2:end,i) = S.tstat.dfe;
             
         end
     end

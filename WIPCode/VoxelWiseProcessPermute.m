@@ -3,7 +3,7 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 % avoids each cluster node starting with the same seed and producing the
 % same results. An alternative futur direction is a precalculation of the permutations for
 % storage in the ModelInfo structure. 
-RandStream.setDefaultStream(RandStream('mt19937ar','Seed',sum(100*clock)));
+RandStream('mt19937ar','Seed',sum(100*clock));
 
 fprintf(1,'Started at: %s\n',datestr(now));
 tic
@@ -12,13 +12,15 @@ tic
 if nargin == 3
     % Load the data and other variables
     load(InDataPath)
-    count = str2num(count);
-    Nperm = str2num(Nperm);
+    % The cluster function calls pass strings
+    if isstr(count); count = str2num(count); end
+    if isstr(Nperm); NPerm = str2num(NPerm); end
+
 elseif nargin == 2
     % If the number of permutations field is left blank then assume that
     % only point estimate is being calculated.
     load(InDataPath)
-    count = str2num(count);
+    if isstr(count); count = str2num(count); end
     Nperm = 0;
 elseif nargin == 1
     % point estimate
@@ -34,18 +36,18 @@ if ~exist('ModelInfo','var')
 end
 
 % extract the number of subjects
-NSub = ModelInfo.NSub;
+Nsub = ModelInfo.Nsub;
 
 % Determine the sample order. This is where the permutation occurs.
 if Nperm == 0
     % This is the point estimate
-    Samp = [1:NSub]';
+    Samp = [1:Nsub]';
 else
     % all permutations for this function call are specified here as
     % seperate columns.
-    Samp = zeros(NSub,Nperm);
+    Samp = zeros(Nsub,Nperm);
     for i = 1:Nperm
-        Samp(:,i) = randperm(NSub)';
+        Samp(:,i) = randperm(Nsub)';
     end
 end
 
@@ -65,15 +67,15 @@ if Nperm > 0
     % Since the data may contain multiple voxels for any of the nodes in
     % the path model this extracts only a single voxel and runs the process
     % modeling on it.
-    tempData.data = zeros(ModelInfo.NSub,ModelInfo.Nvar);
+    tempData.data = zeros(ModelInfo.Nsub,ModelInfo.Nvar);
     
     % Cycle over each data variable and pulls out the first column whether
     % it is multi-column of only has a single column.
     % extract the data
     for j = 1:ModelInfo.Nvar
-        % CHeck to see if this variable has more then one column
+        % Check to see if this variable has more then one column
         if size(ModelInfo.data{j},2) > 1
-            tempData.data(:,j) = ModelInfo.data{j}(:,1);
+            tempData.data(:,j) = ModelInfo.data{j}(1,:);
         else
             tempData.data(:,j) = ModelInfo.data{j};
         end
@@ -142,18 +144,18 @@ for k = 1:size(Samp,2)
     for i = 1:Nvoxels
         % for this voxel
         tempData = ModelInfo;
-        tempData.data = zeros(ModelInfo.NSub,ModelInfo.Nvar);
+        tempData.data = zeros(ModelInfo.Nsub,ModelInfo.Nvar);
         % extract the data
         for j = 1:ModelInfo.Nvar
             if size(ModelInfo.data{j},2) > 1
-                tempData.data(:,j) = ModelInfo.data{j}(:,i);
+                tempData.data(:,j) = ModelInfo.data{j}(i,:);
             else
                 tempData.data(:,j) = ModelInfo.data{j};
             end
         end
         % Shuffle the first column
         tempData.data(:,1) = tempData.data(Samp(:,k),1);
-        Results = WIPsubfnFitModel(tempData);
+        Results = FitProcessModel(tempData);
         if Nperm == 0
             % this is the point estimate, keep everything
             Parameters{i} = Results;
@@ -163,13 +165,13 @@ for k = 1:size(Samp,2)
             PermResults.beta(:,:,i) = Results.beta;
         end
         
-        % Doing this is real nice to see progress but it SLOWS it down A LOT!!!
+        % Doing this is good to see progress but it SLOWS it down A LOT!!!
         % if ~mod(i,1000)
         %     fprintf(1,'Finished voxel %d of %d in %0.2f s.\n',i,Nvox,toc);
         % end
     end
     if Nperm > 0
-        fprintf(1,'\tFinding the maxima and minima from this permutaion.\n');
+        % fprintf(1,'\tFinding the maxima and minima from this permutaion.\n');
         clear Parameters
         % Find the max and min values from the permutation
         for i = 1:NPaths
@@ -194,7 +196,7 @@ for k = 1:size(Samp,2)
     end
     fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
 end
-fprintf(1,'Saving data to file now.\n');
+fprintf(1,'Saving data to file now.\n\n');
 % Save results to file
 if Nperm > 0
     [PathName FileName] = fileparts(InDataPath);
@@ -216,6 +218,7 @@ else
     OutFile = fullfile(ResultsFolder,'PointEstimate');
     Str = sprintf('save %s Parameters',OutFile);
     eval(Str)
+    fprintf(1,'Saved point estimate results to file.\n\n');
 end
     
     

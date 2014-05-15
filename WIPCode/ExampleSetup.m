@@ -8,24 +8,31 @@
 P = spm_select(Inf,'image','Select the imaging data which will serve as the mediator.');
 V = spm_vol(P);
 I = spm_read_vols(V);
+% The format of the input data is needed for later writing of the output
+% images
+DataHeader = V(1);
 
 % A mask image is needed. From this mask image the indices of voxels to
 % include is determined.
 % MASK
-Pmask = spm_select(1,'image','Select the mask image');
-Vmask = spm_vol(Pmask);
-Imask = spm_read_vols(Vmask);
-% make sure the selected mask has the same dimensions as the data
-if false(Vmask.dim == V(1).dim)
-    errordlg('The mask is not the same size as the selected data');
-end
-% make sure the mask image is really a mask image
-if length(unique(Imask)) > 2
-    errordlg('The mask image selected has more then two unique values.');
-else
-    % Find the indices of the voxels included inthe mask
-    Indices = find(Imask);
-    clear Imask Vmask
+MaskFlag = 0;
+while MaskFlag == 0
+    Pmask = spm_select(1,'image','Select the mask image');
+    Vmask = spm_vol(Pmask);
+    Imask = spm_read_vols(Vmask);
+    % make sure the selected mask has the same dimensions as the data
+    if false(Vmask.dim == V(1).dim)
+        errordlg('The mask is not the same size as the selected data');
+    end
+    % make sure the mask image is really a mask image
+    if length(unique(Imask)) > 2
+        errordlg('The mask image selected has more then two unique values.');
+    else
+        % Find the indices of the voxels included inthe mask
+        Indices = find(Imask);
+        clear Imask Vmask
+        MaskFlag = 1;
+    end
 end
 % determine the size of the data
 Nvoxels = length(Indices);
@@ -51,7 +58,11 @@ fprintf(1,'Done prepapring data.\n');
 % results for a specific analysis will all be in folders contained within
 % this base directory. The output folders are named according to a
 % user specified "Tag" name.
-BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode';
+if ismac
+    BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode';
+elseif ispc
+    BaseDir = 'C:\Users\js2746\Dropbox\SteffenerColumbia\Projects\TestProcessCode';
+end
 
 % Create a structure where each cell is a node in the path diagram. This
 % could be a voxel-wise matrix or a vector.
@@ -85,7 +96,7 @@ Nboot = 0;
 % determined based onthe number of permutations and the thresholds. Note,
 % two-tailed thresholds are used.
 % Are there any permutaion resamples to perform?
-Nperm = 200;
+Nperm = 10;
 
 % The job split variable is how many jobs this analysis is split into for
 % sending to a comuputer cluster environment. Note that the more splits
@@ -107,6 +118,7 @@ Thresh = [0.025 0.005];
 
 % Create a structure which will contain all information for this analysis.
 ModelInfo = {};
+ModelInfo.BaseDir = BaseDir;
 ModelInfo.Names = Names;
 ModelInfo.data = data;
 ModelInfo.Nboot = Nboot;
@@ -124,6 +136,12 @@ ModelInfo.Thresholds = Thresh;
 ModelInfo.STRAT = [];
 ModelInfo.Nsub = size(data{1},1);
 ModelInfo.Nvar = Nvar;
+
+% Prepare the output data header
+DataHeader.fname = '';
+DataHeader.descrip = '';
+DataHeader.dt = [16 0];
+ModelInfo.DataHeader = DataHeader;
 
 %% Model Setup
 Model1 = ModelInfo;
@@ -171,14 +189,15 @@ Inter = zeros(Nvar);
 Paths = zeros(Nvar);
 Paths(1,2) = 1;
 Paths(2,3) = 2;
-Paths(3,4) = 3;
+
 
 Model1.Direct = Direct;
 Model1.Inter = Inter;
 Model1.Paths = Paths;
+%%
+PrepareDataForProcess(Model1)
 
-WIPsubfnPrepareDataForProcessPERMUTE(Model1)
-
+WriteOutImages
 
 %%
 
