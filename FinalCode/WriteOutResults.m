@@ -1,51 +1,130 @@
-function WriteOutResults
-
-SelectedPath = spm_select(1,'dir');
-cd(SelectedPath)
-
-if exist('AnalysisParameters.mat')
-    load AnalysisParameters
-else
-    errordlg('this folder does not have the required AnalysticParameters.mat file');
+function WriteOutResults(ResultsFolder)
+% Take the results from an analysis and write out results as NIFTI images.
+if nargin == 0
+    ResultsFolder = spm_select(1,'dir','Select analysis directory');
 end
-% Check to see if the process is finished
-F = dir('Results_*.mat');
-if AnalysisParameters.NJobSplit == 1
-    NvoxelsPerJob = ceil(AnalysisParameters.Nvoxels/AnalysisParameters.NJobSplit);
-    % prealocate memory for AllParameters
-    AllParameters = cell(AnalysisParameters.Nvoxels,1);
-    % load up all the data
 
-        clear Parameters
-        load(F(1).name)
-        AllParameters(:) = Parameters;
-    
+% Load the data/parameters used in this analysis
+load(fullfile(ResultsFolder,'data','ModelInfo'))
+ModelInfo.ResultsPath = ResultsFolder;
 
-    [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
+% Remove the data from the structure to preserve memory
+ModelInfo.data = [];
 
-elseif AnalysisParameters.NJobSplit == length(F) 
-    % the process is finished
-    NvoxelsPerJob = ceil(AnalysisParameters.Nvoxels/AnalysisParameters.NJobSplit);
-    % prealocate memory for AllParameters
-    AllParameters = cell(AnalysisParameters.Nvoxels,1);
-    % load up all the data
-    for i = 1:length(F)-1
-        clear Parameters
-        load(F(i).name)
-        AllParameters((i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob) = Parameters;
+% Check to see if there are Permute results
+if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute*.mat')))
+    ModelType = 'permutation';
+elseif ~isempty(dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat')))
+    ModelType = 'bootstrap';
+else
+    errordlg('Unknown results');
+end
+
+% Find the number of results files
+switch ModelType
+    case 'permutation'
+        % locate the results files
+        F = dir(fullfile(ResultsFolder,'Results','Permute*.mat'));
+        NFiles = length(F);
+        
+        % Check to see if the analyses are completed
+        if ~(NFiles == ModelInfo.NJobSplit)
+            errordlg('This analysis is not complete.');
+        end
+        
+        % load a single results fle to determine the size of the paths
+        load(fullfile(ResultsFolder,'Results',F(1).name))
+        [m n o p] = size(MaxPaths);
+        % Check to make sure all the files are there
+        if ~(ModelInfo.Nperm == p*NFiles)
+            errordlg('There are not enough results files based onthe specified parameters.');
+        end
+        % Create the structures to hold the permutation results for the
+        % path values and the standardized parameter estimates
+        MaxPermPaths = zeros(m,n,o,p*NFiles);
+        MinPermPaths = zeros(m,n,o,p*NFiles);
+        [mB nB pB] = size(MaxB);
+        MaxPermB = zeros(mB,nB,pB*NFiles);
+        MinPermB = zeros(mB,nB,pB*NFiles);
+        
+        % load the data and put the permutation results in these structures
+        for i = 1:NFiles
+            load(fullfile(ResultsFolder,'Results',F(i).name))
+            MaxPermPaths(:,:,:,(i-1)*p+1:i*p) = MaxPaths;
+            MinPermPaths(:,:,:,(i-1)*p+1:i*p) = MinPaths;
+            MaxPermB(:,:,(i-1)*p+1:i*p) = MaxB;
+            MinPermB(:,:,(i-1)*p+1:i*p) = MinB;
+        end
+        % Load up the point estimate results
+        F = dir(fullfile(ResultsFolder,'Results','PointEstimate*.mat'));
+        load(fullfile(ResultsFolder,'Results',F(1).name))
+        
+        % Reshape the path estimates for the next step of writing them out
+        % as images
+        PointEstimate = zeros(m,n,o,length(Parameters));
+        for i = 1:length(Parameters)
+            for kk = 1:o
+                PointEstimate(:,:,kk,i) = Parameters{i}.Paths{kk};
+            end
+        end
+    case 'bootstrap'
+end
+
+%% WRITE OUT ALL IMAGES
+WriteOutParameterMaps('beta',Parameters,ModelInfo)
+WriteOutParameterMaps('B',Parameters,ModelInfo)
+WriteOutParameterMaps('t',Parameters,ModelInfo)
+
+
+%% WRITE OUT THE PATH IMAGES FOR THE PERMUTATION TEST
+
+% cycle over the thresholds requested
+for j = 1:length(ModelInfo.Thresholds)
+    % Find the number in a sorted list of permutations that corresponds to
+    % the threshold.
+    c = floor(ModelInfo.Thresholds(j)*ModelInfo.Nperm);
+    % If the value exceeds the precision of the number of permutaions then
+    % set it to zero.
+    % e.g. a threshold of 0.00001 is not possible with 100 permutations.
+    % The most precise threshold is: 1/100 = 0.01
+    if c == 0
+        % RESET the threshold used to the most precise
+        ModelInfo.Thresholds(j) = 1/ModelInfo.Nperm;
+        c = 1;
     end
-    clear Parameters
-    load(F(i+1).name)
-    AllParameters(i*NvoxelsPerJob+1:end) = Parameters;
-
-    [tVoxelIndices tImageVoxelIndices] = subfnWriteOutResults(AllParameters,AnalysisParameters,SelectedPath);
-else
-    errordlg('This process has not finished')
+    
+    for kk = 1:o % cycle over the number of paths
+        % cycle over ...
+        for i = 1:m 
+            % sort the max and min permutaion results
+            sMax(:,i) = sort(squeeze(MaxPermPaths(i,:,kk,:)),'descend');
+            sMin(:,i) = sort(squeeze(MinPermPaths(i,:,kk,:)));
+            % find the permutation value based on the sorted values
+            Mx(i) = sMax(c,i);
+            Mn(i) = sMin(c,i);
+            
+            % write unthresholed path estimate
+            Vo = ModelInfo.DataHeader;
+            Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d.nii',kk,i)));
+            % Prepare the data matrix
+            I = zeros(ModelInfo.DataHeader.dim);
+            % Extract the path data values
+            temp = squeeze(PointEstimate(i,1,kk,:));
+            I(ModelInfo.Indices) = temp;
+            % Write the images
+            spm_write_vol(Vo,I);
+            
+            % Find the locations that exceed the two-tailed threshold
+            temp(find((PointEstimate(i,1,kk,:) < Mx(i))&(PointEstimate(i,1,kk,:) >0))) = 0;
+            temp(find((PointEstimate(i,1,kk,:) > Mn(i))&(PointEstimate(i,1,kk,:) <0))) = 0;
+            
+            % Create the thresholded path output file name.
+            Vo.fname=(fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%0.4f.nii',kk,i,ModelInfo.Thresholds(j))));
+            I = zeros(Vo.dim);
+            I(ModelInfo.Indices) = temp;
+            % Write the image.
+            spm_write_vol(Vo,I);
+        end
+    end
 end
 
-% for i = 1:length(AllParameters)
-%     if ~isempty(AllParameters{i})
-%         i
-%         break
-%     end
-% end
