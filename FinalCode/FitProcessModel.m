@@ -68,7 +68,7 @@ for i = 1:M
 end
 
 
-% The paths are stored in an array of cells. This is incovnetient for any
+% The paths are stored in an array of cells. This is inconvenient for any
 % other processes, but for now it works. The reason this was chosen was
 % because the size of indirect effects all depend on the model and the
 % number of paths requested. Some of the paths could have interactions

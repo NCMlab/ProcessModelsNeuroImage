@@ -302,7 +302,7 @@ Direct(2,3) = 1;
 
 % For this model there is interaction
 Inter = zeros(Model3.Nvar);
-Inter([1 2],3) = 1
+Inter([1 2],3) = 1;
 
 
 % The paths do not change
@@ -324,6 +324,36 @@ ResultsFolder = PrepareDataForProcess(Model3);
 WriteOutResults(ResultsFolder)
 
 %%
+% Other models:
+%     M
+%     |
+% X ----- Y
+
+%    M1--M2
+%   /      \
+%  /        \
+% X          Y
+
+%  W  M
+%   \/ \
+%   /   \
+%  X     Y
+
+%     M  V
+%    / \/
+%   /   \
+%  X     Y
+
+%     M
+%    / \
+%   /\ /\
+%  /  W  \
+% X       Y
+
+%    M1--M2
+%   /      \
+%  /       /\
+% X--------  Y
 
 % TODO 
 % The program that prepares the data to be submitted to the cluster also
