@@ -51,6 +51,8 @@ clear temp I
 BEHAVIOR = randn(Nsub,1);
 AgeGroup = round(rand(Nsub,1));
 
+COVARIATES = randn(Nsub,2);
+
 fprintf(1,'Done preparing data.\n');
 
 %% General Setup
@@ -85,7 +87,7 @@ Nvar = length(data);
 % correctsed accelerated confidence intervals determined from bootstrap
 % resampling.
 % Are there any voxel-wise bootstrap resamplings?
-Nboot = 5;
+Nboot = 100;
 
 % An alternative to voxel-wise statistics is a map-wise statistics based
 % off of the maximum statistic approach from a series of permutation
@@ -144,11 +146,20 @@ DataHeader.descrip = '';
 DataHeader.dt = [16 0];
 ModelInfo.DataHeader = DataHeader;
 
-%% Model Setup
+%% Model Specific Setup Number One
+% THe first model is to perform a simple mediation analysis with the
+% voxel-wise brain data as the mediation between a dichotomous variable
+% (Age group) and a continuous variable (Behavior). 
+
+%     M
+%    / \
+%   /   \
+%  X     Y
+
 Model1 = ModelInfo;
 
 % Name of the output folder
-Tag = 'ExampleModel1_perm';
+Tag = 'ExampleModel1_boot';
 Model1.Tag = Tag;
 
 % The first model is a basic mediation model testing whether the effect of age
@@ -167,7 +178,7 @@ Model1.Tag = Tag;
 % VAR_2 = VAR_1
 % VAR_3 = VAR_1 + VAR_2
 
-Direct = zeros(Nvar);
+Direct = zeros(Model1.Nvar);
 Direct(1,[2 3]) = 1;
 Direct(2,3) = 1;
 
@@ -181,13 +192,13 @@ Direct(2,3) = 1;
 
 % For this model there are no interactions so this is kept as a zero
 % matrix.
-Inter = zeros(Nvar);
+Inter = zeros(Model1.Nvar);
 
 % The paths to be tested are included in another matrix the same size of
 % the DIRECT matrix. One difference here is that the PATHS matrix may have
 % a third dimension to test multiple paths within a single model. The steps
 % along a path are specified with integers, i.e. step 1, step 2 ...
-Paths = zeros(Nvar);
+Paths = zeros(Model1.Nvar);
 Paths(1,2) = 1;
 Paths(2,3) = 2;
 
@@ -195,8 +206,117 @@ Paths(2,3) = 2;
 Model1.Direct = Direct;
 Model1.Inter = Inter;
 Model1.Paths = Paths;
-%%
+
+%% Run the analysis
 ResultsFolder = PrepareDataForProcess(Model1);
+% The writing of the images should ideally be perfomed by the cluster once
+% the analyses have completed. Therefore, a check is needed or better yet a
+% wait command for the cluster job: 
+% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
+WriteOutResults(ResultsFolder)
+
+
+%% Model Specific Setup Number Two
+% The second model is to perform a simple mediation analysis with the
+% voxel-wise brain data as the mediation between a dichotomous variable
+% (Age group) and a continuous variable (Behavior). This analysis now
+% includes covariates also.
+
+
+Model2 = ModelInfo;
+
+% Add the covariate names
+Model2.Names = [Model2.Names 'Cov1' 'Cov2'];
+
+% Add the covariate data
+Model2.data = [Model2.data COVARIATES(:,1) COVARIATES(:,2)];
+
+% Update the number of variables value 
+Model2.Nvar = length(Model2.Names);
+
+% Name of the output folder
+Tag = 'ExampleModel2_boot';
+Model2.Tag = Tag;
+
+% Specify the simple mediation model as above
+
+Direct = zeros(Model2.Nvar);
+Direct(1,[2 3]) = 1;
+Direct(2,3) = 1;
+
+% Now specify the covariates in the models
+Direct([4,5],2) = 1;
+Direct([4,5],3) = 1;
+
+% For this model there are no interactions so this is kept as a zero
+% matrix.
+Inter = zeros(Model2.Nvar);
+
+% The paths do not change
+Paths = zeros(Model2.Nvar);
+Paths(1,2) = 1;
+Paths(2,3) = 2;
+
+
+Model2.Direct = Direct;
+Model2.Inter = Inter;
+Model2.Paths = Paths;
+
+ResultsFolder = PrepareDataForProcess(Model2);
+
+% The writing of the images should ideally be perfomed by the cluster once
+% the analyses have completed. Therefore, a check is needed or better yet a
+% wait command for the cluster job: 
+% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
+WriteOutResults(ResultsFolder)
+
+
+%% Model Specific Setup Number Three
+% The third model is to perform a moderated-mediation analysis with the
+% voxel-wise brain data as the mediation between a dichotomous variable
+% (Age group) and a continuous variable (Behavior). 
+% Now there is an interaction between the brain measure and age group in
+% predicting the behavior variable
+
+%     M
+%    / \
+%   /  /\
+%  /  /  \
+% X --    Y
+
+Model3 = ModelInfo;
+
+% Update the number of variables value 
+Model3.Nvar = length(Model3.Names);
+
+% Name of the output folder
+Tag = 'ExampleModel3_boot';
+Model3.Tag = Tag;
+
+% Specify the simple mediation model as above
+
+Direct = zeros(Model3.Nvar);
+Direct(1,[2 3]) = 1;
+Direct(2,3) = 1;
+
+
+% For this model there is interaction
+Inter = zeros(Model3.Nvar);
+Inter([1 2],3) = 1
+
+
+% The paths do not change
+Paths = zeros(Model3.Nvar);
+Paths(1,2) = 1;
+Paths(2,3) = 2;
+
+
+Model3.Direct = Direct;
+Model3.Inter = Inter;
+Model3.Paths = Paths;
+
+ResultsFolder = PrepareDataForProcess(Model3);
+
 % The writing of the images should ideally be perfomed by the cluster once
 % the analyses have completed. Therefore, a check is needed or better yet a
 % wait command for the cluster job: 
@@ -223,23 +343,4 @@ WriteOutResults(ResultsFolder)
 % non-included data from memory. The problem is that there will be
 % transient times of large amounts of data in memory. I am afraid to
 % overload a single computer even transiently.
-% 
-% 
-% 
-% WIPsubfnPrepareDataForProcessPERMUTE
-% % THis performs the permutation testing approach
-% WIPsubfnVoxelWiseProcessPERMUTE(InDataPath,count,Nperm)
-% % This applies the BCaCI to each voxel
-% Results = WIPsubfnProcessData(Model)
-%     
-%     BootStrap = WIPsubfnBootStrap(Model,Model.Nboot,FieldNames);
-% 
-%     % Perform the jack-knife step
-%     JackKnife = WIPJackKnife(Model,Results,FieldNames);
-%     
-%     % Calculate the BCaci values for each parameter
-%     Results.BCaCI = WIPsubfnCreateBCaCI(Results,BootStrap,JackKnife,Model.Thresh);
-% 
-% % THis does the actual regression model fitting.
-% Results = WIPsubfnFitModel(data)
 % 

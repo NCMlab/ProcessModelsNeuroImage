@@ -22,7 +22,7 @@ if Model.Nboot > 0
     JackKnife = JackKnifeFunction(Model,Results,FieldNames);
     
     % Calculate the BCaci values for each parameter
-    Results.BCaCI = WIPsubfnCreateBCaCI(Results,BootStrap,JackKnife,Model.Thresholds);
+    Results.BCaCI = CreateBCaCI(Results,BootStrap,JackKnife,Model.Thresholds);
   
 end
 

@@ -71,8 +71,19 @@ else
     % This analysis is run on the host computer
     switch ModelType
         case 'bootstrap'
-            % Need to split the data and cycle over voxels
-            Results = CycleOverVoxelsProcessBootstrap(ModelInfo);
+            % Save the data
+            InDataPath = fullfile(DataFolder,'ModelInfo');
+            Str = ['save ' InDataPath ' ModelInfo '];
+            eval(Str);
+            % Process the data
+            Parameters = CycleOverVoxelsProcessBootstrap(ModelInfo);
+            
+            % Save the results
+            ResultsPath = fullfile(OutFolder,'Results');
+            mkdir(ResultsPath)
+            Str = sprintf('save %s %s',fullfile(ResultsPath,sprintf('Bootstrap_count%04d_%dSamp',1,ModelInfo.Nboot)),'Parameters');
+            eval(Str)
+            
         case 'permutation'
             % The permutation analysis requires calculation of the point
             % estimate and then calculation of all of the permutations. The

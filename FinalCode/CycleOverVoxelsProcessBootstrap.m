@@ -8,6 +8,7 @@ Nvoxels = length(ModelInfo.Indices);
 % Prepare the output structure
 Results = cell(Nvoxels,1);
 for i = 1:Nvoxels
+    fprintf(1,'%d of %d voxels\n',i,Nvoxels);
     % Extract the data for this voxel
     OneVoxelModel = ExtractDataFromVoxel(ModelInfo,i);
     % Perform the analysis for this voxel

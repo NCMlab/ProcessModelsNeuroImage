@@ -22,7 +22,8 @@ for i = 1:Model.Nsub
     Include = 1:Model.Nsub;
     Include(i) = 0;
     tempModel.data = Model.data(find(Include),:);
-    tempResults = WIPsubfnFitModel(tempModel);
+    tempResults = FitProcessModel(tempModel);
+    
     % store all the parameter estimates in the JackKnife structure
     JackKnife.beta(:,:,i) = tempResults.beta;
     JackKnife.B(:,:,i) = tempResults.B;

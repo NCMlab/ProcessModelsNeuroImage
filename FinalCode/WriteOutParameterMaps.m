@@ -34,8 +34,8 @@ for i = 1:ModelInfo.Nvar
                 FileName = sprintf('%s%sX',FileName,ModelInfo.Names{InterVar(j)});
             end
             FileName = sprintf('%s_%s.nii',FileName(1:end-1),Tag);
-            I = zeros(ModelInfor.DataHeader.dim);
-            I(ModelInfo.Indices) = squeeze(temp(Nvar+2,i,:));
+            I = zeros(ModelInfo.DataHeader.dim);
+            I(ModelInfo.Indices) = squeeze(temp(ModelInfo.Nvar+2,i,:));
             % Create the header for this image
             Vo = ModelInfo.DataHeader;
             Vo.fname = fullfile(ModelInfo.ResultsPath,FileName);

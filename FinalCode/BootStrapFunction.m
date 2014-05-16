@@ -1,5 +1,7 @@
 function BootStrap = BootStrapFunction(data,Nboot,FieldNames)
-PointEstResults = WIPsubfnFitModel(data);
+
+PointEstResults  = FitProcessModel(data);
+
 % initialize bootstrap values based on the size of the results structure.
 % FieldNames to bootstrap
 
@@ -38,7 +40,7 @@ for i = 1:Nboot
         Samp = [Samp1; Samp2];
     end
     temp.data = temp.data(Samp,:);
-    Results = WIPsubfnFitModel(temp);
+    Results = FitProcessModel(temp);
     BootStrap.beta(:,:,i) = Results.beta;
     BootStrap.B(:,:,i) = Results.B;
     BootStrap.Paths{i} = Results.Paths;
