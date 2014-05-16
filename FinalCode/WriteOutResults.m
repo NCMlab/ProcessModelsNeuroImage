@@ -67,17 +67,89 @@ switch ModelType
                 PointEstimate(:,:,kk,i) = Parameters{i}.Paths{kk};
             end
         end
+        
+        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate)
     case 'bootstrap'
+        % locate the results files
+        F = dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat'));
+        NFiles = length(F);
+        
+        % Check to see if the analyses are completed
+        if ~(NFiles == ModelInfo.NJobSplit)
+            errordlg('This analysis is not complete.');
+        end
+        
+        % load a single results fle to determine the size of the paths
+        load(fullfile(ResultsFolder,'Results',F(1).name))
+        [n m] = size(Parameters{1}.Paths{1});
+        PointEstimate = zeros(m,n,length(Parameters));
+        % cycle over number of voxels
+        for i = 1:length(Parameters)
+            PointEstimate(:,:,i) = Parameters{i}.Paths{:};
+            % cycle over thresholds
+            for j = 1:length(ModelInfo.Thresholds)
+                BCaCIUpper(:,:,j,i) = Parameters{i}.BCaCI.Paths(:,:,j,1,1);
+                BCaCILower(:,:,j,i) = Parameters{i}.BCaCI.Paths(:,:,j,1,2);
+            end
+        end
+        
+        WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
 end
 
-%% WRITE OUT ALL IMAGES
+
+
+
+
+
+%% WRITE OUT ALL IMAGES from the regression models
 WriteOutParameterMaps('beta',Parameters,ModelInfo)
 WriteOutParameterMaps('B',Parameters,ModelInfo)
 WriteOutParameterMaps('t',Parameters,ModelInfo)
 
+%%
+function WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
+%% WRITE OUT THE PATH IMAGES FOR THE BOOTSTRAP TEST
 
+for i = 1:m % cycle over path number
+    for j = 1:n % cycle over probed level in the path
+        
+        % write unthresholed path estimate
+        Vo = ModelInfo.DataHeader;
+        Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d.nii',i,j)));
+        % Prepare the data matrix
+        I = zeros(ModelInfo.DataHeader.dim);
+        % Extract the path data values
+        temp = squeeze(PointEstimate(i,j,:));
+        I(ModelInfo.Indices) = temp;
+        % Write the images
+        spm_write_vol(Vo,I);
+    end
+end
+% Write out the thresholded path images
+for k = 1:length(ModelInfo.Thresholds)
+    for i = 1:m % cycle over path number
+        for j = 1:n % cycle over probed level in the path
+            
+            % Find those locations where the product ofthe confidence
+            % intervals is greater then zero. These are locatons where the
+            % CI do not include zero.
+            temp = squeeze(BCaCILower(j,i,k,:).*BCaCIUpper(j,i,k,:)) > 0;
+            Vo = ModelInfo.DataHeader;
+            Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%0.3f.nii',i,j,ModelInfo.Thresholds(k))));
+            % Prepare the data matrix
+            I = zeros(ModelInfo.DataHeader.dim);
+
+            I(ModelInfo.Indices) = temp;
+            % Write the images
+            spm_write_vol(Vo,I);
+        end
+    end
+end
+
+
+
+function WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate)
 %% WRITE OUT THE PATH IMAGES FOR THE PERMUTATION TEST
-
 % cycle over the thresholds requested
 for j = 1:length(ModelInfo.Thresholds)
     % Find the number in a sorted list of permutations that corresponds to
@@ -94,9 +166,9 @@ for j = 1:length(ModelInfo.Thresholds)
     end
     
     for kk = 1:o % cycle over the number of paths
-        % cycle over ...
-        for i = 1:m 
-            % sort the max and min permutaion results
+        % cycle over the probed value??
+        for i = 1:m
+            % sort the max and min permutation results
             sMax(:,i) = sort(squeeze(MaxPermPaths(i,:,kk,:)),'descend');
             sMin(:,i) = sort(squeeze(MinPermPaths(i,:,kk,:)));
             % find the permutation value based on the sorted values
@@ -115,6 +187,7 @@ for j = 1:length(ModelInfo.Thresholds)
             spm_write_vol(Vo,I);
             
             % Find the locations that exceed the two-tailed threshold
+% >>>> I THINK THERE IS A BUG HERE WITH THE SECOND INDEX BEING SET TO 1 <<<
             temp(find((PointEstimate(i,1,kk,:) < Mx(i))&(PointEstimate(i,1,kk,:) >0))) = 0;
             temp(find((PointEstimate(i,1,kk,:) > Mn(i))&(PointEstimate(i,1,kk,:) <0))) = 0;
             

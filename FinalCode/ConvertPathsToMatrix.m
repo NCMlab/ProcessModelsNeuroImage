@@ -1,4 +1,4 @@
-function data = WIPsubfnConvertPathsToMatrix(Paths,PathNumber)
+function data = ConvertPathsToMatrix(Paths,PathNumber)
 % number of bootstraps
 Nrepeats = size(Paths,2);
 
