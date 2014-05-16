@@ -75,7 +75,7 @@ if Nperm > 0
     for j = 1:ModelInfo.Nvar
         % Check to see if this variable has more then one column
         if size(ModelInfo.data{j},2) > 1
-            tempData.data(:,j) = ModelInfo.data{j}(1,:);
+            tempData.data(:,j) = ModelInfo.data{j}(:,j);
         else
             tempData.data(:,j) = ModelInfo.data{j};
         end
@@ -148,7 +148,7 @@ for k = 1:size(Samp,2)
         % extract the data
         for j = 1:ModelInfo.Nvar
             if size(ModelInfo.data{j},2) > 1
-                tempData.data(:,j) = ModelInfo.data{j}(i,:);
+                tempData.data(:,j) = ModelInfo.data{j}(:,i);
             else
                 tempData.data(:,j) = ModelInfo.data{j};
             end

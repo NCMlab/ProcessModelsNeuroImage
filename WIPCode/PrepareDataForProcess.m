@@ -57,32 +57,30 @@ if ModelInfo.NJobSplit > 1
     % Create the folder to hold the output from the jobs executed on the
     % cluster. These are especially useful for investigation of errors.
     JobOutputFolder = fullfile(OutFolder,'JobOutput');
+    if ~exist(JobOutputFolder,'dir')
+        mkdir(JobOutputFolder);
+    end
     
     % Create the folder to hold the job files that get sent to the cluster
     % itself. These are useful if any jobs
     InJobFolder = fullfile(OutFolder,'JobFiles');
-    
-    if ~exist(JobOutputFolder)
-        mkdir(JobOutputFolder);
-    end
-    
-    if ~exist(InJobFolder)
+    if ~exist(InJobFolder,'dir')
         mkdir(InJobFolder);
     end
 else
     % This analysis is run on the host computer
     switch ModelType
         case 'bootstrap'
-            Results = VoxelWiseProcessBootstrap(ModelInfo);
-            
+            % Need to split the data and cycle over voxels
+            Results = CycleOverVoxelsProcessBootstrap(ModelInfo);
         case 'permutation'
             % The permutation analysis requires calculation of the point
             % estimate and then calculation of all of the permutations. The
             % point estimate is a full set of results and the permutations
             % only require a smaller subset to be calculated. Therefore,
-            % the permutation test requires the saving of data to file. 
+            % the permutation test requires the saving of data to file.
             % The permutation test is also used to calculate the multiple
-            % comparison corrected results across voxels. Thereofre, it
+            % comparison corrected results across voxels. Therefore, it
             % does not make sense to run this type of analysis on a single
             % point data set.
             % 
@@ -99,6 +97,5 @@ else
     end
 end
     
-    % If so is this a bootstrap analysis or a permutation analysis?
     
 

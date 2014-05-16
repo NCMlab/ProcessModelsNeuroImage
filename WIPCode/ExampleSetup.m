@@ -38,10 +38,10 @@ end
 Nvoxels = length(Indices);
 Nsub = size(I,4);
 % restructure the imaging data to be a Nvoxels X NSub matrix
-NIData = zeros(Nvoxels,Nsub);
+NIData = zeros(Nsub, Nvoxels);
 for i = 1:Nsub
     temp = I(:,:,:,i);
-    NIData(:,i) = temp(Indices);
+    NIData(i,:) = temp(Indices)';
 end
 % Clean up the memory
 clear temp I 
@@ -51,7 +51,7 @@ clear temp I
 BEHAVIOR = randn(Nsub,1);
 AgeGroup = round(rand(Nsub,1));
 
-fprintf(1,'Done prepapring data.\n');
+fprintf(1,'Done preparing data.\n');
 
 %% General Setup
 % The base directory is the folder containg the folder of results. The
@@ -85,7 +85,7 @@ Nvar = length(data);
 % correctsed accelerated confidence intervals determined from bootstrap
 % resampling.
 % Are there any voxel-wise bootstrap resamplings?
-Nboot = 0;
+Nboot = 5;
 
 % An alternative to voxel-wise statistics is a map-wise statistics based
 % off of the maximum statistic approach from a series of permutation
@@ -96,7 +96,7 @@ Nboot = 0;
 % determined based onthe number of permutations and the thresholds. Note,
 % two-tailed thresholds are used.
 % Are there any permutaion resamples to perform?
-Nperm = 10;
+Nperm = 0;
 
 % The job split variable is how many jobs this analysis is split into for
 % sending to a comuputer cluster environment. Note that the more splits
@@ -114,7 +114,7 @@ NJobSplit = 1;
 % However, for  estimation of the significance of the paths resampling
 % methods are required and the probabilities need to be calculated at the
 % time of the bootstrapping and therefore, made a prior.
-Thresh = [0.025 0.005];
+Thresh = [0.2 0.1];
 
 % Create a structure which will contain all information for this analysis.
 ModelInfo = {};
@@ -148,7 +148,7 @@ ModelInfo.DataHeader = DataHeader;
 Model1 = ModelInfo;
 
 % Name of the output folder
-Tag = 'ExampleModel1';
+Tag = 'ExampleModel1_perm';
 Model1.Tag = Tag;
 
 % The first model is a basic mediation model testing whether the effect of age
@@ -197,7 +197,10 @@ Model1.Inter = Inter;
 Model1.Paths = Paths;
 %%
 ResultsFolder = PrepareDataForProcess(Model1);
-
+% The writing of the images should ideally be perfomed by the cluster once
+% the analyses have completed. Therefore, a check is needed or better yet a
+% wait command for the cluster job: 
+% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
 WriteOutResults(ResultsFolder)
 
 %%
