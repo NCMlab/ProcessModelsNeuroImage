@@ -261,7 +261,7 @@ Paths(2,3) = 2;
 Model2.Direct = Direct;
 Model2.Inter = Inter;
 Model2.Paths = Paths;
-
+%%
 ResultsFolder = PrepareDataForProcess(Model2);
 
 % The writing of the images should ideally be perfomed by the cluster once
@@ -300,7 +300,11 @@ Direct(1,[2 3]) = 1;
 Direct(2,3) = 1;
 
 
-% For this model there is interaction
+% For this model there is interaction.
+% There can actually be more then one interaction in a single model. If
+% that is the case thise interaction matrix will need a third dimension. As
+% of right now this is not supported.
+
 Inter = zeros(Model3.Nvar);
 Inter([1 2],3) = 1;
 
@@ -314,7 +318,7 @@ Paths(2,3) = 2;
 Model3.Direct = Direct;
 Model3.Inter = Inter;
 Model3.Paths = Paths;
-
+%%
 ResultsFolder = PrepareDataForProcess(Model3);
 
 % The writing of the images should ideally be perfomed by the cluster once
@@ -322,6 +326,39 @@ ResultsFolder = PrepareDataForProcess(Model3);
 % wait command for the cluster job: 
 % e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
 WriteOutResults(ResultsFolder)
+
+%% Perform analyses on a single data point and print out the results
+SinglePointModel = Model1;
+SinglePointModel.data{2} = Model1.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Tag = 'SinglePointModel';
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+PrintResults(SinglePointModel,Results)
+%%
+SinglePointModel = Model2;
+SinglePointModel.data{2} = Model2.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Tag = 'SinglePointModel';
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+PrintResults(SinglePointModel,Results)
+
+%%
+SinglePointModel = Model3;
+SinglePointModel.data{2} = Model3.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Nboot = 10000;
+SinglePointModel.Tag = 'SinglePointModel';
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+PrintResults(SinglePointModel,Results)
 
 %%
 % Other models:

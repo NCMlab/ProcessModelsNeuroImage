@@ -1,4 +1,4 @@
-function WIPPrintResults(Model,Results)
+function PrintResults(Model,Results)
 %%
 fid = 1;
 fprintf(fid,'==================================================\n');

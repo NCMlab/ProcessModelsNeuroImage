@@ -68,7 +68,7 @@ switch ModelType
             end
         end
         
-        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate)
+        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate,o,m)
     case 'bootstrap'
         % locate the results files
         F = dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat'));
@@ -148,7 +148,7 @@ end
 
 
 
-function WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate)
+function WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate,o,m)
 %% WRITE OUT THE PATH IMAGES FOR THE PERMUTATION TEST
 % cycle over the thresholds requested
 for j = 1:length(ModelInfo.Thresholds)

@@ -1,0 +1,1127 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ExampleSetup</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-05-19"><meta name="DC.source" content="ExampleSetup.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">The aim of this example is to demonstrate a setup of this software.</a></li><li><a href="#2">General Setup</a></li><li><a href="#3">Model Specific Setup Number One</a></li><li><a href="#4">Run the analysis</a></li><li><a href="#5">Model Specific Setup Number Two</a></li><li><a href="#7">Model Specific Setup Number Three</a></li><li><a href="#9">Perform analyses on a single data point and print out the results</a></li></ul></div><h2>The aim of this example is to demonstrate a setup of this software.<a name="1"></a></h2><p>This will be an incremental step example. First, will be a simple mediation analysis where the effect of age group on a behavioral performance measure is mediated by a voxel-wise measure of grey matter density.</p><pre class="codeinput"><span class="comment">% To begin, start by loading up the brain data.</span>
+P = spm_select(Inf,<span class="string">'image'</span>,<span class="string">'Select the imaging data which will serve as the mediator.'</span>);
+V = spm_vol(P);
+I = spm_read_vols(V);
+<span class="comment">% The format of the input data is needed for later writing of the output</span>
+<span class="comment">% images</span>
+DataHeader = V(1);
+
+<span class="comment">% A mask image is needed. From this mask image the indices of voxels to</span>
+<span class="comment">% include is determined.</span>
+<span class="comment">% MASK</span>
+MaskFlag = 0;
+<span class="keyword">while</span> MaskFlag == 0
+    Pmask = spm_select(1,<span class="string">'image'</span>,<span class="string">'Select the mask image'</span>);
+    Vmask = spm_vol(Pmask);
+    Imask = spm_read_vols(Vmask);
+    <span class="comment">% make sure the selected mask has the same dimensions as the data</span>
+    <span class="keyword">if</span> false(Vmask.dim == V(1).dim)
+        errordlg(<span class="string">'The mask is not the same size as the selected data'</span>);
+    <span class="keyword">end</span>
+    <span class="comment">% make sure the mask image is really a mask image</span>
+    <span class="keyword">if</span> length(unique(Imask)) &gt; 2
+        errordlg(<span class="string">'The mask image selected has more then two unique values.'</span>);
+    <span class="keyword">else</span>
+        <span class="comment">% Find the indices of the voxels included inthe mask</span>
+        Indices = find(Imask);
+        clear <span class="string">Imask</span> <span class="string">Vmask</span>
+        MaskFlag = 1;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">% determine the size of the data</span>
+Nvoxels = length(Indices);
+Nsub = size(I,4);
+<span class="comment">% restructure the imaging data to be a Nvoxels X NSub matrix</span>
+NIData = zeros(Nsub, Nvoxels);
+<span class="keyword">for</span> i = 1:Nsub
+    temp = I(:,:,:,i);
+    NIData(i,:) = temp(Indices)';
+<span class="keyword">end</span>
+<span class="comment">% Clean up the memory</span>
+clear <span class="string">temp</span> <span class="string">I</span>
+
+<span class="comment">% For this example the behavioral data is a single number per person.</span>
+<span class="comment">% Behavioral Data</span>
+BEHAVIOR = randn(Nsub,1);
+AgeGroup = round(rand(Nsub,1));
+
+COVARIATES = randn(Nsub,2);
+
+fprintf(1,<span class="string">'Done preparing data.\n'</span>);
+</pre><pre class="codeoutput">Done preparing data.
+</pre><h2>General Setup<a name="2"></a></h2><p>The base directory is the folder containg the folder of results. The results for a specific analysis will all be in folders contained within this base directory. The output folders are named according to a user specified "Tag" name.</p><pre class="codeinput"><span class="keyword">if</span> ismac
+    BaseDir = <span class="string">'/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode'</span>;
+<span class="keyword">elseif</span> ispc
+    BaseDir = <span class="string">'C:\Users\js2746\Dropbox\SteffenerColumbia\Projects\TestProcessCode'</span>;
+<span class="keyword">end</span>
+
+<span class="comment">% Create a structure where each cell is a node in the path diagram. This</span>
+<span class="comment">% could be a voxel-wise matrix or a vector.</span>
+data = {};
+data{1} = AgeGroup;
+data{2} = NIData;
+data{3} = BEHAVIOR;
+
+<span class="comment">% Create a structure of corresponding names for each cell in the data</span>
+<span class="comment">% structure</span>
+Names = {};
+Names{1} = <span class="string">'AgeGr'</span>;
+Names{2} = <span class="string">'Brain'</span>;
+Names{3} = <span class="string">'Behavior'</span>;
+
+<span class="comment">% How many variables were entered</span>
+Nvar = length(data);
+
+<span class="comment">% Right now the statistics can be performed at the voxel-level using bias</span>
+<span class="comment">% correctsed accelerated confidence intervals determined from bootstrap</span>
+<span class="comment">% resampling.</span>
+<span class="comment">% Are there any voxel-wise bootstrap resamplings?</span>
+Nboot = 100;
+
+<span class="comment">% An alternative to voxel-wise statistics is a map-wise statistics based</span>
+<span class="comment">% off of the maximum statistic approach from a series of permutation</span>
+<span class="comment">% resamples. This approach performs the voxel-wise calculations, then</span>
+<span class="comment">% identifiies the value of the maximal statistic in the image. This is</span>
+<span class="comment">% redone with each permutation to create a distribution of maximal</span>
+<span class="comment">% statistical values. These values are sorted and the percentiles are</span>
+<span class="comment">% determined based onthe number of permutations and the thresholds. Note,</span>
+<span class="comment">% two-tailed thresholds are used.</span>
+<span class="comment">% Are there any permutaion resamples to perform?</span>
+Nperm = 0;
+
+<span class="comment">% The job split variable is how many jobs this analysis is split into for</span>
+<span class="comment">% sending to a comuputer cluster environment. Note that the more splits</span>
+<span class="comment">% does not mean faster computing because there is a limitationon the number</span>
+<span class="comment">% of available cluster nodes. When the number of job splits exceeds the</span>
+<span class="comment">% number of available jobs then jobs are placed in the queue and need to</span>
+<span class="comment">% wait.</span>
+<span class="comment">% If you are running this on a single (non-cluster environment) computer</span>
+<span class="comment">% then set this to equal 1.</span>
+NJobSplit = 1;
+
+<span class="comment">% Specify the thresholds used in the analysis.</span>
+<span class="comment">% Some of the images and results in the mediation analysis perform</span>
+<span class="comment">% parametric tests where the threshold can be more dynamically changed.</span>
+<span class="comment">% However, for  estimation of the significance of the paths resampling</span>
+<span class="comment">% methods are required and the probabilities need to be calculated at the</span>
+<span class="comment">% time of the bootstrapping and therefore, made a prior.</span>
+Thresh = [0.2 0.1];
+
+<span class="comment">% Create a structure which will contain all information for this analysis.</span>
+ModelInfo = {};
+ModelInfo.BaseDir = BaseDir;
+ModelInfo.Names = Names;
+ModelInfo.data = data;
+ModelInfo.Nboot = Nboot;
+ModelInfo.Nperm = Nperm;
+ModelInfo.BaseDir = BaseDir;
+
+ModelInfo.Indices = Indices;
+ModelInfo.NJobSplit = NJobSplit;
+ModelInfo.Thresholds = Thresh;
+<span class="comment">% Startification is used when the resamples are created and needs to be a</span>
+<span class="comment">% binomial parameter for right now. The use of a stratification variable is</span>
+<span class="comment">% so that when the reampling is performed each resample maintains the</span>
+<span class="comment">% number of subjects as in the stratification parameter. This is most</span>
+<span class="comment">% applicable when there are multiple groups with different sample sizes.</span>
+ModelInfo.STRAT = [];
+ModelInfo.Nsub = size(data{1},1);
+ModelInfo.Nvar = Nvar;
+ModelInfo.Nvoxels = Nvoxels;
+
+<span class="comment">% Prepare the output data header</span>
+DataHeader.fname = <span class="string">''</span>;
+DataHeader.descrip = <span class="string">''</span>;
+DataHeader.dt = [16 0];
+ModelInfo.DataHeader = DataHeader;
+</pre><h2>Model Specific Setup Number One<a name="3"></a></h2><p>THe first model is to perform a simple mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior).</p><pre class="codeinput"><span class="comment">%     M</span>
+<span class="comment">%    / \</span>
+<span class="comment">%   /   \</span>
+<span class="comment">%  X     Y</span>
+
+Model1 = ModelInfo;
+
+<span class="comment">% Name of the output folder</span>
+Tag = <span class="string">'ExampleModel1_boot'</span>;
+Model1.Tag = Tag;
+
+<span class="comment">% The first model is a basic mediation model testing whether the effect of age</span>
+<span class="comment">% group on behavior is mediated by the voxel-wise brain measures.</span>
+
+
+<span class="comment">% The modeling is specified using a series of matrices. The first is the</span>
+<span class="comment">% DIRECT matrix. This matrix is square with dimension based onthe number of</span>
+<span class="comment">% variables in the model. The rows and columns refer to the variabvles in</span>
+<span class="comment">% the model in the same order as they are specified in the data matrix.</span>
+<span class="comment">% Since the path analyses are in fact a series of regression models these</span>
+<span class="comment">% models get specified in DIRECT matrix. Interaction or moderating effects</span>
+<span class="comment">% get specified in the INTER(actions) matrix below.</span>
+
+<span class="comment">% A simple mediation model would be:</span>
+<span class="comment">% VAR_2 = VAR_1</span>
+<span class="comment">% VAR_3 = VAR_1 + VAR_2</span>
+
+Direct = zeros(Model1.Nvar);
+Direct(1,[2 3]) = 1;
+Direct(2,3) = 1;
+
+<span class="comment">% To specify interactions in the model create another matrix the same size</span>
+<span class="comment">% as the DIRECT matrix.</span>
+<span class="comment">% An interaction between two variables in predicting a third, the rows</span>
+<span class="comment">% of the interacting variables will both have a value of one within the</span>
+<span class="comment">% column of the variable they are predicting. Be sure to include in the</span>
+<span class="comment">% DIRECT matrix the main effects for each of these variables on the</span>
+<span class="comment">% predicted variable.</span>
+
+<span class="comment">% For this model there are no interactions so this is kept as a zero</span>
+<span class="comment">% matrix.</span>
+Inter = zeros(Model1.Nvar);
+
+<span class="comment">% The paths to be tested are included in another matrix the same size of</span>
+<span class="comment">% the DIRECT matrix. One difference here is that the PATHS matrix may have</span>
+<span class="comment">% a third dimension to test multiple paths within a single model. The steps</span>
+<span class="comment">% along a path are specified with integers, i.e. step 1, step 2 ...</span>
+Paths = zeros(Model1.Nvar);
+Paths(1,2) = 1;
+Paths(2,3) = 2;
+
+
+Model1.Direct = Direct;
+Model1.Inter = Inter;
+Model1.Paths = Paths;
+</pre><h2>Run the analysis<a name="4"></a></h2><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model1);
+<span class="comment">% The writing of the images should ideally be perfomed by the cluster once</span>
+<span class="comment">% the analyses have completed. Therefore, a check is needed or better yet a</span>
+<span class="comment">% wait command for the cluster job:</span>
+<span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
+WriteOutResults(ResultsFolder)
+</pre><pre class="codeoutput">1 of 95 voxels
+2 of 95 voxels
+3 of 95 voxels
+4 of 95 voxels
+5 of 95 voxels
+6 of 95 voxels
+7 of 95 voxels
+8 of 95 voxels
+9 of 95 voxels
+10 of 95 voxels
+11 of 95 voxels
+12 of 95 voxels
+13 of 95 voxels
+14 of 95 voxels
+15 of 95 voxels
+16 of 95 voxels
+17 of 95 voxels
+18 of 95 voxels
+19 of 95 voxels
+20 of 95 voxels
+21 of 95 voxels
+22 of 95 voxels
+23 of 95 voxels
+24 of 95 voxels
+25 of 95 voxels
+26 of 95 voxels
+27 of 95 voxels
+28 of 95 voxels
+29 of 95 voxels
+30 of 95 voxels
+31 of 95 voxels
+32 of 95 voxels
+33 of 95 voxels
+34 of 95 voxels
+35 of 95 voxels
+36 of 95 voxels
+37 of 95 voxels
+38 of 95 voxels
+39 of 95 voxels
+40 of 95 voxels
+41 of 95 voxels
+42 of 95 voxels
+43 of 95 voxels
+44 of 95 voxels
+45 of 95 voxels
+46 of 95 voxels
+47 of 95 voxels
+48 of 95 voxels
+49 of 95 voxels
+50 of 95 voxels
+51 of 95 voxels
+52 of 95 voxels
+53 of 95 voxels
+54 of 95 voxels
+55 of 95 voxels
+56 of 95 voxels
+57 of 95 voxels
+58 of 95 voxels
+59 of 95 voxels
+60 of 95 voxels
+61 of 95 voxels
+62 of 95 voxels
+63 of 95 voxels
+64 of 95 voxels
+65 of 95 voxels
+66 of 95 voxels
+67 of 95 voxels
+68 of 95 voxels
+69 of 95 voxels
+70 of 95 voxels
+71 of 95 voxels
+72 of 95 voxels
+73 of 95 voxels
+74 of 95 voxels
+75 of 95 voxels
+76 of 95 voxels
+77 of 95 voxels
+78 of 95 voxels
+79 of 95 voxels
+80 of 95 voxels
+81 of 95 voxels
+82 of 95 voxels
+83 of 95 voxels
+84 of 95 voxels
+85 of 95 voxels
+86 of 95 voxels
+87 of 95 voxels
+88 of 95 voxels
+89 of 95 voxels
+90 of 95 voxels
+91 of 95 voxels
+92 of 95 voxels
+93 of 95 voxels
+94 of 95 voxels
+95 of 95 voxels
+</pre><h2>Model Specific Setup Number Two<a name="5"></a></h2><p>The second model is to perform a simple mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior). This analysis now includes covariates also.</p><pre class="codeinput">Model2 = ModelInfo;
+
+<span class="comment">% Add the covariate names</span>
+Model2.Names = [Model2.Names <span class="string">'Cov1'</span> <span class="string">'Cov2'</span>];
+
+<span class="comment">% Add the covariate data</span>
+Model2.data = [Model2.data COVARIATES(:,1) COVARIATES(:,2)];
+
+<span class="comment">% Update the number of variables value</span>
+Model2.Nvar = length(Model2.Names);
+
+<span class="comment">% Name of the output folder</span>
+Tag = <span class="string">'ExampleModel2_boot'</span>;
+Model2.Tag = Tag;
+
+<span class="comment">% Specify the simple mediation model as above</span>
+
+Direct = zeros(Model2.Nvar);
+Direct(1,[2 3]) = 1;
+Direct(2,3) = 1;
+
+<span class="comment">% Now specify the covariates in the models</span>
+Direct([4,5],2) = 1;
+Direct([4,5],3) = 1;
+
+<span class="comment">% For this model there are no interactions so this is kept as a zero</span>
+<span class="comment">% matrix.</span>
+Inter = zeros(Model2.Nvar);
+
+<span class="comment">% The paths do not change</span>
+Paths = zeros(Model2.Nvar);
+Paths(1,2) = 1;
+Paths(2,3) = 2;
+
+
+Model2.Direct = Direct;
+Model2.Inter = Inter;
+Model2.Paths = Paths;
+</pre><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model2);
+
+<span class="comment">% The writing of the images should ideally be perfomed by the cluster once</span>
+<span class="comment">% the analyses have completed. Therefore, a check is needed or better yet a</span>
+<span class="comment">% wait command for the cluster job:</span>
+<span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
+WriteOutResults(ResultsFolder)
+</pre><pre class="codeoutput">1 of 95 voxels
+2 of 95 voxels
+3 of 95 voxels
+4 of 95 voxels
+5 of 95 voxels
+6 of 95 voxels
+7 of 95 voxels
+8 of 95 voxels
+9 of 95 voxels
+10 of 95 voxels
+11 of 95 voxels
+12 of 95 voxels
+13 of 95 voxels
+14 of 95 voxels
+15 of 95 voxels
+16 of 95 voxels
+17 of 95 voxels
+18 of 95 voxels
+19 of 95 voxels
+20 of 95 voxels
+21 of 95 voxels
+22 of 95 voxels
+23 of 95 voxels
+24 of 95 voxels
+25 of 95 voxels
+26 of 95 voxels
+27 of 95 voxels
+28 of 95 voxels
+29 of 95 voxels
+30 of 95 voxels
+31 of 95 voxels
+32 of 95 voxels
+33 of 95 voxels
+34 of 95 voxels
+35 of 95 voxels
+36 of 95 voxels
+37 of 95 voxels
+38 of 95 voxels
+39 of 95 voxels
+40 of 95 voxels
+41 of 95 voxels
+42 of 95 voxels
+43 of 95 voxels
+44 of 95 voxels
+45 of 95 voxels
+46 of 95 voxels
+47 of 95 voxels
+48 of 95 voxels
+49 of 95 voxels
+50 of 95 voxels
+51 of 95 voxels
+52 of 95 voxels
+53 of 95 voxels
+54 of 95 voxels
+55 of 95 voxels
+56 of 95 voxels
+57 of 95 voxels
+58 of 95 voxels
+59 of 95 voxels
+60 of 95 voxels
+61 of 95 voxels
+62 of 95 voxels
+63 of 95 voxels
+64 of 95 voxels
+65 of 95 voxels
+66 of 95 voxels
+67 of 95 voxels
+68 of 95 voxels
+69 of 95 voxels
+70 of 95 voxels
+71 of 95 voxels
+72 of 95 voxels
+73 of 95 voxels
+74 of 95 voxels
+75 of 95 voxels
+76 of 95 voxels
+77 of 95 voxels
+78 of 95 voxels
+79 of 95 voxels
+80 of 95 voxels
+81 of 95 voxels
+82 of 95 voxels
+83 of 95 voxels
+84 of 95 voxels
+85 of 95 voxels
+86 of 95 voxels
+87 of 95 voxels
+88 of 95 voxels
+89 of 95 voxels
+90 of 95 voxels
+91 of 95 voxels
+92 of 95 voxels
+93 of 95 voxels
+94 of 95 voxels
+95 of 95 voxels
+</pre><h2>Model Specific Setup Number Three<a name="7"></a></h2><p>The third model is to perform a moderated-mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior). Now there is an interaction between the brain measure and age group in predicting the behavior variable</p><pre class="codeinput"><span class="comment">%     M</span>
+<span class="comment">%    / \</span>
+<span class="comment">%   /  /\</span>
+<span class="comment">%  /  /  \</span>
+<span class="comment">% X --    Y</span>
+
+Model3 = ModelInfo;
+
+<span class="comment">% Update the number of variables value</span>
+Model3.Nvar = length(Model3.Names);
+
+<span class="comment">% Name of the output folder</span>
+Tag = <span class="string">'ExampleModel3_boot'</span>;
+Model3.Tag = Tag;
+
+<span class="comment">% Specify the simple mediation model as above</span>
+
+Direct = zeros(Model3.Nvar);
+Direct(1,[2 3]) = 1;
+Direct(2,3) = 1;
+
+
+<span class="comment">% For this model there is interaction.</span>
+<span class="comment">% There can actually be more then one interaction in a single model. If</span>
+<span class="comment">% that is the case thise interaction matrix will need a third dimension. As</span>
+<span class="comment">% of right now this is not supported.</span>
+
+Inter = zeros(Model3.Nvar);
+Inter([1 2],3) = 1;
+
+
+<span class="comment">% The paths do not change</span>
+Paths = zeros(Model3.Nvar);
+Paths(1,2) = 1;
+Paths(2,3) = 2;
+
+
+Model3.Direct = Direct;
+Model3.Inter = Inter;
+Model3.Paths = Paths;
+</pre><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model3);
+
+<span class="comment">% The writing of the images should ideally be perfomed by the cluster once</span>
+<span class="comment">% the analyses have completed. Therefore, a check is needed or better yet a</span>
+<span class="comment">% wait command for the cluster job:</span>
+<span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
+WriteOutResults(ResultsFolder)
+</pre><pre class="codeoutput">1 of 95 voxels
+2 of 95 voxels
+3 of 95 voxels
+4 of 95 voxels
+5 of 95 voxels
+6 of 95 voxels
+7 of 95 voxels
+8 of 95 voxels
+9 of 95 voxels
+10 of 95 voxels
+11 of 95 voxels
+12 of 95 voxels
+13 of 95 voxels
+14 of 95 voxels
+15 of 95 voxels
+16 of 95 voxels
+17 of 95 voxels
+18 of 95 voxels
+19 of 95 voxels
+20 of 95 voxels
+21 of 95 voxels
+22 of 95 voxels
+23 of 95 voxels
+24 of 95 voxels
+25 of 95 voxels
+26 of 95 voxels
+27 of 95 voxels
+28 of 95 voxels
+29 of 95 voxels
+30 of 95 voxels
+31 of 95 voxels
+32 of 95 voxels
+33 of 95 voxels
+34 of 95 voxels
+35 of 95 voxels
+36 of 95 voxels
+37 of 95 voxels
+38 of 95 voxels
+39 of 95 voxels
+40 of 95 voxels
+41 of 95 voxels
+42 of 95 voxels
+43 of 95 voxels
+44 of 95 voxels
+45 of 95 voxels
+46 of 95 voxels
+47 of 95 voxels
+48 of 95 voxels
+49 of 95 voxels
+50 of 95 voxels
+51 of 95 voxels
+52 of 95 voxels
+53 of 95 voxels
+54 of 95 voxels
+55 of 95 voxels
+56 of 95 voxels
+57 of 95 voxels
+58 of 95 voxels
+59 of 95 voxels
+60 of 95 voxels
+61 of 95 voxels
+62 of 95 voxels
+63 of 95 voxels
+64 of 95 voxels
+65 of 95 voxels
+66 of 95 voxels
+67 of 95 voxels
+68 of 95 voxels
+69 of 95 voxels
+70 of 95 voxels
+71 of 95 voxels
+72 of 95 voxels
+73 of 95 voxels
+74 of 95 voxels
+75 of 95 voxels
+76 of 95 voxels
+77 of 95 voxels
+78 of 95 voxels
+79 of 95 voxels
+80 of 95 voxels
+81 of 95 voxels
+82 of 95 voxels
+83 of 95 voxels
+84 of 95 voxels
+85 of 95 voxels
+86 of 95 voxels
+87 of 95 voxels
+88 of 95 voxels
+89 of 95 voxels
+90 of 95 voxels
+91 of 95 voxels
+92 of 95 voxels
+93 of 95 voxels
+94 of 95 voxels
+95 of 95 voxels
+</pre><h2>Perform analyses on a single data point and print out the results<a name="9"></a></h2><pre class="codeinput">SinglePointModel = Model3;
+SinglePointModel.data{2} = Model3.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Tag = <span class="string">'SinglePointModel'</span>;
+
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel)
+WIPPrintResults(SinglePointModel,Results)
+</pre><pre class="codeoutput">
+Results = 
+
+           beta: [5x3 double]
+              B: [5x3 double]
+              t: [5x3 double]
+             se: [5x3 double]
+              p: [5x3 double]
+             df: [5x3 double]
+          Paths: {[2x1 double]}
+    ProbeValues: {[2x1 double]}
+          BCaCI: [1x1 struct]
+
+
+Dependent variable: Brain
+               Model      beta    stderr         B         t         p
+            constant   864.491     0.666        --  1297.669     0.000
+               AgeGr    -0.071     0.942    -0.011    -0.075     0.940
+
+Dependent variable: Behavior
+               Model      beta    stderr         B         t         p
+            constant   -11.508    59.023        --    -0.195     0.846
+               AgeGr   -24.078    79.778   -11.416    -0.302     0.764
+               Brain     0.013     0.068     0.040     0.188     0.852
+       AgeGr_x_Brain     0.028     0.092    11.663     0.308     0.759
+
+Path: 1
+               AgeGr to                Brain
+               Brain to             Behavior
+Indirect Effect size: -0.0009
+Indirect Effect size: -0.0029
+At alpha = 0.2000, BCaCI = [-0.1285, -0.1104]
+At alpha = 0.0898, BCaCI = [0.0267, At alpha = 0.1000, BCaCI = [-0.1893, -0.1347]
+At alpha = 0.1129, BCaCI = [0.0549, </pre><p>Other models:     M     | X ----- Y</p><pre class="codeinput"><span class="comment">%    M1--M2</span>
+<span class="comment">%   /      \</span>
+<span class="comment">%  /        \</span>
+<span class="comment">% X          Y</span>
+
+<span class="comment">%  W  M</span>
+<span class="comment">%   \/ \</span>
+<span class="comment">%   /   \</span>
+<span class="comment">%  X     Y</span>
+
+<span class="comment">%     M  V</span>
+<span class="comment">%    / \/</span>
+<span class="comment">%   /   \</span>
+<span class="comment">%  X     Y</span>
+
+<span class="comment">%     M</span>
+<span class="comment">%    / \</span>
+<span class="comment">%   /\ /\</span>
+<span class="comment">%  /  W  \</span>
+<span class="comment">% X       Y</span>
+
+<span class="comment">%    M1--M2</span>
+<span class="comment">%   /      \</span>
+<span class="comment">%  /       /\</span>
+<span class="comment">% X--------  Y</span>
+
+<span class="comment">% TODO</span>
+<span class="comment">% The program that prepares the data to be submitted to the cluster also</span>
+<span class="comment">% needs to decide whether to launch the permuattion test split or the</span>
+<span class="comment">% bootstrap split.</span>
+<span class="comment">% In the case of the permutation test a single copy of the data is saved.</span>
+<span class="comment">% For bootstrap the full data set is saved and then a broken up copy of</span>
+<span class="comment">% data is also saved. Each of these is a single "chunk" of the data based</span>
+<span class="comment">% onthe number of job splits. There is the option of not creating and</span>
+<span class="comment">% saving all these samll chunks but to pass the path to the full data set</span>
+<span class="comment">% and only break up the indices to analyze by each compute node. The only</span>
+<span class="comment">% downside I see to this is the potential to use a lot of RAM memory buy</span>
+<span class="comment">% loading up the very large data set for each compute node. And since each</span>
+<span class="comment">% computer in the cluster has muliple nodes, the full data set will be</span>
+<span class="comment">% loaded up by each node on each computer. It is possible to load the full</span>
+<span class="comment">% data set and then exract the data chunk of interest and rgen remove the</span>
+<span class="comment">% non-included data from memory. The problem is that there will be</span>
+<span class="comment">% transient times of large amounts of data in memory. I am afraid to</span>
+<span class="comment">% overload a single computer even transiently.</span>
+<span class="comment">%</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% The aim of this example is to demonstrate a setup of this software.
+% This will be an incremental step example. 
+% First, will be a simple mediation analysis where the effect of age group
+% on a behavioral performance measure is mediated by a voxel-wise measure
+% of grey matter density.
+
+% To begin, start by loading up the brain data. 
+P = spm_select(Inf,'image','Select the imaging data which will serve as the mediator.');
+V = spm_vol(P);
+I = spm_read_vols(V);
+% The format of the input data is needed for later writing of the output
+% images
+DataHeader = V(1);
+
+% A mask image is needed. From this mask image the indices of voxels to
+% include is determined.
+% MASK
+MaskFlag = 0;
+while MaskFlag == 0
+    Pmask = spm_select(1,'image','Select the mask image');
+    Vmask = spm_vol(Pmask);
+    Imask = spm_read_vols(Vmask);
+    % make sure the selected mask has the same dimensions as the data
+    if false(Vmask.dim == V(1).dim)
+        errordlg('The mask is not the same size as the selected data');
+    end
+    % make sure the mask image is really a mask image
+    if length(unique(Imask)) > 2
+        errordlg('The mask image selected has more then two unique values.');
+    else
+        % Find the indices of the voxels included inthe mask
+        Indices = find(Imask);
+        clear Imask Vmask
+        MaskFlag = 1;
+    end
+end
+% determine the size of the data
+Nvoxels = length(Indices);
+Nsub = size(I,4);
+% restructure the imaging data to be a Nvoxels X NSub matrix
+NIData = zeros(Nsub, Nvoxels);
+for i = 1:Nsub
+    temp = I(:,:,:,i);
+    NIData(i,:) = temp(Indices)';
+end
+% Clean up the memory
+clear temp I 
+
+% For this example the behavioral data is a single number per person.
+% Behavioral Data
+BEHAVIOR = randn(Nsub,1);
+AgeGroup = round(rand(Nsub,1));
+
+COVARIATES = randn(Nsub,2);
+
+fprintf(1,'Done preparing data.\n');
+
+%% General Setup
+% The base directory is the folder containg the folder of results. The
+% results for a specific analysis will all be in folders contained within
+% this base directory. The output folders are named according to a
+% user specified "Tag" name.
+if ismac
+    BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode';
+elseif ispc
+    BaseDir = 'C:\Users\js2746\Dropbox\SteffenerColumbia\Projects\TestProcessCode';
+end
+
+% Create a structure where each cell is a node in the path diagram. This
+% could be a voxel-wise matrix or a vector.
+data = {};
+data{1} = AgeGroup;
+data{2} = NIData;
+data{3} = BEHAVIOR;
+
+% Create a structure of corresponding names for each cell in the data
+% structure
+Names = {};
+Names{1} = 'AgeGr';
+Names{2} = 'Brain';
+Names{3} = 'Behavior';
+
+% How many variables were entered
+Nvar = length(data);
+
+% Right now the statistics can be performed at the voxel-level using bias
+% correctsed accelerated confidence intervals determined from bootstrap
+% resampling.
+% Are there any voxel-wise bootstrap resamplings?
+Nboot = 100;
+
+% An alternative to voxel-wise statistics is a map-wise statistics based
+% off of the maximum statistic approach from a series of permutation
+% resamples. This approach performs the voxel-wise calculations, then
+% identifiies the value of the maximal statistic in the image. This is
+% redone with each permutation to create a distribution of maximal
+% statistical values. These values are sorted and the percentiles are
+% determined based onthe number of permutations and the thresholds. Note,
+% two-tailed thresholds are used.
+% Are there any permutaion resamples to perform?
+Nperm = 0;
+
+% The job split variable is how many jobs this analysis is split into for
+% sending to a comuputer cluster environment. Note that the more splits
+% does not mean faster computing because there is a limitationon the number
+% of available cluster nodes. When the number of job splits exceeds the
+% number of available jobs then jobs are placed in the queue and need to
+% wait.
+% If you are running this on a single (non-cluster environment) computer
+% then set this to equal 1.
+NJobSplit = 1;
+
+% Specify the thresholds used in the analysis. 
+% Some of the images and results in the mediation analysis perform
+% parametric tests where the threshold can be more dynamically changed.
+% However, for  estimation of the significance of the paths resampling
+% methods are required and the probabilities need to be calculated at the
+% time of the bootstrapping and therefore, made a prior.
+Thresh = [0.2 0.1];
+
+% Create a structure which will contain all information for this analysis.
+ModelInfo = {};
+ModelInfo.BaseDir = BaseDir;
+ModelInfo.Names = Names;
+ModelInfo.data = data;
+ModelInfo.Nboot = Nboot;
+ModelInfo.Nperm = Nperm;
+ModelInfo.BaseDir = BaseDir;
+
+ModelInfo.Indices = Indices;
+ModelInfo.NJobSplit = NJobSplit;
+ModelInfo.Thresholds = Thresh;
+% Startification is used when the resamples are created and needs to be a
+% binomial parameter for right now. The use of a stratification variable is
+% so that when the reampling is performed each resample maintains the
+% number of subjects as in the stratification parameter. This is most
+% applicable when there are multiple groups with different sample sizes.
+ModelInfo.STRAT = [];
+ModelInfo.Nsub = size(data{1},1);
+ModelInfo.Nvar = Nvar;
+ModelInfo.Nvoxels = Nvoxels;
+
+% Prepare the output data header
+DataHeader.fname = '';
+DataHeader.descrip = '';
+DataHeader.dt = [16 0];
+ModelInfo.DataHeader = DataHeader;
+
+%% Model Specific Setup Number One
+% THe first model is to perform a simple mediation analysis with the
+% voxel-wise brain data as the mediation between a dichotomous variable
+% (Age group) and a continuous variable (Behavior). 
+
+%     M
+%    / \
+%   /   \
+%  X     Y
+
+Model1 = ModelInfo;
+
+% Name of the output folder
+Tag = 'ExampleModel1_boot';
+Model1.Tag = Tag;
+
+% The first model is a basic mediation model testing whether the effect of age
+% group on behavior is mediated by the voxel-wise brain measures.
+
+
+% The modeling is specified using a series of matrices. The first is the
+% DIRECT matrix. This matrix is square with dimension based onthe number of
+% variables in the model. The rows and columns refer to the variabvles in
+% the model in the same order as they are specified in the data matrix.
+% Since the path analyses are in fact a series of regression models these
+% models get specified in DIRECT matrix. Interaction or moderating effects
+% get specified in the INTER(actions) matrix below.
+
+% A simple mediation model would be: 
+% VAR_2 = VAR_1
+% VAR_3 = VAR_1 + VAR_2
+
+Direct = zeros(Model1.Nvar);
+Direct(1,[2 3]) = 1;
+Direct(2,3) = 1;
+
+% To specify interactions in the model create another matrix the same size
+% as the DIRECT matrix.
+% An interaction between two variables in predicting a third, the rows
+% of the interacting variables will both have a value of one within the
+% column of the variable they are predicting. Be sure to include in the
+% DIRECT matrix the main effects for each of these variables on the
+% predicted variable.
+
+% For this model there are no interactions so this is kept as a zero
+% matrix.
+Inter = zeros(Model1.Nvar);
+
+% The paths to be tested are included in another matrix the same size of
+% the DIRECT matrix. One difference here is that the PATHS matrix may have
+% a third dimension to test multiple paths within a single model. The steps
+% along a path are specified with integers, i.e. step 1, step 2 ...
+Paths = zeros(Model1.Nvar);
+Paths(1,2) = 1;
+Paths(2,3) = 2;
+
+
+Model1.Direct = Direct;
+Model1.Inter = Inter;
+Model1.Paths = Paths;
+
+%% Run the analysis
+ResultsFolder = PrepareDataForProcess(Model1);
+% The writing of the images should ideally be perfomed by the cluster once
+% the analyses have completed. Therefore, a check is needed or better yet a
+% wait command for the cluster job: 
+% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
+WriteOutResults(ResultsFolder)
+
+
+%% Model Specific Setup Number Two
+% The second model is to perform a simple mediation analysis with the
+% voxel-wise brain data as the mediation between a dichotomous variable
+% (Age group) and a continuous variable (Behavior). This analysis now
+% includes covariates also.
+
+
+Model2 = ModelInfo;
+
+% Add the covariate names
+Model2.Names = [Model2.Names 'Cov1' 'Cov2'];
+
+% Add the covariate data
+Model2.data = [Model2.data COVARIATES(:,1) COVARIATES(:,2)];
+
+% Update the number of variables value 
+Model2.Nvar = length(Model2.Names);
+
+% Name of the output folder
+Tag = 'ExampleModel2_boot';
+Model2.Tag = Tag;
+
+% Specify the simple mediation model as above
+
+Direct = zeros(Model2.Nvar);
+Direct(1,[2 3]) = 1;
+Direct(2,3) = 1;
+
+% Now specify the covariates in the models
+Direct([4,5],2) = 1;
+Direct([4,5],3) = 1;
+
+% For this model there are no interactions so this is kept as a zero
+% matrix.
+Inter = zeros(Model2.Nvar);
+
+% The paths do not change
+Paths = zeros(Model2.Nvar);
+Paths(1,2) = 1;
+Paths(2,3) = 2;
+
+
+Model2.Direct = Direct;
+Model2.Inter = Inter;
+Model2.Paths = Paths;
+%%
+ResultsFolder = PrepareDataForProcess(Model2);
+
+% The writing of the images should ideally be perfomed by the cluster once
+% the analyses have completed. Therefore, a check is needed or better yet a
+% wait command for the cluster job: 
+% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
+WriteOutResults(ResultsFolder)
+
+
+%% Model Specific Setup Number Three
+% The third model is to perform a moderated-mediation analysis with the
+% voxel-wise brain data as the mediation between a dichotomous variable
+% (Age group) and a continuous variable (Behavior). 
+% Now there is an interaction between the brain measure and age group in
+% predicting the behavior variable
+
+%     M
+%    / \
+%   /  /\
+%  /  /  \
+% X REPLACE_WITH_DASH_DASH    Y
+
+Model3 = ModelInfo;
+
+% Update the number of variables value 
+Model3.Nvar = length(Model3.Names);
+
+% Name of the output folder
+Tag = 'ExampleModel3_boot';
+Model3.Tag = Tag;
+
+% Specify the simple mediation model as above
+
+Direct = zeros(Model3.Nvar);
+Direct(1,[2 3]) = 1;
+Direct(2,3) = 1;
+
+
+% For this model there is interaction.
+% There can actually be more then one interaction in a single model. If
+% that is the case thise interaction matrix will need a third dimension. As
+% of right now this is not supported.
+
+Inter = zeros(Model3.Nvar);
+Inter([1 2],3) = 1;
+
+
+% The paths do not change
+Paths = zeros(Model3.Nvar);
+Paths(1,2) = 1;
+Paths(2,3) = 2;
+
+
+Model3.Direct = Direct;
+Model3.Inter = Inter;
+Model3.Paths = Paths;
+%%
+ResultsFolder = PrepareDataForProcess(Model3);
+
+% The writing of the images should ideally be perfomed by the cluster once
+% the analyses have completed. Therefore, a check is needed or better yet a
+% wait command for the cluster job: 
+% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
+WriteOutResults(ResultsFolder)
+
+%% Perform analyses on a single data point and print out the results
+SinglePointModel = Model3;
+SinglePointModel.data{2} = Model3.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Tag = 'SinglePointModel';
+
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel)
+WIPPrintResults(SinglePointModel,Results)
+
+%%
+% Other models:
+%     M
+%     |
+% X REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH- Y
+
+%    M1REPLACE_WITH_DASH_DASHM2
+%   /      \
+%  /        \
+% X          Y
+
+%  W  M
+%   \/ \
+%   /   \
+%  X     Y
+
+%     M  V
+%    / \/
+%   /   \
+%  X     Y
+
+%     M
+%    / \
+%   /\ /\
+%  /  W  \
+% X       Y
+
+%    M1REPLACE_WITH_DASH_DASHM2
+%   /      \
+%  /       /\
+% XREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  Y
+
+% TODO 
+% The program that prepares the data to be submitted to the cluster also
+% needs to decide whether to launch the permuattion test split or the
+% bootstrap split. 
+% In the case of the permutation test a single copy of the data is saved.
+% For bootstrap the full data set is saved and then a broken up copy of
+% data is also saved. Each of these is a single "chunk" of the data based
+% onthe number of job splits. There is the option of not creating and
+% saving all these samll chunks but to pass the path to the full data set
+% and only break up the indices to analyze by each compute node. The only
+% downside I see to this is the potential to use a lot of RAM memory buy
+% loading up the very large data set for each compute node. And since each
+% computer in the cluster has muliple nodes, the full data set will be
+% loaded up by each node on each computer. It is possible to load the full
+% data set and then exract the data chunk of interest and rgen remove the
+% non-included data from memory. The problem is that there will be
+% transient times of large amounts of data in memory. I am afraid to
+% overload a single computer even transiently.
+% 
+
+##### SOURCE END #####
+--></body></html>
