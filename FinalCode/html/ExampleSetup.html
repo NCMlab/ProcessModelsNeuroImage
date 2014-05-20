@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ExampleSetup</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-05-19"><meta name="DC.source" content="ExampleSetup.m"><style type="text/css">
+      --><title>ExampleSetup</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-05-19"><meta name="DC.source" content="ExampleSetup.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -23,7 +23,7 @@ a:visited { color:#004aa0; text-decoration:none; }
 
 p { padding:0px; margin:0px 0px 20px; }
 img { padding:0px; margin:0px 0px 20px; border:none; }
-p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+p img, pre img, tt img, li img { margin-bottom:0px; } 
 
 ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
 ul li { padding:0px; margin:0px 0px 7px 0px; }
@@ -38,12 +38,11 @@ ol li ul li { list-style:square; }
 
 .content { font-size:1.2em; line-height:140%; padding: 20px; }
 
-pre, code { font-size:12px; }
-tt { font-size: 1.2em; }
+pre, tt, code { font-size:12px; }
 pre { margin:0px 0px 20px; }
+pre.error { color:red; }
 pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
 pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
-pre.error { color:red; }
 
 @media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
 
@@ -66,7 +65,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">The aim of this example is to demonstrate a setup of this software.</a></li><li><a href="#2">General Setup</a></li><li><a href="#3">Model Specific Setup Number One</a></li><li><a href="#4">Run the analysis</a></li><li><a href="#5">Model Specific Setup Number Two</a></li><li><a href="#7">Model Specific Setup Number Three</a></li><li><a href="#9">Perform analyses on a single data point and print out the results</a></li></ul></div><h2>The aim of this example is to demonstrate a setup of this software.<a name="1"></a></h2><p>This will be an incremental step example. First, will be a simple mediation analysis where the effect of age group on a behavioral performance measure is mediated by a voxel-wise measure of grey matter density.</p><pre class="codeinput"><span class="comment">% To begin, start by loading up the brain data.</span>
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">The aim of this example is to demonstrate a setup of this software.</a></li><li><a href="#2">General Setup</a></li><li><a href="#3">Model Specific Setup Number One</a></li><li><a href="#4">Run the analysis for Model 1</a></li><li><a href="#5">Model Specific Setup Number 2</a></li><li><a href="#6">Run the analysis for Model 2</a></li><li><a href="#7">Model Specific Setup Number Three</a></li><li><a href="#8">Run the analysis for Model 3</a></li><li><a href="#9">Perform Model 1 analyses on a single data point and print out the results</a></li><li><a href="#10">Perform Model 2 analyses on a single data point and print out the results</a></li><li><a href="#11">Perform Model 3 analyses on a single data point and print out the results</a></li></ul></div><h2>The aim of this example is to demonstrate a setup of this software.<a name="1"></a></h2><p>This will be an incremental step example. First, will be a simple mediation analysis where the effect of age group on a behavioral performance measure is mediated by a voxel-wise measure of grey matter density.</p><pre class="codeinput"><span class="comment">% To begin, start by loading up the brain data.</span>
 P = spm_select(Inf,<span class="string">'image'</span>,<span class="string">'Select the imaging data which will serve as the mediator.'</span>);
 V = spm_vol(P);
 I = spm_read_vols(V);
@@ -117,7 +116,9 @@ COVARIATES = randn(Nsub,2);
 
 fprintf(1,<span class="string">'Done preparing data.\n'</span>);
 </pre><pre class="codeoutput">Done preparing data.
-</pre><h2>General Setup<a name="2"></a></h2><p>The base directory is the folder containg the folder of results. The results for a specific analysis will all be in folders contained within this base directory. The output folders are named according to a user specified "Tag" name.</p><pre class="codeinput"><span class="keyword">if</span> ismac
+</pre><h2>General Setup<a name="2"></a></h2><p>The base directory is the folder containg the folder of results. The results for a specific analysis will all be in folders contained within this base directory. The output folders are named according to a user specified "Tag" name.</p><pre class="codeinput"><span class="comment">% Check to see whether this example is running on my laptop or desktop.</span>
+<span class="comment">% This will have to be changed for any specific user.</span>
+<span class="keyword">if</span> ismac
     BaseDir = <span class="string">'/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode'</span>;
 <span class="keyword">elseif</span> ispc
     BaseDir = <span class="string">'C:\Users\js2746\Dropbox\SteffenerColumbia\Projects\TestProcessCode'</span>;
@@ -202,7 +203,7 @@ DataHeader.fname = <span class="string">''</span>;
 DataHeader.descrip = <span class="string">''</span>;
 DataHeader.dt = [16 0];
 ModelInfo.DataHeader = DataHeader;
-</pre><h2>Model Specific Setup Number One<a name="3"></a></h2><p>THe first model is to perform a simple mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior).</p><pre class="codeinput"><span class="comment">%     M</span>
+</pre><h2>Model Specific Setup Number One<a name="3"></a></h2><p>The first model is to perform a simple mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior).</p><pre class="codeinput"><span class="comment">%     M</span>
 <span class="comment">%    / \</span>
 <span class="comment">%   /   \</span>
 <span class="comment">%  X     Y</span>
@@ -257,108 +258,14 @@ Paths(2,3) = 2;
 Model1.Direct = Direct;
 Model1.Inter = Inter;
 Model1.Paths = Paths;
-</pre><h2>Run the analysis<a name="4"></a></h2><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model1);
+</pre><h2>Run the analysis for Model 1<a name="4"></a></h2><p>The following two functions actually run the mediation analysis and then writes out the results to NIFTI format images.</p><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model1);
+
 <span class="comment">% The writing of the images should ideally be perfomed by the cluster once</span>
 <span class="comment">% the analyses have completed. Therefore, a check is needed or better yet a</span>
 <span class="comment">% wait command for the cluster job:</span>
 <span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
 WriteOutResults(ResultsFolder)
-</pre><pre class="codeoutput">1 of 95 voxels
-2 of 95 voxels
-3 of 95 voxels
-4 of 95 voxels
-5 of 95 voxels
-6 of 95 voxels
-7 of 95 voxels
-8 of 95 voxels
-9 of 95 voxels
-10 of 95 voxels
-11 of 95 voxels
-12 of 95 voxels
-13 of 95 voxels
-14 of 95 voxels
-15 of 95 voxels
-16 of 95 voxels
-17 of 95 voxels
-18 of 95 voxels
-19 of 95 voxels
-20 of 95 voxels
-21 of 95 voxels
-22 of 95 voxels
-23 of 95 voxels
-24 of 95 voxels
-25 of 95 voxels
-26 of 95 voxels
-27 of 95 voxels
-28 of 95 voxels
-29 of 95 voxels
-30 of 95 voxels
-31 of 95 voxels
-32 of 95 voxels
-33 of 95 voxels
-34 of 95 voxels
-35 of 95 voxels
-36 of 95 voxels
-37 of 95 voxels
-38 of 95 voxels
-39 of 95 voxels
-40 of 95 voxels
-41 of 95 voxels
-42 of 95 voxels
-43 of 95 voxels
-44 of 95 voxels
-45 of 95 voxels
-46 of 95 voxels
-47 of 95 voxels
-48 of 95 voxels
-49 of 95 voxels
-50 of 95 voxels
-51 of 95 voxels
-52 of 95 voxels
-53 of 95 voxels
-54 of 95 voxels
-55 of 95 voxels
-56 of 95 voxels
-57 of 95 voxels
-58 of 95 voxels
-59 of 95 voxels
-60 of 95 voxels
-61 of 95 voxels
-62 of 95 voxels
-63 of 95 voxels
-64 of 95 voxels
-65 of 95 voxels
-66 of 95 voxels
-67 of 95 voxels
-68 of 95 voxels
-69 of 95 voxels
-70 of 95 voxels
-71 of 95 voxels
-72 of 95 voxels
-73 of 95 voxels
-74 of 95 voxels
-75 of 95 voxels
-76 of 95 voxels
-77 of 95 voxels
-78 of 95 voxels
-79 of 95 voxels
-80 of 95 voxels
-81 of 95 voxels
-82 of 95 voxels
-83 of 95 voxels
-84 of 95 voxels
-85 of 95 voxels
-86 of 95 voxels
-87 of 95 voxels
-88 of 95 voxels
-89 of 95 voxels
-90 of 95 voxels
-91 of 95 voxels
-92 of 95 voxels
-93 of 95 voxels
-94 of 95 voxels
-95 of 95 voxels
-</pre><h2>Model Specific Setup Number Two<a name="5"></a></h2><p>The second model is to perform a simple mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior). This analysis now includes covariates also.</p><pre class="codeinput">Model2 = ModelInfo;
+</pre><h2>Model Specific Setup Number 2<a name="5"></a></h2><p>The second model is to perform a simple mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior). This analysis now includes covariates also.</p><pre class="codeinput">Model2 = ModelInfo;
 
 <span class="comment">% Add the covariate names</span>
 Model2.Names = [Model2.Names <span class="string">'Cov1'</span> <span class="string">'Cov2'</span>];
@@ -396,108 +303,13 @@ Paths(2,3) = 2;
 Model2.Direct = Direct;
 Model2.Inter = Inter;
 Model2.Paths = Paths;
-</pre><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model2);
+</pre><h2>Run the analysis for Model 2<a name="6"></a></h2><p>The following two functions actually run the mediation analysis and then writes out the results to NIFTI format images.</p><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model2);
 
 <span class="comment">% The writing of the images should ideally be perfomed by the cluster once</span>
 <span class="comment">% the analyses have completed. Therefore, a check is needed or better yet a</span>
 <span class="comment">% wait command for the cluster job:</span>
 <span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
 WriteOutResults(ResultsFolder)
-</pre><pre class="codeoutput">1 of 95 voxels
-2 of 95 voxels
-3 of 95 voxels
-4 of 95 voxels
-5 of 95 voxels
-6 of 95 voxels
-7 of 95 voxels
-8 of 95 voxels
-9 of 95 voxels
-10 of 95 voxels
-11 of 95 voxels
-12 of 95 voxels
-13 of 95 voxels
-14 of 95 voxels
-15 of 95 voxels
-16 of 95 voxels
-17 of 95 voxels
-18 of 95 voxels
-19 of 95 voxels
-20 of 95 voxels
-21 of 95 voxels
-22 of 95 voxels
-23 of 95 voxels
-24 of 95 voxels
-25 of 95 voxels
-26 of 95 voxels
-27 of 95 voxels
-28 of 95 voxels
-29 of 95 voxels
-30 of 95 voxels
-31 of 95 voxels
-32 of 95 voxels
-33 of 95 voxels
-34 of 95 voxels
-35 of 95 voxels
-36 of 95 voxels
-37 of 95 voxels
-38 of 95 voxels
-39 of 95 voxels
-40 of 95 voxels
-41 of 95 voxels
-42 of 95 voxels
-43 of 95 voxels
-44 of 95 voxels
-45 of 95 voxels
-46 of 95 voxels
-47 of 95 voxels
-48 of 95 voxels
-49 of 95 voxels
-50 of 95 voxels
-51 of 95 voxels
-52 of 95 voxels
-53 of 95 voxels
-54 of 95 voxels
-55 of 95 voxels
-56 of 95 voxels
-57 of 95 voxels
-58 of 95 voxels
-59 of 95 voxels
-60 of 95 voxels
-61 of 95 voxels
-62 of 95 voxels
-63 of 95 voxels
-64 of 95 voxels
-65 of 95 voxels
-66 of 95 voxels
-67 of 95 voxels
-68 of 95 voxels
-69 of 95 voxels
-70 of 95 voxels
-71 of 95 voxels
-72 of 95 voxels
-73 of 95 voxels
-74 of 95 voxels
-75 of 95 voxels
-76 of 95 voxels
-77 of 95 voxels
-78 of 95 voxels
-79 of 95 voxels
-80 of 95 voxels
-81 of 95 voxels
-82 of 95 voxels
-83 of 95 voxels
-84 of 95 voxels
-85 of 95 voxels
-86 of 95 voxels
-87 of 95 voxels
-88 of 95 voxels
-89 of 95 voxels
-90 of 95 voxels
-91 of 95 voxels
-92 of 95 voxels
-93 of 95 voxels
-94 of 95 voxels
-95 of 95 voxels
 </pre><h2>Model Specific Setup Number Three<a name="7"></a></h2><p>The third model is to perform a moderated-mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior). Now there is an interaction between the brain measure and age group in predicting the behavior variable</p><pre class="codeinput"><span class="comment">%     M</span>
 <span class="comment">%    / \</span>
 <span class="comment">%   /  /\</span>
@@ -538,152 +350,134 @@ Paths(2,3) = 2;
 Model3.Direct = Direct;
 Model3.Inter = Inter;
 Model3.Paths = Paths;
-</pre><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model3);
+</pre><h2>Run the analysis for Model 3<a name="8"></a></h2><p>The following two functions actually run the mediation analysis and then writes out the results to NIFTI format images.</p><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model3);
 
 <span class="comment">% The writing of the images should ideally be perfomed by the cluster once</span>
 <span class="comment">% the analyses have completed. Therefore, a check is needed or better yet a</span>
 <span class="comment">% wait command for the cluster job:</span>
 <span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
 WriteOutResults(ResultsFolder)
-</pre><pre class="codeoutput">1 of 95 voxels
-2 of 95 voxels
-3 of 95 voxels
-4 of 95 voxels
-5 of 95 voxels
-6 of 95 voxels
-7 of 95 voxels
-8 of 95 voxels
-9 of 95 voxels
-10 of 95 voxels
-11 of 95 voxels
-12 of 95 voxels
-13 of 95 voxels
-14 of 95 voxels
-15 of 95 voxels
-16 of 95 voxels
-17 of 95 voxels
-18 of 95 voxels
-19 of 95 voxels
-20 of 95 voxels
-21 of 95 voxels
-22 of 95 voxels
-23 of 95 voxels
-24 of 95 voxels
-25 of 95 voxels
-26 of 95 voxels
-27 of 95 voxels
-28 of 95 voxels
-29 of 95 voxels
-30 of 95 voxels
-31 of 95 voxels
-32 of 95 voxels
-33 of 95 voxels
-34 of 95 voxels
-35 of 95 voxels
-36 of 95 voxels
-37 of 95 voxels
-38 of 95 voxels
-39 of 95 voxels
-40 of 95 voxels
-41 of 95 voxels
-42 of 95 voxels
-43 of 95 voxels
-44 of 95 voxels
-45 of 95 voxels
-46 of 95 voxels
-47 of 95 voxels
-48 of 95 voxels
-49 of 95 voxels
-50 of 95 voxels
-51 of 95 voxels
-52 of 95 voxels
-53 of 95 voxels
-54 of 95 voxels
-55 of 95 voxels
-56 of 95 voxels
-57 of 95 voxels
-58 of 95 voxels
-59 of 95 voxels
-60 of 95 voxels
-61 of 95 voxels
-62 of 95 voxels
-63 of 95 voxels
-64 of 95 voxels
-65 of 95 voxels
-66 of 95 voxels
-67 of 95 voxels
-68 of 95 voxels
-69 of 95 voxels
-70 of 95 voxels
-71 of 95 voxels
-72 of 95 voxels
-73 of 95 voxels
-74 of 95 voxels
-75 of 95 voxels
-76 of 95 voxels
-77 of 95 voxels
-78 of 95 voxels
-79 of 95 voxels
-80 of 95 voxels
-81 of 95 voxels
-82 of 95 voxels
-83 of 95 voxels
-84 of 95 voxels
-85 of 95 voxels
-86 of 95 voxels
-87 of 95 voxels
-88 of 95 voxels
-89 of 95 voxels
-90 of 95 voxels
-91 of 95 voxels
-92 of 95 voxels
-93 of 95 voxels
-94 of 95 voxels
-95 of 95 voxels
-</pre><h2>Perform analyses on a single data point and print out the results<a name="9"></a></h2><pre class="codeinput">SinglePointModel = Model3;
-SinglePointModel.data{2} = Model3.data{2}(:,45);
+</pre><h2>Perform Model 1 analyses on a single data point and print out the results<a name="9"></a></h2><pre class="codeinput"><span class="comment">% It is also possible to use this software to do single point analyses. The</span>
+<span class="comment">% model setup is the same as above. The real difference is that the number</span>
+<span class="comment">% of voxels and the list of indices need to be set to one to indicate that</span>
+<span class="comment">% a "single voxel" is being analyzed.</span>
+
+SinglePointModel = Model1;
+<span class="comment">% extract a single voxel.</span>
+SinglePointModel.data{2} = Model1.data{2}(:,45);
 SinglePointModel.Indices = 1;
 SinglePointModel.Nvoxels = 1;
 SinglePointModel.Tag = <span class="string">'SinglePointModel'</span>;
 
+<span class="comment">% The data is entered in the above examples as a cell array of arrays or</span>
+<span class="comment">% vectors. The first thing to do is to collapse the cell array into a</span>
+<span class="comment">% single array for running the regression models.</span>
 SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
 
-Results = OneVoxelProcessBootstrap(SinglePointModel)
-WIPPrintResults(SinglePointModel,Results)
-</pre><pre class="codeoutput">
-Results = 
+<span class="comment">% This function is at the core of the multi-voxel analyses.</span>
+Results = OneVoxelProcessBootstrap(SinglePointModel);
 
-           beta: [5x3 double]
-              B: [5x3 double]
-              t: [5x3 double]
-             se: [5x3 double]
-              p: [5x3 double]
-             df: [5x3 double]
-          Paths: {[2x1 double]}
-    ProbeValues: {[2x1 double]}
-          BCaCI: [1x1 struct]
-
+<span class="comment">% This function prints the results to the screen.</span>
+PrintResults(SinglePointModel,Results)
+</pre><pre class="codeoutput">==================================================
 
 Dependent variable: Brain
                Model      beta    stderr         B         t         p
-            constant   864.491     0.666        --  1297.669     0.000
-               AgeGr    -0.071     0.942    -0.011    -0.075     0.940
+            constant   864.682     0.665        --  1300.995     0.000
+               AgeGr    -0.452     0.940    -0.069    -0.480     0.633
 
 Dependent variable: Behavior
                Model      beta    stderr         B         t         p
-            constant   -11.508    59.023        --    -0.195     0.846
-               AgeGr   -24.078    79.778   -11.416    -0.302     0.764
-               Brain     0.013     0.068     0.040     0.188     0.852
-       AgeGr_x_Brain     0.028     0.092    11.663     0.308     0.759
+            constant    71.967    44.096        --     1.632     0.109
+               AgeGr    -0.919     0.333    -0.368    -2.760     0.008
+               Brain    -0.082     0.051    -0.215    -1.616     0.113
 
 Path: 1
                AgeGr to                Brain
                Brain to             Behavior
-Indirect Effect size: -0.0009
-Indirect Effect size: -0.0029
-At alpha = 0.2000, BCaCI = [-0.1285, -0.1104]
-At alpha = 0.0898, BCaCI = [0.0267, At alpha = 0.1000, BCaCI = [-0.1893, -0.1347]
-At alpha = 0.1129, BCaCI = [0.0549, </pre><p>Other models:     M     | X ----- Y</p><pre class="codeinput"><span class="comment">%    M1--M2</span>
+alpha = 0.200
+   EffSize     LLBCa     UUBCa
+    0.0372   -0.0520     0.157
+alpha = 0.100
+   EffSize     LLBCa     UUBCa
+    0.0372   -0.0908     0.233
+
+==================================================
+</pre><h2>Perform Model 2 analyses on a single data point and print out the results<a name="10"></a></h2><pre class="codeinput">SinglePointModel = Model2;
+SinglePointModel.data{2} = Model2.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Tag = <span class="string">'SinglePointModel'</span>;
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+PrintResults(SinglePointModel,Results)
+</pre><pre class="codeoutput">==================================================
+
+Dependent variable: Brain
+               Model      beta    stderr         B         t         p
+            constant   864.676     0.681        --  1270.550     0.000
+               AgeGr    -0.474     0.964    -0.073    -0.492     0.625
+                Cov1    -0.076     0.451    -0.025    -0.168     0.868
+                Cov2     0.082     0.537     0.023     0.153     0.879
+
+Dependent variable: Behavior
+               Model      beta    stderr         B         t         p
+            constant    73.702    44.389        --     1.660     0.104
+               AgeGr    -0.945     0.337    -0.378    -2.808     0.007
+               Brain    -0.084     0.051    -0.220    -1.644     0.107
+                Cov1    -0.039     0.157    -0.034    -0.247     0.806
+                Cov2     0.206     0.187     0.151     1.104     0.276
+
+Path: 1
+               AgeGr to                Brain
+               Brain to             Behavior
+alpha = 0.200
+   EffSize     LLBCa     UUBCa
+    0.0400   -0.0199     0.205
+alpha = 0.100
+   EffSize     LLBCa     UUBCa
+    0.0400   -0.0554     0.312
+
+==================================================
+</pre><h2>Perform Model 3 analyses on a single data point and print out the results<a name="11"></a></h2><pre class="codeinput">SinglePointModel = Model3;
+SinglePointModel.data{2} = Model3.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Nboot = 10000;
+SinglePointModel.Tag = <span class="string">'SinglePointModel'</span>;
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+PrintResults(SinglePointModel,Results)
+</pre><pre class="codeoutput">==================================================
+
+Dependent variable: Brain
+               Model      beta    stderr         B         t         p
+            constant   864.682     0.665        --  1300.995     0.000
+               AgeGr    -0.452     0.940    -0.069    -0.480     0.633
+
+Dependent variable: Behavior
+               Model      beta    stderr         B         t         p
+            constant   104.306    57.242        --     1.822     0.075
+               AgeGr   -80.959    90.040   -32.388    -0.899     0.373
+               Brain    -0.120     0.066    -0.313    -1.810     0.077
+       AgeGr_x_Brain     0.093     0.104    32.014     0.889     0.379
+
+Path: 1
+               AgeGr to                Brain
+               Brain to             Behavior
+alpha = 0.200
+  ProbeVal   EffSize     LLBCa     UUBCa
+    0.0000    0.0541    -0.046     0.282
+    1.0000    0.0123    -0.059     0.160
+alpha = 0.100
+  ProbeVal   EffSize     LLBCa     UUBCa
+    0.0000    0.0541    -0.089     0.361
+    1.0000    0.0123    -0.109     0.218
+
+==================================================
+</pre><p>Other models:     M     | X ----- Y</p><pre class="codeinput"><span class="comment">%    M1--M2</span>
 <span class="comment">%   /      \</span>
 <span class="comment">%  /        \</span>
 <span class="comment">% X          Y</span>
@@ -728,7 +522,7 @@ At alpha = 0.1129, BCaCI = [0.0549, </pre><p>Other models:     M     | X ----- Y
 <span class="comment">% transient times of large amounts of data in memory. I am afraid to</span>
 <span class="comment">% overload a single computer even transiently.</span>
 <span class="comment">%</span>
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% The aim of this example is to demonstrate a setup of this software.
 % This will be an incremental step example. 
@@ -792,6 +586,9 @@ fprintf(1,'Done preparing data.\n');
 % results for a specific analysis will all be in folders contained within
 % this base directory. The output folders are named according to a
 % user specified "Tag" name.
+
+% Check to see whether this example is running on my laptop or desktop.
+% This will have to be changed for any specific user.
 if ismac
     BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode';
 elseif ispc
@@ -879,7 +676,7 @@ DataHeader.dt = [16 0];
 ModelInfo.DataHeader = DataHeader;
 
 %% Model Specific Setup Number One
-% THe first model is to perform a simple mediation analysis with the
+% The first model is to perform a simple mediation analysis with the
 % voxel-wise brain data as the mediation between a dichotomous variable
 % (Age group) and a continuous variable (Behavior). 
 
@@ -939,8 +736,12 @@ Model1.Direct = Direct;
 Model1.Inter = Inter;
 Model1.Paths = Paths;
 
-%% Run the analysis
+%% Run the analysis for Model 1
+% The following two functions actually run the mediation analysis and then
+% writes out the results to NIFTI format images.
+
 ResultsFolder = PrepareDataForProcess(Model1);
+
 % The writing of the images should ideally be perfomed by the cluster once
 % the analyses have completed. Therefore, a check is needed or better yet a
 % wait command for the cluster job: 
@@ -948,7 +749,7 @@ ResultsFolder = PrepareDataForProcess(Model1);
 WriteOutResults(ResultsFolder)
 
 
-%% Model Specific Setup Number Two
+%% Model Specific Setup Number 2
 % The second model is to perform a simple mediation analysis with the
 % voxel-wise brain data as the mediation between a dichotomous variable
 % (Age group) and a continuous variable (Behavior). This analysis now
@@ -993,7 +794,10 @@ Paths(2,3) = 2;
 Model2.Direct = Direct;
 Model2.Inter = Inter;
 Model2.Paths = Paths;
-%%
+%% Run the analysis for Model 2
+% The following two functions actually run the mediation analysis and then
+% writes out the results to NIFTI format images.
+
 ResultsFolder = PrepareDataForProcess(Model2);
 
 % The writing of the images should ideally be perfomed by the cluster once
@@ -1050,7 +854,10 @@ Paths(2,3) = 2;
 Model3.Direct = Direct;
 Model3.Inter = Inter;
 Model3.Paths = Paths;
-%%
+%% Run the analysis for Model 3
+% The following two functions actually run the mediation analysis and then
+% writes out the results to NIFTI format images.
+
 ResultsFolder = PrepareDataForProcess(Model3);
 
 % The writing of the images should ideally be perfomed by the cluster once
@@ -1059,17 +866,52 @@ ResultsFolder = PrepareDataForProcess(Model3);
 % e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
 WriteOutResults(ResultsFolder)
 
-%% Perform analyses on a single data point and print out the results
-SinglePointModel = Model3;
-SinglePointModel.data{2} = Model3.data{2}(:,45);
+%% Perform Model 1 analyses on a single data point and print out the results 
+
+% It is also possible to use this software to do single point analyses. The
+% model setup is the same as above. The real difference is that the number
+% of voxels and the list of indices need to be set to one to indicate that
+% a "single voxel" is being analyzed.
+
+SinglePointModel = Model1;
+% extract a single voxel.
+SinglePointModel.data{2} = Model1.data{2}(:,45);
 SinglePointModel.Indices = 1;
 SinglePointModel.Nvoxels = 1;
 SinglePointModel.Tag = 'SinglePointModel';
 
+% The data is entered in the above examples as a cell array of arrays or
+% vectors. The first thing to do is to collapse the cell array into a
+% single array for running the regression models.
 SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
 
-Results = OneVoxelProcessBootstrap(SinglePointModel)
-WIPPrintResults(SinglePointModel,Results)
+% This function is at the core of the multi-voxel analyses.
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+
+% This function prints the results to the screen.
+PrintResults(SinglePointModel,Results)
+%% Perform Model 2 analyses on a single data point and print out the results 
+SinglePointModel = Model2;
+SinglePointModel.data{2} = Model2.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Tag = 'SinglePointModel';
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+PrintResults(SinglePointModel,Results)
+
+%% Perform Model 3 analyses on a single data point and print out the results 
+SinglePointModel = Model3;
+SinglePointModel.data{2} = Model3.data{2}(:,45);
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Nboot = 10000;
+SinglePointModel.Tag = 'SinglePointModel';
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+PrintResults(SinglePointModel,Results)
 
 %%
 % Other models:

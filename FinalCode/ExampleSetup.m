@@ -60,6 +60,9 @@ fprintf(1,'Done preparing data.\n');
 % results for a specific analysis will all be in folders contained within
 % this base directory. The output folders are named according to a
 % user specified "Tag" name.
+
+% Check to see whether this example is running on my laptop or desktop.
+% This will have to be changed for any specific user.
 if ismac
     BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode';
 elseif ispc
@@ -147,7 +150,7 @@ DataHeader.dt = [16 0];
 ModelInfo.DataHeader = DataHeader;
 
 %% Model Specific Setup Number One
-% THe first model is to perform a simple mediation analysis with the
+% The first model is to perform a simple mediation analysis with the
 % voxel-wise brain data as the mediation between a dichotomous variable
 % (Age group) and a continuous variable (Behavior). 
 
@@ -207,8 +210,12 @@ Model1.Direct = Direct;
 Model1.Inter = Inter;
 Model1.Paths = Paths;
 
-%% Run the analysis
+%% Run the analysis for Model 1
+% The following two functions actually run the mediation analysis and then
+% writes out the results to NIFTI format images.
+
 ResultsFolder = PrepareDataForProcess(Model1);
+
 % The writing of the images should ideally be perfomed by the cluster once
 % the analyses have completed. Therefore, a check is needed or better yet a
 % wait command for the cluster job: 
@@ -216,7 +223,7 @@ ResultsFolder = PrepareDataForProcess(Model1);
 WriteOutResults(ResultsFolder)
 
 
-%% Model Specific Setup Number Two
+%% Model Specific Setup Number 2
 % The second model is to perform a simple mediation analysis with the
 % voxel-wise brain data as the mediation between a dichotomous variable
 % (Age group) and a continuous variable (Behavior). This analysis now
@@ -261,7 +268,10 @@ Paths(2,3) = 2;
 Model2.Direct = Direct;
 Model2.Inter = Inter;
 Model2.Paths = Paths;
-%%
+%% Run the analysis for Model 2
+% The following two functions actually run the mediation analysis and then
+% writes out the results to NIFTI format images.
+
 ResultsFolder = PrepareDataForProcess(Model2);
 
 % The writing of the images should ideally be perfomed by the cluster once
@@ -318,7 +328,10 @@ Paths(2,3) = 2;
 Model3.Direct = Direct;
 Model3.Inter = Inter;
 Model3.Paths = Paths;
-%%
+%% Run the analysis for Model 3
+% The following two functions actually run the mediation analysis and then
+% writes out the results to NIFTI format images.
+
 ResultsFolder = PrepareDataForProcess(Model3);
 
 % The writing of the images should ideally be perfomed by the cluster once
@@ -327,17 +340,31 @@ ResultsFolder = PrepareDataForProcess(Model3);
 % e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
 WriteOutResults(ResultsFolder)
 
-%% Perform analyses on a single data point and print out the results
+%% Perform Model 1 analyses on a single data point and print out the results 
+
+% It is also possible to use this software to do single point analyses. The
+% model setup is the same as above. The real difference is that the number
+% of voxels and the list of indices need to be set to one to indicate that
+% a "single voxel" is being analyzed.
+
 SinglePointModel = Model1;
+% extract a single voxel.
 SinglePointModel.data{2} = Model1.data{2}(:,45);
 SinglePointModel.Indices = 1;
 SinglePointModel.Nvoxels = 1;
 SinglePointModel.Tag = 'SinglePointModel';
+
+% The data is entered in the above examples as a cell array of arrays or
+% vectors. The first thing to do is to collapse the cell array into a
+% single array for running the regression models.
 SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
 
+% This function is at the core of the multi-voxel analyses.
 Results = OneVoxelProcessBootstrap(SinglePointModel);
+
+% This function prints the results to the screen.
 PrintResults(SinglePointModel,Results)
-%%
+%% Perform Model 2 analyses on a single data point and print out the results 
 SinglePointModel = Model2;
 SinglePointModel.data{2} = Model2.data{2}(:,45);
 SinglePointModel.Indices = 1;
@@ -348,7 +375,7 @@ SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
 Results = OneVoxelProcessBootstrap(SinglePointModel);
 PrintResults(SinglePointModel,Results)
 
-%%
+%% Perform Model 3 analyses on a single data point and print out the results 
 SinglePointModel = Model3;
 SinglePointModel.data{2} = Model3.data{2}(:,45);
 SinglePointModel.Indices = 1;
