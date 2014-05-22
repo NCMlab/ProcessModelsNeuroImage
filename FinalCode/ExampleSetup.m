@@ -400,6 +400,7 @@ ClusterModel1 = Model1;
 % analysis uses permutation testing then the number of permutations is
 % split across the different jobs.
 ClusterModel1.NJobSplit = 10;
+ClusterModel1.Nboot = 100;
 % Using the cluster requires the use fo creating job shell scripts using
 % this function:
 %
@@ -409,6 +410,8 @@ ClusterModel1.NJobSplit = 10;
 % command along with the command to be executed. 
 % THis function needs to be modified to make it site specific by specifying
 % the install locations of MatLab and SPM.
+
+ResultsFolder = PrepareDataForProcess(ClusterModel1);
 
 %%
 % Other models:

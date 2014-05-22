@@ -8,11 +8,8 @@ function OutFolder = PrepareDataForProcess(ModelInfo)
 % of passing data to each function call on the cluster, only the paths are
 % passed.
 % 
-% TO DO
-% The programs are also smart enough to know that if actual data is passed,
-% instead of a parth, then the data is considered pre-loaded and processed.
 
-
+% To Do:
 % This function checks the specified model to ensure it is correctly
 % specified. It also sets up the output folder structure for housing
 % results. This is especially important for working with a cluster
@@ -82,7 +79,12 @@ if ModelInfo.NJobSplit > 1
             % How many voxels will be in each split?
             NvoxelsPerJob = ceil(ModelInfo.Nvoxels/ModelInfo.NJobSplit);
 
-            % Cycle over the number of splits 
+            % Cycle over the number of splits and submit each data chunk to
+            % the cluster to be processed.
+            % Create a list of submitted jobs to be used for executing
+            % clean up commands after the jobs have finished.
+            WaitList = '';
+            
             for i = 1:ModelInfo.NJobSplit
                 
                 VoxelsForThisJob = [(i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob];
@@ -116,18 +118,27 @@ if ModelInfo.NJobSplit > 1
                 % Create the cluster submission script
                 CreateClusterJobFile(Command,fid)
                 % Submit the script to the cluster
-                SubmitClusterJob(jobPath,JobOutputFolder)
-                
+                JobName = SubmitClusterJob(jobPath,JobOutputFolder);
+                WaitList = sprintf('%s,%s',WaitList,JobName);
             end
-            Str = 'qsub -hold_jid ';
-            for i = 1:10
-                Str = sprintf('%s job_%04d.sh,',Str,i);
-            end
-            Str = Str(1:end-1);
-            Str = sprintf('%s job_%04d.sh',Str,1);
-            unix(Str)
-            
-            
+            % Remove initial comma from the WaitList 
+            WaitList = WaitList(2:end);
+            % The following command is submitted to the cluster and s
+            % waiting for all of the other jobs to finish first. These
+            % clean up commands and writing out the images do not need to be run on the cluster, 
+            % instead of the head node. The advantage of this approach is
+            % that the by using the cluster this job waits until other jobs
+            % finish. By having the cluster wait it frees up the MatLab
+            % process on the head node.
+            % 
+            % Write out the resultant images
+            Command = sprintf('WriteOutResults(''%s'')',OutFolder);
+            jobPath = fullfile(InJobFolder,sprintf('WriteOutJob.sh'));
+            fid = fopen(jobPath,'w');
+            CreateClusterJobFile(Command,fid)
+            % Submit the job with the wait list.
+            SubmitClusterJob(jobPath,JobOutputFolder,WaitList);
+
         case 'permutation'
             % here the data is used as a whole and only multiple results
             % files are created for each of the permutations
