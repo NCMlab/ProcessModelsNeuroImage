@@ -67,6 +67,8 @@ if ismac
     BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode';
 elseif ispc
     BaseDir = 'C:\Users\js2746\Dropbox\SteffenerColumbia\Projects\TestProcessCode';
+elseif isunix
+    BaseDir = '/home/js2746/DropBox/SteffenerColumbia/Projects/TestProcessCode';
 end
 
 % Create a structure where each cell is a node in the path diagram. This
@@ -111,7 +113,7 @@ Nperm = 0;
 % wait.
 % If you are running this on a single (non-cluster environment) computer
 % then set this to equal 1.
-NJobSplit = 1;
+NJobSplit = 0;
 
 % Specify the thresholds used in the analysis. 
 % Some of the images and results in the mediation analysis perform
@@ -386,6 +388,27 @@ SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
 
 Results = OneVoxelProcessBootstrap(SinglePointModel);
 PrintResults(SinglePointModel,Results)
+
+%% Perform Model 1 using the cluster
+% The real advantage of this software is the use of a cluster computing
+% environment.
+% In order to use the cluster environment you need to specify the number of
+% jobs to split the analysis into.
+ClusterModel1 = Model1;
+% If the analysis uses bootstrapping then the data itself is broken up into
+% chunks and each chunk is processed by a different cluster job. If the
+% analysis uses permutation testing then the number of permutations is
+% split across the different jobs.
+ClusterModel1.NJobSplit = 10;
+% Using the cluster requires the use fo creating job shell scripts using
+% this function:
+%
+%       CreateClusterJobFile(Command,fid)
+%
+% Once a file is created its fid (file identifier) is passed to this
+% command along with the command to be executed. 
+% THis function needs to be modified to make it site specific by specifying
+% the install locations of MatLab and SPM.
 
 %%
 % Other models:

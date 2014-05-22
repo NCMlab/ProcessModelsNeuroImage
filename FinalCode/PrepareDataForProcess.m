@@ -67,12 +67,77 @@ if ModelInfo.NJobSplit > 1
     if ~exist(InJobFolder,'dir')
         mkdir(InJobFolder);
     end
+    
+    switch ModelType
+        case 'bootstrap'
+            % Here the data is split and saved as a series of small files.
+            
+            % Save the data
+            % This is actually redundent because the data is being split
+            % and then the subsets saved.
+            InDataPath = fullfile(DataFolder,'ModelInfo');
+            Str = ['save ' InDataPath ' ModelInfo '];
+            eval(Str);
+            
+            % How many voxels will be in each split?
+            NvoxelsPerJob = ceil(ModelInfo.Nvoxels/ModelInfo.NJobSplit);
+
+            % Cycle over the number of splits 
+            for i = 1:ModelInfo.NJobSplit
+                
+                VoxelsForThisJob = [(i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob];
+                % remove any voxels in this split which are beyond the
+                % total number of voxels in the dataset. This is only a
+                % concern for the last data split which may be a partial
+                % smaller data set.
+                VoxelsForThisJob(find(VoxelsForThisJob > ModelInfo.Nvoxels)) = [];
+                % Create a version of the full data/model structure only containing the
+                % subset of voxels to be analyzed.
+                subModelInfo = ModelInfo;
+                subModelInfo.Indices = VoxelsForThisJob;
+                for j = 1:ModelInfo.Nvar
+                    % Check to see which variables are multi-voxel variables and
+                    % extract the subset of data
+                    if size(subModelInfo.data{j},2) > 1
+                        subModelInfo.data{j} = ModelInfo.data{j}(:,VoxelsForThisJob);
+                    end
+                end
+                % Save this subset of data to a file
+                InTag = sprintf('data_%04d',i);
+                InDataPath = fullfile(DataFolder,InTag);
+                Str = ['save ' InDataPath ' subModelInfo  '];
+                eval(Str);
+                
+                % Create the cluster submission job
+                jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
+                fid = fopen(jobPath,'w');
+                % Create string of the command to be run with MatLab
+                Command = sprintf('Results = CycleOverVoxelsProcessBootstrap(''%s'')',InDataPath);
+                % Create the cluster submission script
+                CreateClusterJobFile(Command,fid)
+                % Submit the script to the cluster
+                SubmitClusterJob(jobPath,JobOutputFolder)
+                
+            end
+            Str = 'qsub -hold_jid ';
+            for i = 1:10
+                Str = sprintf('%s job_%04d.sh,',Str,i);
+            end
+            Str = Str(1:end-1);
+            Str = sprintf('%s job_%04d.sh',Str,1);
+            unix(Str)
+            
+            
+        case 'permutation'
+            % here the data is used as a whole and only multiple results
+            % files are created for each of the permutations
+    end
 else
     % This analysis is run on the host computer
     switch ModelType
         case 'bootstrap'
             % Save the data
-            InDataPath = fullfile(DataFolder,'ModelInfo');
+            InDataPath = fullfile(DataFolder,'ModelInfo'); 
             Str = ['save ' InDataPath ' ModelInfo '];
             eval(Str);
             % Process the data
