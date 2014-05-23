@@ -84,17 +84,21 @@ switch ModelType
         % load a single results fle to determine the size of the paths
         load(fullfile(ResultsFolder,'Results',F(1).name))
         [n m] = size(Results{1}.Paths{1});
-        PointEstimate = zeros(m,n,length(Results));
+        PointEstimate = zeros(m,n,ModelInfo.Nvoxels);
         % cycle over number of voxels
-        for i = 1:length(Results)
-            PointEstimate(:,:,i) = Results{i}.Paths{:};
-            % cycle over thresholds
-            for j = 1:length(ModelInfo.Thresholds)
-                BCaCIUpper(:,:,j,i) = Results{i}.BCaCI.Paths(:,:,j,1,1);
-                BCaCILower(:,:,j,i) = Results{i}.BCaCI.Paths(:,:,j,1,2);
+        Parameters = cell(ModelInfo.Nvoxels,1);
+        for k = 1:NFiles
+            load(fullfile(ResultsFolder,'Results',F(k).name))
+            for i = 1:length(Results)
+                Parameters{(k-1)*ModelInfo.NJobSplit + i} = Results{i};
+                PointEstimate(:,:,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.Paths{:};
+                % cycle over thresholds
+                for j = 1:length(ModelInfo.Thresholds)
+                    BCaCIUpper(:,:,j,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.BCaCI.Paths(:,:,j,1,1);
+                    BCaCILower(:,:,j,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.BCaCI.Paths(:,:,j,1,2);
+                end
             end
         end
-        
         WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
 end
 
