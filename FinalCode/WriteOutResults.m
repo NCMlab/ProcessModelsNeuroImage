@@ -14,7 +14,7 @@ ModelInfo.data = [];
 % Check to see if there are Permute results
 if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute*.mat')))
     ModelType = 'permutation';
-elseif ~isempty(dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat')))
+elseif ~isempty(dir(fullfile(ResultsFolder,'Results','BootStrap*.mat')))
     ModelType = 'bootstrap';
 else
     errordlg('Unknown results');
@@ -70,8 +70,10 @@ switch ModelType
         
         WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate,o,m)
     case 'bootstrap'
+        % There is a problem here fusing the split results back together
+        
         % locate the results files
-        F = dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat'));
+        F = dir(fullfile(ResultsFolder,'Results','BootStrap*.mat'));
         NFiles = length(F);
         
         % Check to see if the analyses are completed
@@ -81,18 +83,22 @@ switch ModelType
         
         % load a single results fle to determine the size of the paths
         load(fullfile(ResultsFolder,'Results',F(1).name))
-        [n m] = size(Parameters{1}.Paths{1});
-        PointEstimate = zeros(m,n,length(Parameters));
+        [n m] = size(Results{1}.Paths{1});
+        PointEstimate = zeros(m,n,ModelInfo.Nvoxels);
         % cycle over number of voxels
-        for i = 1:length(Parameters)
-            PointEstimate(:,:,i) = Parameters{i}.Paths{:};
-            % cycle over thresholds
-            for j = 1:length(ModelInfo.Thresholds)
-                BCaCIUpper(:,:,j,i) = Parameters{i}.BCaCI.Paths(:,:,j,1,1);
-                BCaCILower(:,:,j,i) = Parameters{i}.BCaCI.Paths(:,:,j,1,2);
+        Parameters = cell(ModelInfo.Nvoxels,1);
+        for k = 1:NFiles
+            load(fullfile(ResultsFolder,'Results',F(k).name))
+            for i = 1:length(Results)
+                Parameters{(k-1)*ModelInfo.NJobSplit + i} = Results{i};
+                PointEstimate(:,:,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.Paths{:};
+                % cycle over thresholds
+                for j = 1:length(ModelInfo.Thresholds)
+                    BCaCIUpper(:,:,j,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.BCaCI.Paths(:,:,j,1,1);
+                    BCaCILower(:,:,j,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.BCaCI.Paths(:,:,j,1,2);
+                end
             end
         end
-        
         WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
 end
 

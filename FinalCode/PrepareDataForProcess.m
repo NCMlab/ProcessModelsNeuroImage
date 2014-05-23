@@ -8,11 +8,8 @@ function OutFolder = PrepareDataForProcess(ModelInfo)
 % of passing data to each function call on the cluster, only the paths are
 % passed.
 % 
-% TO DO
-% The programs are also smart enough to know that if actual data is passed,
-% instead of a parth, then the data is considered pre-loaded and processed.
 
-
+% To Do:
 % This function checks the specified model to ensure it is correctly
 % specified. It also sets up the output folder structure for housing
 % results. This is especially important for working with a cluster
@@ -67,12 +64,91 @@ if ModelInfo.NJobSplit > 1
     if ~exist(InJobFolder,'dir')
         mkdir(InJobFolder);
     end
+    
+    switch ModelType
+        case 'bootstrap'
+            % Here the data is split and saved as a series of small files.
+            
+            % Save the data
+            % This is actually redundent because the data is being split
+            % and then the subsets saved.
+            InDataPath = fullfile(DataFolder,'ModelInfo');
+            Str = ['save ' InDataPath ' ModelInfo '];
+            eval(Str);
+            
+            % How many voxels will be in each split?
+            NvoxelsPerJob = ceil(ModelInfo.Nvoxels/ModelInfo.NJobSplit);
+
+            % Cycle over the number of splits and submit each data chunk to
+            % the cluster to be processed.
+            % Create a list of submitted jobs to be used for executing
+            % clean up commands after the jobs have finished.
+            WaitList = '';
+            
+            for i = 1:ModelInfo.NJobSplit
+                
+                VoxelsForThisJob = [(i-1)*NvoxelsPerJob + 1:i*NvoxelsPerJob];
+                % remove any voxels in this split which are beyond the
+                % total number of voxels in the dataset. This is only a
+                % concern for the last data split which may be a partial
+                % smaller data set.
+                VoxelsForThisJob(find(VoxelsForThisJob > ModelInfo.Nvoxels)) = [];
+                % Create a version of the full data/model structure only containing the
+                % subset of voxels to be analyzed.
+                subModelInfo = ModelInfo;
+                subModelInfo.Indices = VoxelsForThisJob;
+                for j = 1:ModelInfo.Nvar
+                    % Check to see which variables are multi-voxel variables and
+                    % extract the subset of data
+                    if size(subModelInfo.data{j},2) > 1
+                        subModelInfo.data{j} = ModelInfo.data{j}(:,VoxelsForThisJob);
+                    end
+                end
+                % Save this subset of data to a file
+                InTag = sprintf('data_%04d',i);
+                InDataPath = fullfile(DataFolder,InTag);
+                Str = ['save ' InDataPath ' subModelInfo  '];
+                eval(Str);
+                
+                % Create the cluster submission job
+                jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
+                fid = fopen(jobPath,'w');
+                % Create string of the command to be run with MatLab
+                Command = sprintf('Results = CycleOverVoxelsProcessBootstrap(''%s'')',InDataPath);
+                % Create the cluster submission script
+                CreateClusterJobFile(Command,fid)
+                % Submit the script to the cluster
+                JobName = SubmitClusterJob(jobPath,JobOutputFolder);
+                WaitList = sprintf('%s,%s',WaitList,JobName);
+            end
+            % Remove initial comma from the WaitList 
+            WaitList = WaitList(2:end);
+            % The following command is submitted to the cluster and s
+            % waiting for all of the other jobs to finish first. These
+            % clean up commands and writing out the images do not need to be run on the cluster, 
+            % instead of the head node. The advantage of this approach is
+            % that the by using the cluster this job waits until other jobs
+            % finish. By having the cluster wait it frees up the MatLab
+            % process on the head node.
+            % 
+            % Write out the resultant images
+            Command = sprintf('WriteOutResults(''%s'')',OutFolder);
+            jobPath = fullfile(InJobFolder,sprintf('WriteOutJob.sh'));
+            fid = fopen(jobPath,'w');
+            CreateClusterJobFile(Command,fid)
+            % Submit the job with the wait list.
+            SubmitClusterJob(jobPath,JobOutputFolder,WaitList);
+
+        case 'permutation'
+            % here the data is used as a whole and only multiple results
+            % files are created for each of the permutations
+    end
 else
     % This analysis is run on the host computer
     switch ModelType
         case 'bootstrap'
             % Save the data
-            InDataPath = fullfile(DataFolder,'ModelInfo');
+            InDataPath = fullfile(DataFolder,'ModelInfo'); 
             Str = ['save ' InDataPath ' ModelInfo '];
             eval(Str);
             % Process the data
