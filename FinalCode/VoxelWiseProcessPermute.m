@@ -14,7 +14,7 @@ if nargin == 3
     load(InDataPath)
     % The cluster function calls pass strings
     if isstr(count); count = str2num(count); end
-    if isstr(Nperm); NPerm = str2num(NPerm); end
+    if isstr(Nperm); Nperm = str2num(Nperm); end
 
 elseif nargin == 2
     % If the number of permutations field is left blank then assume that
@@ -30,6 +30,8 @@ elseif nargin == 1
 else
     error('Expected at least one input.');
 end
+
+
 % Ensure that the InDataPath actually contained the ModelInfo structure
 if ~exist('ModelInfo','var')
     errordlg('The data passed does not contain the ModelInfo structure.');
