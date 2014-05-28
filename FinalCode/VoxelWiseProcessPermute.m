@@ -194,7 +194,7 @@ for k = 1:size(Samp,2)
             end
         end
     end
-    fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
+   % fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
 end
 fprintf(1,'Saving data to file now.\n\n');
 % Save results to file
