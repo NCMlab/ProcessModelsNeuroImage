@@ -218,10 +218,7 @@ Model1.Paths = Paths;
 
 ResultsFolder = PrepareDataForProcess(Model1);
 
-% The writing of the images should ideally be perfomed by the cluster once
-% the analyses have completed. Therefore, a check is needed or better yet a
-% wait command for the cluster job: 
-% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
+
 WriteOutResults(ResultsFolder)
 
 
@@ -394,13 +391,15 @@ PrintResults(SinglePointModel,Results)
 % environment.
 % In order to use the cluster environment you need to specify the number of
 % jobs to split the analysis into.
+
 ClusterModel1 = Model1;
 % If the analysis uses bootstrapping then the data itself is broken up into
 % chunks and each chunk is processed by a different cluster job. If the
 % analysis uses permutation testing then the number of permutations is
 % split across the different jobs.
+
 ClusterModel1.NJobSplit = 10;
-ClusterModel1.Nboot = 100;
+ClusterModel1.Nboot = 500;
 % Using the cluster requires the use fo creating job shell scripts using
 % this function:
 %

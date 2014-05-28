@@ -84,18 +84,31 @@ switch ModelType
         % load a single results fle to determine the size of the paths
         load(fullfile(ResultsFolder,'Results',F(1).name))
         [n m] = size(Results{1}.Paths{1});
+        % Prespecify the data structures
         PointEstimate = zeros(m,n,ModelInfo.Nvoxels);
-        % cycle over number of voxels
         Parameters = cell(ModelInfo.Nvoxels,1);
+        BCaCIUpper = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
+        BCaCILower = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
+        
+        NvoxelsPerJob = ceil(ModelInfo.Nvoxels/ModelInfo.NJobSplit);
+        
+        
+        % Cycle over each file
         for k = 1:NFiles
+            % load each results file
             load(fullfile(ResultsFolder,'Results',F(k).name))
+            % cycle over the voxels in the results file
             for i = 1:length(Results)
-                Parameters{(k-1)*ModelInfo.NJobSplit + i} = Results{i};
-                PointEstimate(:,:,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.Paths{:};
+                % what is the overall index of voxels as described by this
+                % chunk of results
+                
+                Index = (k-1)*NvoxelsPerJob + i;
+                Parameters{Index} = Results{i};
+                PointEstimate(:,:,Index) = Results{i}.Paths{:};
                 % cycle over thresholds
                 for j = 1:length(ModelInfo.Thresholds)
-                    BCaCIUpper(:,:,j,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.BCaCI.Paths(:,:,j,1,1);
-                    BCaCILower(:,:,j,(k-1)*ModelInfo.NJobSplit + i) = Results{i}.BCaCI.Paths(:,:,j,1,2);
+                    BCaCIUpper(:,:,j,Index) = Results{i}.BCaCI.Paths(:,:,j,1,1);
+                    BCaCILower(:,:,j,Index) = Results{i}.BCaCI.Paths(:,:,j,1,2);
                 end
             end
         end

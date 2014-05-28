@@ -123,13 +123,15 @@ if ModelInfo.NJobSplit > 1
             end
             % Remove initial comma from the WaitList 
             WaitList = WaitList(2:end);
-            % The following command is submitted to the cluster and s
-            % waiting for all of the other jobs to finish first. These
-            % clean up commands and writing out the images do not need to be run on the cluster, 
-            % instead of the head node. The advantage of this approach is
-            % that the by using the cluster this job waits until other jobs
-            % finish. By having the cluster wait it frees up the MatLab
-            % process on the head node.
+            % The following command is submitted to the cluster and given a
+            % list of all the previous processing jobs. This forces the
+            % write out of the resultant images to 
+            % wait for all of the other jobs to finish first. These
+            % clean up commands and writing out the images do not need to be 
+            % run on the cluster. 
+            % The advantage of using the cluster queueing is that this job 
+            % waits until other jobs finish. By having the cluster wait 
+            % it frees up the MatLab process on the head node.
             % 
             % Write out the resultant images
             Command = sprintf('WriteOutResults(''%s'')',OutFolder);
