@@ -14,7 +14,7 @@ ModelInfo.data = [];
 % Check to see if there are Permute results
 if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute*.mat')))
     ModelType = 'permutation';
-elseif ~isempty(dir(fullfile(ResultsFolder,'Results','BootStrap*.mat')))
+elseif ~isempty(dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat')))
     ModelType = 'bootstrap';
 else
     errordlg('Unknown results');
@@ -68,12 +68,14 @@ switch ModelType
             end
         end
         
+        AllParameters = Parameters;
+        clear Parameters;
         WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate,o,m)
     case 'bootstrap'
         % There is a problem here fusing the split results back together
         
         % locate the results files
-        F = dir(fullfile(ResultsFolder,'Results','BootStrap*.mat'));
+        F = dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat'));
         NFiles = length(F);
         
         % Check to see if the analyses are completed
@@ -83,10 +85,12 @@ switch ModelType
         
         % load a single results fle to determine the size of the paths
         load(fullfile(ResultsFolder,'Results',F(1).name))
-        [n m] = size(Results{1}.Paths{1});
+        [n m] = size(Parameters{1}.Paths{1});
         % Prespecify the data structures
         PointEstimate = zeros(m,n,ModelInfo.Nvoxels);
-        Parameters = cell(ModelInfo.Nvoxels,1);
+        % Create a structure to contain the parameters from all analysis chunks        
+        AllParameters = cell(ModelInfo.Nvoxels,1);
+        
         BCaCIUpper = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
         BCaCILower = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
         
@@ -98,17 +102,17 @@ switch ModelType
             % load each results file
             load(fullfile(ResultsFolder,'Results',F(k).name))
             % cycle over the voxels in the results file
-            for i = 1:length(Results)
+            for i = 1:length(Parameters)
                 % what is the overall index of voxels as described by this
                 % chunk of results
                 
                 Index = (k-1)*NvoxelsPerJob + i;
-                Parameters{Index} = Results{i};
-                PointEstimate(:,:,Index) = Results{i}.Paths{:};
+                AllParameters{Index} = Parameters{i};
+                PointEstimate(:,:,Index) = Parameters{i}.Paths{:};
                 % cycle over thresholds
                 for j = 1:length(ModelInfo.Thresholds)
-                    BCaCIUpper(:,:,j,Index) = Results{i}.BCaCI.Paths(:,:,j,1,1);
-                    BCaCILower(:,:,j,Index) = Results{i}.BCaCI.Paths(:,:,j,1,2);
+                    BCaCIUpper(:,:,j,Index) = Parameters{i}.BCaCI.Paths(:,:,j,1,1);
+                    BCaCILower(:,:,j,Index) = Parameters{i}.BCaCI.Paths(:,:,j,1,2);
                 end
             end
         end
@@ -121,9 +125,9 @@ end
 
 
 %% WRITE OUT ALL IMAGES from the regression models
-WriteOutParameterMaps('beta',Parameters,ModelInfo)
-WriteOutParameterMaps('B',Parameters,ModelInfo)
-WriteOutParameterMaps('t',Parameters,ModelInfo)
+WriteOutParameterMaps('beta',AllParameters,ModelInfo)
+WriteOutParameterMaps('B',AllParameters,ModelInfo)
+WriteOutParameterMaps('t',AllParameters,ModelInfo)
 
 %%
 function WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)

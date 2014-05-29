@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ExampleSetup</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-05-19"><meta name="DC.source" content="ExampleSetup.m"><style type="text/css">
+      --><title>ExampleSetup</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-05-29"><meta name="DC.source" content="ExampleSetup.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -65,7 +65,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">The aim of this example is to demonstrate a setup of this software.</a></li><li><a href="#2">General Setup</a></li><li><a href="#3">Model Specific Setup Number One</a></li><li><a href="#4">Run the analysis for Model 1</a></li><li><a href="#5">Model Specific Setup Number 2</a></li><li><a href="#6">Run the analysis for Model 2</a></li><li><a href="#7">Model Specific Setup Number Three</a></li><li><a href="#8">Run the analysis for Model 3</a></li><li><a href="#9">Perform Model 1 analyses on a single data point and print out the results</a></li><li><a href="#10">Perform Model 2 analyses on a single data point and print out the results</a></li><li><a href="#11">Perform Model 3 analyses on a single data point and print out the results</a></li></ul></div><h2>The aim of this example is to demonstrate a setup of this software.<a name="1"></a></h2><p>This will be an incremental step example. First, will be a simple mediation analysis where the effect of age group on a behavioral performance measure is mediated by a voxel-wise measure of grey matter density.</p><pre class="codeinput"><span class="comment">% To begin, start by loading up the brain data.</span>
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">The aim of this example is to demonstrate a setup of this software.</a></li><li><a href="#2">General Setup</a></li><li><a href="#3">Model Specific Setup Number One</a></li><li><a href="#4">Run the analysis for Model 1</a></li><li><a href="#5">Model Specific Setup Number 2</a></li><li><a href="#6">Run the analysis for Model 2</a></li><li><a href="#7">Model Specific Setup Number Three</a></li><li><a href="#8">Run the analysis for Model 3</a></li><li><a href="#9">Run Model 1 using permutation testing</a></li><li><a href="#10">Perform Model 1 analyses on a single data point and print out the results</a></li><li><a href="#11">Perform Model 2 analyses on a single data point and print out the results</a></li><li><a href="#12">Perform Model 3 analyses on a single data point and print out the results</a></li><li><a href="#13">Perform Model 1 using the cluster with bootstrapping</a></li><li><a href="#14">Perform Model 1 using the cluster with permutation</a></li></ul></div><h2>The aim of this example is to demonstrate a setup of this software.<a name="1"></a></h2><p>This will be an incremental step example. First, will be a simple mediation analysis where the effect of age group on a behavioral performance measure is mediated by a voxel-wise measure of grey matter density.</p><pre class="codeinput"><span class="comment">% To begin, start by loading up the brain data.</span>
 P = spm_select(Inf,<span class="string">'image'</span>,<span class="string">'Select the imaging data which will serve as the mediator.'</span>);
 V = spm_vol(P);
 I = spm_read_vols(V);
@@ -122,6 +122,8 @@ fprintf(1,<span class="string">'Done preparing data.\n'</span>);
     BaseDir = <span class="string">'/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode'</span>;
 <span class="keyword">elseif</span> ispc
     BaseDir = <span class="string">'C:\Users\js2746\Dropbox\SteffenerColumbia\Projects\TestProcessCode'</span>;
+<span class="keyword">elseif</span> isunix
+    BaseDir = <span class="string">'/home/js2746/DropBox/SteffenerColumbia/Projects/TestProcessCode'</span>;
 <span class="keyword">end</span>
 
 <span class="comment">% Create a structure where each cell is a node in the path diagram. This</span>
@@ -174,7 +176,7 @@ NJobSplit = 1;
 <span class="comment">% However, for  estimation of the significance of the paths resampling</span>
 <span class="comment">% methods are required and the probabilities need to be calculated at the</span>
 <span class="comment">% time of the bootstrapping and therefore, made a prior.</span>
-Thresh = [0.2 0.1];
+Thresh = [0.1 0.2];
 
 <span class="comment">% Create a structure which will contain all information for this analysis.</span>
 ModelInfo = {};
@@ -260,11 +262,9 @@ Model1.Inter = Inter;
 Model1.Paths = Paths;
 </pre><h2>Run the analysis for Model 1<a name="4"></a></h2><p>The following two functions actually run the mediation analysis and then writes out the results to NIFTI format images.</p><pre class="codeinput">ResultsFolder = PrepareDataForProcess(Model1);
 
-<span class="comment">% The writing of the images should ideally be perfomed by the cluster once</span>
-<span class="comment">% the analyses have completed. Therefore, a check is needed or better yet a</span>
-<span class="comment">% wait command for the cluster job:</span>
-<span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
+
 WriteOutResults(ResultsFolder)
+</pre><pre class="codeoutput">Starting analyses ... Done!
 </pre><h2>Model Specific Setup Number 2<a name="5"></a></h2><p>The second model is to perform a simple mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior). This analysis now includes covariates also.</p><pre class="codeinput">Model2 = ModelInfo;
 
 <span class="comment">% Add the covariate names</span>
@@ -310,6 +310,7 @@ Model2.Paths = Paths;
 <span class="comment">% wait command for the cluster job:</span>
 <span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
 WriteOutResults(ResultsFolder)
+</pre><pre class="codeoutput">Starting analyses ... Done!
 </pre><h2>Model Specific Setup Number Three<a name="7"></a></h2><p>The third model is to perform a moderated-mediation analysis with the voxel-wise brain data as the mediation between a dichotomous variable (Age group) and a continuous variable (Behavior). Now there is an interaction between the brain measure and age group in predicting the behavior variable</p><pre class="codeinput"><span class="comment">%     M</span>
 <span class="comment">%    / \</span>
 <span class="comment">%   /  /\</span>
@@ -357,7 +358,50 @@ Model3.Paths = Paths;
 <span class="comment">% wait command for the cluster job:</span>
 <span class="comment">% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh</span>
 WriteOutResults(ResultsFolder)
-</pre><h2>Perform Model 1 analyses on a single data point and print out the results<a name="9"></a></h2><pre class="codeinput"><span class="comment">% It is also possible to use this software to do single point analyses. The</span>
+</pre><pre class="codeoutput">Starting analyses ... Done!
+</pre><h2>Run Model 1 using permutation testing<a name="9"></a></h2><pre class="codeinput">pModel1 = Model1;
+pModel1.Nboot = 0;
+pModel1.Nperm = 100;
+pModel1.Tag = <span class="string">'ExampleModel1_perm'</span>
+
+ResultsFolder = PrepareDataForProcess(pModel1);
+
+WriteOutResults(ResultsFolder)
+</pre><pre class="codeoutput">
+pModel1 = 
+
+       BaseDir: [1x63 char]
+         Names: {'AgeGr'  'Brain'  'Behavior'}
+          data: {[50x1 double]  [50x95 double]  [50x1 double]}
+         Nboot: 0
+         Nperm: 100
+       Indices: [95x1 double]
+     NJobSplit: 1
+    Thresholds: [0.1000 0.2000]
+         STRAT: []
+          Nsub: 50
+          Nvar: 3
+       Nvoxels: 95
+    DataHeader: [1x1 struct]
+           Tag: 'ExampleModel1_perm'
+        Direct: [3x3 double]
+         Inter: [3x3 double]
+         Paths: [3x3 double]
+
+Starting analyses ...Started at: 29-May-2014 15:57:37
+Data prepared in 0.00 s.
+Starting first permutation at: 29-May-2014 15:57:37
+Saving data to file now.
+
+Saved point estimate results to file.
+
+Started at: 29-May-2014 15:57:37
+Data prepared in 0.01 s.
+Starting first permutation at: 29-May-2014 15:57:37
+Saving data to file now.
+
+ Done!
+</pre><h2>Perform Model 1 analyses on a single data point and print out the results<a name="10"></a></h2><pre class="codeinput"><span class="comment">% It is also possible to use this software to do single point analyses. The</span>
 <span class="comment">% model setup is the same as above. The real difference is that the number</span>
 <span class="comment">% of voxels and the list of indices need to be set to one to indicate that</span>
 <span class="comment">% a "single voxel" is being analyzed.</span>
@@ -383,27 +427,27 @@ PrintResults(SinglePointModel,Results)
 
 Dependent variable: Brain
                Model      beta    stderr         B         t         p
-            constant   864.682     0.665        --  1300.995     0.000
-               AgeGr    -0.452     0.940    -0.069    -0.480     0.633
+            constant   864.514     0.608        --  1421.813     0.000
+               AgeGr    -0.144     0.961    -0.022    -0.150     0.881
 
 Dependent variable: Behavior
                Model      beta    stderr         B         t         p
-            constant    71.967    44.096        --     1.632     0.109
-               AgeGr    -0.919     0.333    -0.368    -2.760     0.008
-               Brain    -0.082     0.051    -0.215    -1.616     0.113
+            constant    12.508    36.166        --     0.346     0.731
+               AgeGr     0.097     0.279     0.051     0.348     0.729
+               Brain    -0.015     0.042    -0.051    -0.348     0.729
 
 Path: 1
                AgeGr to                Brain
                Brain to             Behavior
-alpha = 0.200
-   EffSize     LLBCa     UUBCa
-    0.0372   -0.0520     0.157
 alpha = 0.100
    EffSize     LLBCa     UUBCa
-    0.0372   -0.0908     0.233
+    0.0021   -0.1164     0.074
+alpha = 0.200
+   EffSize     LLBCa     UUBCa
+    0.0021   -0.0633     0.051
 
 ==================================================
-</pre><h2>Perform Model 2 analyses on a single data point and print out the results<a name="10"></a></h2><pre class="codeinput">SinglePointModel = Model2;
+</pre><h2>Perform Model 2 analyses on a single data point and print out the results<a name="11"></a></h2><pre class="codeinput">SinglePointModel = Model2;
 SinglePointModel.data{2} = Model2.data{2}(:,45);
 SinglePointModel.Indices = 1;
 SinglePointModel.Nvoxels = 1;
@@ -416,35 +460,34 @@ PrintResults(SinglePointModel,Results)
 
 Dependent variable: Brain
                Model      beta    stderr         B         t         p
-            constant   864.676     0.681        --  1270.550     0.000
-               AgeGr    -0.474     0.964    -0.073    -0.492     0.625
-                Cov1    -0.076     0.451    -0.025    -0.168     0.868
-                Cov2     0.082     0.537     0.023     0.153     0.879
+            constant   864.545     0.621        --  1391.429     0.000
+               AgeGr    -0.244     0.994    -0.037    -0.245     0.807
+                Cov1     0.254     0.468     0.081     0.542     0.590
+                Cov2    -0.067     0.459    -0.022    -0.147     0.884
 
 Dependent variable: Behavior
                Model      beta    stderr         B         t         p
-            constant    73.702    44.389        --     1.660     0.104
-               AgeGr    -0.945     0.337    -0.378    -2.808     0.007
-               Brain    -0.084     0.051    -0.220    -1.644     0.107
-                Cov1    -0.039     0.157    -0.034    -0.247     0.806
-                Cov2     0.206     0.187     0.151     1.104     0.276
+            constant     9.162    36.616        --     0.250     0.804
+               AgeGr     0.152     0.286     0.079     0.530     0.598
+               Brain    -0.011     0.042    -0.037    -0.253     0.801
+                Cov1    -0.135     0.135    -0.150    -1.000     0.323
+                Cov2     0.048     0.132     0.054     0.365     0.717
 
 Path: 1
                AgeGr to                Brain
                Brain to             Behavior
-alpha = 0.200
-   EffSize     LLBCa     UUBCa
-    0.0400   -0.0199     0.205
 alpha = 0.100
    EffSize     LLBCa     UUBCa
-    0.0400   -0.0554     0.312
+    0.0026   -0.0973     0.102
+alpha = 0.200
+   EffSize     LLBCa     UUBCa
+    0.0026   -0.0605     0.073
 
 ==================================================
-</pre><h2>Perform Model 3 analyses on a single data point and print out the results<a name="11"></a></h2><pre class="codeinput">SinglePointModel = Model3;
+</pre><h2>Perform Model 3 analyses on a single data point and print out the results<a name="12"></a></h2><pre class="codeinput">SinglePointModel = Model3;
 SinglePointModel.data{2} = Model3.data{2}(:,45);
 SinglePointModel.Indices = 1;
 SinglePointModel.Nvoxels = 1;
-SinglePointModel.Nboot = 10000;
 SinglePointModel.Tag = <span class="string">'SinglePointModel'</span>;
 SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
 
@@ -454,29 +497,81 @@ PrintResults(SinglePointModel,Results)
 
 Dependent variable: Brain
                Model      beta    stderr         B         t         p
-            constant   864.682     0.665        --  1300.995     0.000
-               AgeGr    -0.452     0.940    -0.069    -0.480     0.633
+            constant   864.514     0.608        --  1421.813     0.000
+               AgeGr    -0.144     0.961    -0.022    -0.150     0.881
 
 Dependent variable: Behavior
                Model      beta    stderr         B         t         p
-            constant   104.306    57.242        --     1.822     0.075
-               AgeGr   -80.959    90.040   -32.388    -0.899     0.373
-               Brain    -0.120     0.066    -0.313    -1.810     0.077
-       AgeGr_x_Brain     0.093     0.104    32.014     0.889     0.379
+            constant    24.141    52.079        --     0.464     0.645
+               AgeGr   -22.787    73.040   -11.897    -0.312     0.756
+               Brain    -0.028     0.060    -0.098    -0.465     0.644
+       AgeGr_x_Brain     0.026     0.084    11.947     0.313     0.755
 
 Path: 1
                AgeGr to                Brain
                Brain to             Behavior
-alpha = 0.200
-  ProbeVal   EffSize     LLBCa     UUBCa
-    0.0000    0.0541    -0.046     0.282
-    1.0000    0.0123    -0.059     0.160
 alpha = 0.100
   ProbeVal   EffSize     LLBCa     UUBCa
-    0.0000    0.0541    -0.089     0.361
-    1.0000    0.0123    -0.109     0.218
+    0.0000    0.0040    -0.067     0.165
+    1.0000    0.0002    -0.105     0.134
+alpha = 0.200
+  ProbeVal   EffSize     LLBCa     UUBCa
+    0.0000    0.0040    -0.029     0.144
+    1.0000    0.0002    -0.064     0.059
 
 ==================================================
+</pre><h2>Perform Model 1 using the cluster with bootstrapping<a name="13"></a></h2><p>The real advantage of this software is the use of a cluster computing environment. In order to use the cluster environment you need to specify the number of jobs to split the analysis into.</p><pre class="codeinput">ClusterModel1Boot = Model1;
+<span class="comment">% If the analysis uses bootstrapping then the data itself is broken up into</span>
+<span class="comment">% chunks and each chunk is processed by a different cluster job. If the</span>
+<span class="comment">% analysis uses permutation testing then the number of permutations is</span>
+<span class="comment">% split across the different jobs.</span>
+
+ClusterModelBoot1.NJobSplit = 10;
+ClusterModel1Boot.Nboot = 500;
+<span class="comment">% Using the cluster requires the use fo creating job shell scripts using</span>
+<span class="comment">% this function:</span>
+<span class="comment">%</span>
+<span class="comment">%       CreateClusterJobFile(Command,fid)</span>
+<span class="comment">%</span>
+<span class="comment">% Once a file is created its fid (file identifier) is passed to this</span>
+<span class="comment">% command along with the command to be executed.</span>
+<span class="comment">% THis function needs to be modified to make it site specific by specifying</span>
+<span class="comment">% the install locations of MatLab and SPM.</span>
+
+ResultsFolder = PrepareDataForProcess(ClusterModel1Boot);
+</pre><pre class="codeoutput">Starting analyses ... Done!
+</pre><h2>Perform Model 1 using the cluster with permutation<a name="14"></a></h2><p>The real advantage of this software is the use of a cluster computing environment. In order to use the cluster environment you need to specify the number of jobs to split the analysis into.</p><pre class="codeinput">ClusterModel1Perm = Model1;
+<span class="comment">% If the analysis uses bootstrapping then the data itself is broken up into</span>
+<span class="comment">% chunks and each chunk is processed by a different cluster job. If the</span>
+<span class="comment">% analysis uses permutation testing then the number of permutations is</span>
+<span class="comment">% split across the different jobs.</span>
+
+ClusterModel1Perm.NJobSplit = 10;
+ClusterModel1Perm.Nboot = 0;
+ClusterModel1Perm.Nperm = 500;
+<span class="comment">% Using the cluster requires the use fo creating job shell scripts using</span>
+<span class="comment">% this function:</span>
+<span class="comment">%</span>
+<span class="comment">%       CreateClusterJobFile(Command,fid)</span>
+<span class="comment">%</span>
+<span class="comment">% Once a file is created its fid (file identifier) is passed to this</span>
+<span class="comment">% command along with the command to be executed.</span>
+<span class="comment">% THis function needs to be modified to make it site specific by specifying</span>
+<span class="comment">% the install locations of MatLab and SPM.</span>
+
+ResultsFolder = PrepareDataForProcess(ClusterModel1Perm);
+</pre><pre class="codeoutput">Your job 2632 ("PointEst_job") has been submitted
+Your job 2633 ("job_0001") has been submitted
+Your job 2634 ("job_0002") has been submitted
+Your job 2635 ("job_0003") has been submitted
+Your job 2636 ("job_0004") has been submitted
+Your job 2637 ("job_0005") has been submitted
+Your job 2638 ("job_0006") has been submitted
+Your job 2639 ("job_0007") has been submitted
+Your job 2640 ("job_0008") has been submitted
+Your job 2641 ("job_0009") has been submitted
+Your job 2642 ("job_0010") has been submitted
+Your job 2643 ("WriteOutJob.sh") has been submitted
 </pre><p>Other models:     M     | X ----- Y</p><pre class="codeinput"><span class="comment">%    M1--M2</span>
 <span class="comment">%   /      \</span>
 <span class="comment">%  /        \</span>
@@ -522,7 +617,7 @@ alpha = 0.100
 <span class="comment">% transient times of large amounts of data in memory. I am afraid to</span>
 <span class="comment">% overload a single computer even transiently.</span>
 <span class="comment">%</span>
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% The aim of this example is to demonstrate a setup of this software.
 % This will be an incremental step example. 
@@ -593,6 +688,8 @@ if ismac
     BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Projects/TestProcessCode';
 elseif ispc
     BaseDir = 'C:\Users\js2746\Dropbox\SteffenerColumbia\Projects\TestProcessCode';
+elseif isunix
+    BaseDir = '/home/js2746/DropBox/SteffenerColumbia/Projects/TestProcessCode';
 end
 
 % Create a structure where each cell is a node in the path diagram. This
@@ -645,7 +742,7 @@ NJobSplit = 1;
 % However, for  estimation of the significance of the paths resampling
 % methods are required and the probabilities need to be calculated at the
 % time of the bootstrapping and therefore, made a prior.
-Thresh = [0.2 0.1];
+Thresh = [0.1 0.2];
 
 % Create a structure which will contain all information for this analysis.
 ModelInfo = {};
@@ -742,10 +839,7 @@ Model1.Paths = Paths;
 
 ResultsFolder = PrepareDataForProcess(Model1);
 
-% The writing of the images should ideally be perfomed by the cluster once
-% the analyses have completed. Therefore, a check is needed or better yet a
-% wait command for the cluster job: 
-% e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
+
 WriteOutResults(ResultsFolder)
 
 
@@ -866,6 +960,17 @@ ResultsFolder = PrepareDataForProcess(Model3);
 % e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
 WriteOutResults(ResultsFolder)
 
+%% Run Model 1 using permutation testing
+pModel1 = Model1;
+pModel1.Nboot = 0;
+pModel1.Nperm = 100;
+pModel1.Tag = 'ExampleModel1_perm'
+
+ResultsFolder = PrepareDataForProcess(pModel1);
+
+WriteOutResults(ResultsFolder)
+
+
 %% Perform Model 1 analyses on a single data point and print out the results 
 
 % It is also possible to use this software to do single point analyses. The
@@ -906,13 +1011,64 @@ SinglePointModel = Model3;
 SinglePointModel.data{2} = Model3.data{2}(:,45);
 SinglePointModel.Indices = 1;
 SinglePointModel.Nvoxels = 1;
-SinglePointModel.Nboot = 10000;
 SinglePointModel.Tag = 'SinglePointModel';
 SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
 
 Results = OneVoxelProcessBootstrap(SinglePointModel);
 PrintResults(SinglePointModel,Results)
 
+%% Perform Model 1 using the cluster with bootstrapping
+% The real advantage of this software is the use of a cluster computing
+% environment.
+% In order to use the cluster environment you need to specify the number of
+% jobs to split the analysis into.
+
+ClusterModel1Boot = Model1;
+% If the analysis uses bootstrapping then the data itself is broken up into
+% chunks and each chunk is processed by a different cluster job. If the
+% analysis uses permutation testing then the number of permutations is
+% split across the different jobs.
+
+ClusterModelBoot1.NJobSplit = 10;
+ClusterModel1Boot.Nboot = 500;
+% Using the cluster requires the use fo creating job shell scripts using
+% this function:
+%
+%       CreateClusterJobFile(Command,fid)
+%
+% Once a file is created its fid (file identifier) is passed to this
+% command along with the command to be executed. 
+% THis function needs to be modified to make it site specific by specifying
+% the install locations of MatLab and SPM.
+
+ResultsFolder = PrepareDataForProcess(ClusterModel1Boot);
+
+%% Perform Model 1 using the cluster with permutation
+% The real advantage of this software is the use of a cluster computing
+% environment.
+% In order to use the cluster environment you need to specify the number of
+% jobs to split the analysis into.
+
+ClusterModel1Perm = Model1;
+% If the analysis uses bootstrapping then the data itself is broken up into
+% chunks and each chunk is processed by a different cluster job. If the
+% analysis uses permutation testing then the number of permutations is
+% split across the different jobs.
+
+ClusterModel1Perm.NJobSplit = 10;
+ClusterModel1Perm.Nboot = 0;
+ClusterModel1Perm.Nperm = 500;
+% Using the cluster requires the use fo creating job shell scripts using
+% this function:
+%
+%       CreateClusterJobFile(Command,fid)
+%
+% Once a file is created its fid (file identifier) is passed to this
+% command along with the command to be executed. 
+% THis function needs to be modified to make it site specific by specifying
+% the install locations of MatLab and SPM.
+
+ResultsFolder = PrepareDataForProcess(ClusterModel1Perm);
 %%
 % Other models:
 %     M

@@ -113,7 +113,7 @@ Nperm = 0;
 % wait.
 % If you are running this on a single (non-cluster environment) computer
 % then set this to equal 1.
-NJobSplit = 0;
+NJobSplit = 1;
 
 % Specify the thresholds used in the analysis. 
 % Some of the images and results in the mediation analysis perform
@@ -121,7 +121,7 @@ NJobSplit = 0;
 % However, for  estimation of the significance of the paths resampling
 % methods are required and the probabilities need to be calculated at the
 % time of the bootstrapping and therefore, made a prior.
-Thresh = [0.2 0.1];
+Thresh = [0.1 0.2];
 
 % Create a structure which will contain all information for this analysis.
 ModelInfo = {};
@@ -339,6 +339,17 @@ ResultsFolder = PrepareDataForProcess(Model3);
 % e.g. qsub -hold_jid job1,job2 -N job3 ./c.sh
 WriteOutResults(ResultsFolder)
 
+%% Run Model 1 using permutation testing
+pModel1 = Model1;
+pModel1.Nboot = 0;
+pModel1.Nperm = 100;
+pModel1.Tag = 'ExampleModel1_perm'
+
+ResultsFolder = PrepareDataForProcess(pModel1);
+
+WriteOutResults(ResultsFolder)
+
+
 %% Perform Model 1 analyses on a single data point and print out the results 
 
 % It is also possible to use this software to do single point analyses. The
@@ -379,27 +390,26 @@ SinglePointModel = Model3;
 SinglePointModel.data{2} = Model3.data{2}(:,45);
 SinglePointModel.Indices = 1;
 SinglePointModel.Nvoxels = 1;
-SinglePointModel.Nboot = 10000;
 SinglePointModel.Tag = 'SinglePointModel';
 SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
 
 Results = OneVoxelProcessBootstrap(SinglePointModel);
 PrintResults(SinglePointModel,Results)
 
-%% Perform Model 1 using the cluster
+%% Perform Model 1 using the cluster with bootstrapping
 % The real advantage of this software is the use of a cluster computing
 % environment.
 % In order to use the cluster environment you need to specify the number of
 % jobs to split the analysis into.
 
-ClusterModel1 = Model1;
+ClusterModel1Boot = Model1;
 % If the analysis uses bootstrapping then the data itself is broken up into
 % chunks and each chunk is processed by a different cluster job. If the
 % analysis uses permutation testing then the number of permutations is
 % split across the different jobs.
 
-ClusterModel1.NJobSplit = 10;
-ClusterModel1.Nboot = 500;
+ClusterModelBoot1.NJobSplit = 10;
+ClusterModel1Boot.Nboot = 500;
 % Using the cluster requires the use fo creating job shell scripts using
 % this function:
 %
@@ -410,8 +420,34 @@ ClusterModel1.Nboot = 500;
 % THis function needs to be modified to make it site specific by specifying
 % the install locations of MatLab and SPM.
 
-ResultsFolder = PrepareDataForProcess(ClusterModel1);
+ResultsFolder = PrepareDataForProcess(ClusterModel1Boot);
 
+%% Perform Model 1 using the cluster with permutation
+% The real advantage of this software is the use of a cluster computing
+% environment.
+% In order to use the cluster environment you need to specify the number of
+% jobs to split the analysis into.
+
+ClusterModel1Perm = Model1;
+% If the analysis uses bootstrapping then the data itself is broken up into
+% chunks and each chunk is processed by a different cluster job. If the
+% analysis uses permutation testing then the number of permutations is
+% split across the different jobs.
+
+ClusterModel1Perm.NJobSplit = 10;
+ClusterModel1Perm.Nboot = 0;
+ClusterModel1Perm.Nperm = 500;
+% Using the cluster requires the use fo creating job shell scripts using
+% this function:
+%
+%       CreateClusterJobFile(Command,fid)
+%
+% Once a file is created its fid (file identifier) is passed to this
+% command along with the command to be executed. 
+% THis function needs to be modified to make it site specific by specifying
+% the install locations of MatLab and SPM.
+
+ResultsFolder = PrepareDataForProcess(ClusterModel1Perm);
 %%
 % Other models:
 %     M

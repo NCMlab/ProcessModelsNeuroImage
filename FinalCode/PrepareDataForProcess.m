@@ -202,6 +202,7 @@ if ModelInfo.NJobSplit > 1
     end
 else
     % This analysis is run on the host computer
+    fprintf(1,'Starting analyses ...')
     switch ModelType
         case 'bootstrap'
             % Save the data
@@ -239,6 +240,7 @@ else
             VoxelWiseProcessPermute(InDataPath,1,ModelInfo.Nperm)
             
     end
+    fprintf(1,' Done!\n');
 end
     
     
