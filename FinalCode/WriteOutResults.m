@@ -224,3 +224,61 @@ for j = 1:length(ModelInfo.Thresholds)
     end
 end
 
+% function WriteOutPermutationBeta(ModelInfo,MaxB,MinB,PointEstimate)
+% % cycle over the thresholds requested
+% for j = 1:length(ModelInfo.Thresholds)
+%     % Find the number in a sorted list of permutations that corresponds to
+%     % the threshold.
+%     c = floor(ModelInfo.Thresholds(j)*ModelInfo.Nperm);
+%     % If the value exceeds the precision of the number of permutaions then
+%     % set it to zero.
+%     % e.g. a threshold of 0.00001 is not possible with 100 permutations.
+%     % The most precise threshold is: 1/100 = 0.01
+%     if c == 0
+%         % RESET the threshold used to the most precise
+%         ModelInfo.Thresholds(j) = 1/ModelInfo.Nperm;
+%         c = 1;
+%     end
+%     for i = 1:ModelInfo.Nvar 
+%       if sum(ModelInfo.Direct(:,i))
+%         % CONSTANT TERMS ARE ROW 1
+%         % cycle over the rows in the model
+%         for j = 1:ModelInfo.Nvar 
+%             if ModelInfo.Direct(j,i)
+%                 % create the filename describing the dependent and
+%                 % independent effects
+%                 FileName = sprintf('Model%d_DEP%s_IND%s_%s.nii',i,ModelInfo.Names{i},ModelInfo.Names{j},Tag);
+%                 % sort the max and min permutation results
+%                 sMax = sort(squeeze(MaxB(j,i,:)),'descend');
+%                 sMin = sort(squeeze(MinB(j,i,:)));
+%                 % find the permutation value based on the sorted values
+%                 Mx = sMax(c);
+%                 Mn = sMin(c)
+%                 
+%                  temp = squeeze(PointEstimate(i,1,kk,:));
+%             temp(find((PointEstimate(i,1,kk,:) < Mx(i))&(PointEstimate(i,1,kk,:) >0))) = 0;
+%             temp(find((PointEstimate(i,1,kk,:) > Mn(i))&(PointEstimate(i,1,kk,:) <0))) = 0;
+%           
+%                 
+%                 I = zeros(ModelInfo.DataHeader.dim);
+%                 I(ModelInfo.Indices) = squeeze(temp(j+1,i,:));
+%                 % Create the header for this image
+%                 Vo = ModelInfo.DataHeader;
+%                 Vo.fname = fullfile(ModelInfo.ResultsPath,FileName);
+%                 spm_write_vol(Vo,I);
+%             end
+%         end
+%     
+% 
+%             
+%             % write unthresholed path estimate
+%             Vo = ModelInfo.DataHeader;
+%             Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d.nii',kk,i)));
+%             % Prepare the data matrix
+%             I = zeros(ModelInfo.DataHeader.dim);
+%             % Extract the path data values
+%             temp = squeeze(PointEstimate(i,1,kk,:));
+%             I(ModelInfo.Indices) = temp;
+%             % Write the images
+%             spm_write_vol(Vo,I);
+    
