@@ -342,7 +342,7 @@ WriteOutResults(ResultsFolder)
 %% Run Model 1 using permutation testing
 pModel1 = Model1;
 pModel1.Nboot = 0;
-pModel1.Nperm = 100;
+pModel1.Nperm = 1000;
 pModel1.Tag = 'ExampleModel1_perm'
 
 ResultsFolder = PrepareDataForProcess(pModel1);
