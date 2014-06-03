@@ -34,6 +34,10 @@ switch ModelType
         
         % load a single results fle to determine the size of the paths
         load(fullfile(ResultsFolder,'Results',F(1).name))
+        % m: steps in this moderated path for dimension 1
+        % n: steps in this moderated path for dimension 2
+        % o: number of paths
+        % p: number of permutaions for this chunk of results
         [m n o p] = size(MaxPaths);
         % Check to make sure all the files are there
         if ~(ModelInfo.Nperm == p*NFiles)
@@ -123,11 +127,6 @@ switch ModelType
         WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
 end
 
-
-
-
-
-
 %% WRITE OUT ALL IMAGES from the regression models
 WriteOutParameterMaps('beta',AllParameters,ModelInfo)
 WriteOutParameterMaps('B',AllParameters,ModelInfo)
@@ -178,22 +177,28 @@ end
 function WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate,o,m)
 %% WRITE OUT THE PATH IMAGES FOR THE PERMUTATION TEST
 % cycle over the thresholds requested
+% This allows the images to be written out even if the processing is not
+% complete;
+Nperm = size(MaxPermPaths,4);
+
 for j = 1:length(ModelInfo.Thresholds)
     % Find the number in a sorted list of permutations that corresponds to
     % the threshold.
-    c = floor(ModelInfo.Thresholds(j)*ModelInfo.Nperm);
+    c = floor(ModelInfo.Thresholds(j)*Nperm);
     % If the value exceeds the precision of the number of permutaions then
     % set it to zero.
     % e.g. a threshold of 0.00001 is not possible with 100 permutations.
     % The most precise threshold is: 1/100 = 0.01
     if c == 0
         % RESET the threshold used to the most precise
-        ModelInfo.Thresholds(j) = 1/ModelInfo.Nperm;
+        ModelInfo.Thresholds(j) = 1/Nperm;
         c = 1;
     end
     
     for kk = 1:o % cycle over the number of paths
-        % cycle over the probed value??
+        
+        % cycle over the probed value for dimension 1
+        % The code does not handle multidimensional interactions yet.
         for i = 1:m
             % sort the max and min permutation results
             sMax(:,i) = sort(squeeze(MaxPermPaths(i,:,kk,:)),'descend');
@@ -214,9 +219,9 @@ for j = 1:length(ModelInfo.Thresholds)
             spm_write_vol(Vo,I);
             
             % Find the locations that exceed the two-tailed threshold
-            % >>>> I THINK THERE IS A BUG HERE WITH THE SECOND INDEX BEING SET TO 1 <<<
-            temp(find((PointEstimate(i,1,kk,:) < Mx(i))&(PointEstimate(i,1,kk,:) >0))) = 0;
-            temp(find((PointEstimate(i,1,kk,:) > Mn(i))&(PointEstimate(i,1,kk,:) <0))) = 0;
+            
+            temp(find((PointEstimate(i,1,kk,:) < Mx(i)) & (PointEstimate(i,1,kk,:) >0))) = 0;
+            temp(find((PointEstimate(i,1,kk,:) > Mn(i)) & (PointEstimate(i,1,kk,:) <0))) = 0;
             
             % Create the thresholded path output file name.
             Vo.fname=(fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%0.4f.nii',kk,i,ModelInfo.Thresholds(j))));
@@ -265,7 +270,6 @@ for j = 1:length(ModelInfo.Thresholds)
                     temp(find((PointEstimate(j+1,i,:) < Mx)&(PointEstimate(j+1,i,:) >0))) = 0;
                     temp(find((PointEstimate(j+1,i,:) > Mn)&(PointEstimate(j+1,i,:) <0))) = 0;
                     
-                    
                     I = zeros(ModelInfo.DataHeader.dim);
                     I(ModelInfo.Indices) = temp;
                     % Create the header for this image
@@ -274,10 +278,6 @@ for j = 1:length(ModelInfo.Thresholds)
                     spm_write_vol(Vo,I);
                 end
             end
-            
-            
-            
-            
         end
     end
 end

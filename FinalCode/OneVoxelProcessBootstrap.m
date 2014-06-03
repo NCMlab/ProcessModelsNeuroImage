@@ -2,8 +2,8 @@ function Results = OneVoxelProcessBootstrap(Model)
 % reset the random number generator. This is EXTREMEMLY important when
 % deploying these analyses to a cluster. Without this resetting then each
 % node of the cluster CAN choose the exact same random numbers.
-% RandStream.setDefaultStream(RandStream('mt19937ar','Seed',sum(100*clock)));
-RandStream('mt19937ar','Seed',sum(100*clock));
+rng('shuffle','multFibonacci');
+
 
 % Fit the model
 % The indirect paths (the Paths cell) is set to be an array of cells. This

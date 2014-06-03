@@ -3,7 +3,7 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 % avoids each cluster node starting with the same seed and producing the
 % same results. An alternative futur direction is a precalculation of the permutations for
 % storage in the ModelInfo structure. 
-RandStream('mt19937ar','Seed',sum(100*clock));
+rng('shuffle','multFibonacci');
 
 fprintf(1,'Started at: %s\n',datestr(now));
 tic
@@ -102,6 +102,8 @@ if Nperm > 0
         end
         PermResults = setfield(PermResults,FieldNames{k},BlankValue);
     end
+    
+    clear BlankValue;
     % determine the size of the matrix of regression parameters. The reason
     % this is not simply the number of variables entered is because there
     % can be any number of interactions in the model.
@@ -144,9 +146,10 @@ fprintf(1,'Starting first permutation at: %s\n',datestr(now));
 % Cycle over 
 for k = 1:size(Samp,2)
     tic
+    tempData = ModelInfo;    
     for i = 1:Nvoxels
         % for this voxel
-        tempData = ModelInfo;
+        % reset the data part
         tempData.data = zeros(ModelInfo.Nsub,ModelInfo.Nvar);
         % extract the data
         for j = 1:ModelInfo.Nvar

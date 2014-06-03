@@ -1,8 +1,8 @@
 % Write out basic regression maps using the minimum statistics correction
-% for multiple comparisons.
+% for multiple comparisons from the permutation results.
 %
 % Add the ability to perform FDR correction for multiple comparisons when
-% using bootstrapping.
+% using bootstrapping. This requires the BCa Z and p maps to be saved.
 %
 % Add the ability to test multiple paths. 
 %
@@ -19,4 +19,6 @@
 % then there needs to be a procedure for interpolating it's value.
 %
 % Have permutations saved to a file in small chunks instead of the cluster
-% split size. This is valuable for processes that get interrupted.
+% split size. This is valuable for processes that get interrupted. 
+% This is now a necessity. The memory demands for multiple permutations is
+% HUGE. So it is best to write each permutation to a file after completion.
