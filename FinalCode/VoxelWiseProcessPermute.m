@@ -111,7 +111,7 @@ if Nperm > 0
     PermResults.beta = zeros(Mbeta, Nbeta, Nvoxels, Nperm);
     
     % Determine the size of the calculated path values
-    [PathSize1 PathSize2] = size(TestResults.Paths{1});
+    [PathSize1, PathSize2] = size(TestResults.Paths{1});
     
     % Determine the number of paths
     NPaths = length(TestResults.Paths);
@@ -139,6 +139,7 @@ fprintf(1,'Data prepared in %0.2f s.\n',toc);
 
 % Feedback for the user
 fprintf(1,'Starting first permutation at: %s\n',datestr(now));
+
 
 % Cycle over 
 for k = 1:size(Samp,2)
@@ -196,7 +197,7 @@ for k = 1:size(Samp,2)
             end
         end
     end
-   % fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
+    fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
 end
 fprintf(1,'Saving data to file now.\n\n');
 % Save results to file
