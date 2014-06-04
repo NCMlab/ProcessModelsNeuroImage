@@ -62,5 +62,7 @@ for i = 1:length(FieldNames)
             CurrentBCaCI(:,:,:,t) = CalculateBCaCI(BootStrapData,Alpha1,Alpha2,PointEstimate);
         end
         BCaCI = setfield(BCaCI,FieldNames{i},CurrentBCaCI);
+        BCaCI.Z = Z;
+        BCaCI.p = p;
     end
 end

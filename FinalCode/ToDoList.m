@@ -22,3 +22,16 @@
 % split size. This is valuable for processes that get interrupted. 
 % This is now a necessity. The memory demands for multiple permutations is
 % HUGE. So it is best to write each permutation to a file after completion.
+
+% There are some careful interplays between the use of qsub and MatLab
+% multithreading nature. By default MatLab will multithread. This puts it
+% in competition (I think) with qsub which determines how to allocate
+% resources. Qsub allocates resources based on the quantity of available
+% memory.
+% I have the question of whether the multithreading of MatLab and qsub may
+% be competing and that qsub may overallocte resources to a single compute
+% host.
+
+% Using 8 threads a process took 224 seconds on the head node. I want to
+% see if using 1 thread takes 1/8 of the time or not. 
+% Using one thread took 240 seconds!

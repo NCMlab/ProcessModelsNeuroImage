@@ -227,9 +227,7 @@ else
     fprintf(1,'Saved point estimate results to file.\n\n');
 end
     
-    
-    
-    
-    
+
+  
     
     

@@ -1,12 +1,29 @@
-function WriteOutParameterMaps(Tag,Parameters,ModelInfo)
-
+function WriteOutParameterMaps(Tag,Parameters,ModelInfo,FDRFlag)
+if nargin == 3
+    FDRFlag = 0;
+end
 % create an array to hold the data of interest
 % The Tag defines which parameter measure to save out.
 
-temp = zeros([size(getfield(Parameters{1},Tag)) ModelInfo.Nvoxels]);
-for i =1:ModelInfo.Nvoxels
-    temp(:,:,i) = getfield(Parameters{i},Tag);
+% If a subfield is passed.
+if ~isempty(findstr(Tag,'.'))
+    Field = Tag(1:findstr(Tag,'.')-1);
+    temp1 = getfield(Parameters{1},Field);
+    temp = zeros([size(getfield(temp1,Tag(findstr(Tag,'.')+1:end))) ModelInfo.Nvoxels]);
+else
+    temp = zeros([size(getfield(Parameters{1},Tag)) ModelInfo.Nvoxels]);
 end
+% If a subfield is passed.
+for i = 1:ModelInfo.Nvoxels
+    if ~isempty(findstr(Tag,'.'))
+        Field = Tag(1:findstr(Tag,'.')-1);
+        temp1 = getfield(Parameters{i},Field);
+        temp(:,:,i) = getfield(temp1,Tag(findstr(Tag,'.')+1:end));
+    else
+        temp(:,:,i) = getfield(Parameters{i},Tag);
+    end
+end
+
 % cycle over the columns in the model
 for i = 1:ModelInfo.Nvar 
     if sum(ModelInfo.Direct(:,i))

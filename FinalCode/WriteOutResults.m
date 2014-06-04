@@ -119,18 +119,21 @@ switch ModelType
                 PointEstimate(:,:,Index) = Parameters{i}.Paths{:};
                 % cycle over thresholds
                 for j = 1:length(ModelInfo.Thresholds)
-                    BCaCIUpper(:,:,j,Index) = Parameters{i}.BCaCI.Paths(:,:,j,1,1);
-                    BCaCILower(:,:,j,Index) = Parameters{i}.BCaCI.Paths(:,:,j,1,2);
+                    BCaCIUpper(:,:,j,Index) = Parameters{i}.BCaCI.Paths(j,1,1);
+                    BCaCILower(:,:,j,Index) = Parameters{i}.BCaCI.Paths(j,1,2);
                 end
             end
         end
         WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
+        WriteOutParameterMaps('BCaCI.p',AllParameters,ModelInfo)
+        WriteOutParameterMaps('BCaCI.Z',AllParameters,ModelInfo)
 end
 
 %% WRITE OUT ALL IMAGES from the regression models
 WriteOutParameterMaps('beta',AllParameters,ModelInfo)
 WriteOutParameterMaps('B',AllParameters,ModelInfo)
 WriteOutParameterMaps('t',AllParameters,ModelInfo)
+
 
 %%
 function WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
@@ -180,6 +183,7 @@ function WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstim
 % This allows the images to be written out even if the processing is not
 % complete;
 Nperm = size(MaxPermPaths,4);
+
 
 for j = 1:length(ModelInfo.Thresholds)
     % Find the number in a sorted list of permutations that corresponds to
