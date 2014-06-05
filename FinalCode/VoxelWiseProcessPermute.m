@@ -129,8 +129,8 @@ if Nperm > 0
     % Wellcome Department of Cognitive Neurology, Institute of Neurology, London, 
     % United Kingdom; 2002 Jan;15(1):1?25. 
     
-    MaxB = zeros([size(TestResults.B) Nperm]);
-    MinB = zeros([size(TestResults.B) Nperm]);
+    MaxBeta = zeros([size(TestResults.B) Nperm]);
+    MinBeta = zeros([size(TestResults.B) Nperm]);
     MaxPaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
     MinPaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
 end
@@ -159,8 +159,9 @@ for k = 1:size(Samp,2)
                 tempData.data(:,j) = ModelInfo.data{j};
             end
         end
-        % Shuffle the first column
-        tempData.data(:,1) = tempData.data(Samp(:,k),1);
+        % Shuffle the specified column
+        tempData.data(:,tempData.ColumnToShuffle) = tempData.data(Samp(:,k),tempData.ColumnToShuffle);
+
         Results = FitProcessModel(tempData);
         if Nperm == 0
             % this is the point estimate, keep everything
@@ -195,8 +196,8 @@ for k = 1:size(Samp,2)
         % find the max and min beta values also
         for i = 1:Mbeta
             for j = 1:Nbeta
-                MaxB(i,j,k) = max(squeeze(PermResults.beta(i,j,:)));
-                MinB(i,j,k) = min(squeeze(PermResults.beta(i,j,:)));
+                MaxBeta(i,j,k) = max(squeeze(PermResults.beta(i,j,:)));
+                MinBeta(i,j,k) = min(squeeze(PermResults.beta(i,j,:)));
             end
         end
     end
@@ -212,7 +213,7 @@ if Nperm > 0
         mkdir(ResultsFolder)
     end
     OutFile = fullfile(ResultsFolder,sprintf('Permute_count%04d_%dSamp',count,Nperm));
-    Str = sprintf('save %s MaxPaths MinPaths MaxB MinB',OutFile);
+    Str = sprintf('save %s MaxPaths MinPaths MaxBeta MinBeta',OutFile);
     eval(Str)
 else
     [PathName FileName] = fileparts(InDataPath);

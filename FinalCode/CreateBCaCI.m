@@ -49,6 +49,8 @@ for i = 1:length(FieldNames)
         % put the confidence interval data back into the structure
         % TO DO: somehow UNFLATTEN the data
         BCaCI = setfield(BCaCI,FieldNames{i},CurrentBCaCI);
+        BCaCI.PathsZ = Z;
+        BCaCI.PathsP = p;
     else
         CurrentBCaCI = zeros(size(getfield(BCaCI,FieldNames{i})));
         for t = 1:Nthresh

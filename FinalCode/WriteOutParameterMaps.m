@@ -24,6 +24,30 @@ for i = 1:ModelInfo.Nvoxels
     end
 end
 
+if strcmp(Tag,'BCaCI.p') && FDRFlag
+    Tag = sprintf('%s_%s',Tag,'FDR');
+    % Only use the first threshold
+    kk = 1;
+    alpha = ModelInfo.Thresholds(kk);
+    % Cycle over each parameter
+    for i = 1:ModelInfo.Nvar
+        if sum(ModelInfo.Direct(:,i))
+            % CONSTANT TERMS ARE ROW 1
+            % cycle over the rows in the model
+            for j = 1:ModelInfo.Nvar
+                if ModelInfo.Direct(j,i)
+                    I = sort(squeeze(temp(j+1,i,:)));
+                    [FDRp, FDRpN] = FDR(I,alpha);
+                    if isempty(FDRp)
+                        FDRp = 1/ModelInfo.Nvoxels*alpha;
+                    end
+                    temp(j+1,i,find(temp(j+1,i,:) > FDRp)) = 0;
+                end
+            end
+        end
+    end
+end
+
 % cycle over the columns in the model
 for i = 1:ModelInfo.Nvar 
     if sum(ModelInfo.Direct(:,i))

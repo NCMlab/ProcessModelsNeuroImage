@@ -126,7 +126,14 @@ switch ModelType
         end
         WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
         WriteOutParameterMaps('BCaCI.p',AllParameters,ModelInfo)
+        
+
+        % Write out the FDR thresholded p maps also
+        WriteOutParameterMaps('BCaCI.p',AllParameters,ModelInfo,1)
         WriteOutParameterMaps('BCaCI.Z',AllParameters,ModelInfo)
+        WriteOutSingleMap('BCaCI.PathsZ',AllParameters,ModelInfo)
+        WriteOutSingleMap('BCaCI.PathsP',AllParameters,ModelInfo)
+        WriteOutSingleMap('BCaCI.PathsP',AllParameters,ModelInfo,1)
 end
 
 %% WRITE OUT ALL IMAGES from the regression models

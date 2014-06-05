@@ -24,7 +24,7 @@ fprintf(fid,'%s\n','addpath /usr/local/SPM/v8');
 % The path to the Process toolbox
 fprintf(fid,'%s\n','addpath /home/js2746/DropBox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FinalCode');
 % Limit the number of cores/threads used to one
-maxNumCompThreads(1);
+% maxNumCompThreads(1);
 fprintf(fid,'%s\n',Command);
 fprintf(fid,'exit\n');
 fprintf(fid,'EOF\n');
