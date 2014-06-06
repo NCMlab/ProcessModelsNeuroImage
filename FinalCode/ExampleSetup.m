@@ -121,7 +121,7 @@ NJobSplit = 1;
 % However, for  estimation of the significance of the paths resampling
 % methods are required and the probabilities need to be calculated at the
 % time of the bootstrapping and therefore, made a prior.
-Thresh = [0.1 0.2];
+Thresh = [0.1 0.2 0.3 0.4];
 
 % Create a structure which will contain all information for this analysis.
 ModelInfo = {};

@@ -4,25 +4,32 @@ if nargin == 0
     ResultsFolder = spm_select(1,'dir','Select analysis directory');
 end
 
-% Load the data/parameters used in this analysis
+
+
+
+
+% Check to see if there are Permute results
+if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute*.mat')))
+    ModelType = 'permutation';
+elseif ~isempty(dir(fullfile(ResultsFolder,'Results','BootStrap*.mat')))
+    ModelType = 'bootstrap';
+else
+    errordlg('Unknown results');
+end
 load(fullfile(ResultsFolder,'data','ModelInfo'))
 ModelInfo.ResultsPath = ResultsFolder;
 
 % Remove the data from the structure to preserve memory
 ModelInfo.data = [];
 
-% Check to see if there are Permute results
-if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute*.mat')))
-    ModelType = 'permutation';
-elseif ~isempty(dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat')))
-    ModelType = 'bootstrap';
-else
-    errordlg('Unknown results');
-end
+
 
 % Find the number of results files
 switch ModelType
     case 'permutation'
+        % Load the data/parameters used in this analysis
+       
+        
         % locate the results files
         F = dir(fullfile(ResultsFolder,'Results','Permute*.mat'));
         NFiles = length(F);
@@ -47,7 +54,7 @@ switch ModelType
         % path values and the standardized parameter estimates
         MaxPermPaths = zeros(m,n,o,p*NFiles);
         MinPermPaths = zeros(m,n,o,p*NFiles);
-        [mB nB pB] = size(MaxB);
+        [mB nB pB] = size(MaxBeta);
         MaxPermB = zeros(mB,nB,pB*NFiles);
         MinPermB = zeros(mB,nB,pB*NFiles);
         
@@ -56,8 +63,8 @@ switch ModelType
             load(fullfile(ResultsFolder,'Results',F(i).name))
             MaxPermPaths(:,:,:,(i-1)*p+1:i*p) = MaxPaths;
             MinPermPaths(:,:,:,(i-1)*p+1:i*p) = MinPaths;
-            MaxPermB(:,:,(i-1)*p+1:i*p) = MaxB;
-            MinPermB(:,:,(i-1)*p+1:i*p) = MinB;
+            MaxPermB(:,:,(i-1)*p+1:i*p) = MaxBeta;
+            MinPermB(:,:,(i-1)*p+1:i*p) = MinBeta;
         end
         % Load up the point estimate results
         F = dir(fullfile(ResultsFolder,'Results','PointEstimate*.mat'));
@@ -82,8 +89,9 @@ switch ModelType
     case 'bootstrap'
         % There is a problem here fusing the split results back together
         
+        
         % locate the results files
-        F = dir(fullfile(ResultsFolder,'Results','Bootstrap*.mat'));
+        F = dir(fullfile(ResultsFolder,'Results','BootStrap*.mat'));
         NFiles = length(F);
         
         % Check to see if the analyses are completed
@@ -93,22 +101,27 @@ switch ModelType
         
         % load a single results fle to determine the size of the paths
         load(fullfile(ResultsFolder,'Results',F(1).name))
+        Parameters = Results;
         [n m] = size(Parameters{1}.Paths{1});
         % Prespecify the data structures
         PointEstimate = zeros(m,n,ModelInfo.Nvoxels);
         % Create a structure to contain the parameters from all analysis chunks
         AllParameters = cell(ModelInfo.Nvoxels,1);
-        
+        % m: path number
+        % n: probed level in the path
         BCaCIUpper = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
         BCaCILower = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
         
         NvoxelsPerJob = ceil(ModelInfo.Nvoxels/ModelInfo.NJobSplit);
         
-        
+        Indices = [];
         % Cycle over each file
         for k = 1:NFiles
-            % load each results file
+            % get the indices
+              % load each results file
             load(fullfile(ResultsFolder,'Results',F(k).name))
+            Parameters = Results;
+            %ModelInfo.Indices = [ModelInfo.Indices Parameters
             % cycle over the voxels in the results file
             for i = 1:length(Parameters)
                 % what is the overall index of voxels as described by this
@@ -119,8 +132,8 @@ switch ModelType
                 PointEstimate(:,:,Index) = Parameters{i}.Paths{:};
                 % cycle over thresholds
                 for j = 1:length(ModelInfo.Thresholds)
-                    BCaCIUpper(:,:,j,Index) = Parameters{i}.BCaCI.Paths(j,1,1);
-                    BCaCILower(:,:,j,Index) = Parameters{i}.BCaCI.Paths(j,1,2);
+                    BCaCIUpper(:,:,j,Index) = Parameters{i}.BCaCI.Paths(:,:,1,:,j);
+                    BCaCILower(:,:,j,Index) = Parameters{i}.BCaCI.Paths(:,:,2,:,j);
                 end
             end
         end
@@ -131,9 +144,9 @@ switch ModelType
         % Write out the FDR thresholded p maps also
         WriteOutParameterMaps('BCaCI.p',AllParameters,ModelInfo,1)
         WriteOutParameterMaps('BCaCI.Z',AllParameters,ModelInfo)
-        WriteOutSingleMap('BCaCI.PathsZ',AllParameters,ModelInfo)
-        WriteOutSingleMap('BCaCI.PathsP',AllParameters,ModelInfo)
-        WriteOutSingleMap('BCaCI.PathsP',AllParameters,ModelInfo,1)
+        %WriteOutSingleMap('BCaCI.PathsZ',AllParameters,ModelInfo)
+        %WriteOutSingleMap('BCaCI.PathsP',AllParameters,ModelInfo)
+        %WriteOutSingleMap('BCaCI.PathsP',AllParameters,ModelInfo,1)
 end
 
 %% WRITE OUT ALL IMAGES from the regression models
