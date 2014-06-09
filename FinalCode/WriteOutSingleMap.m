@@ -38,12 +38,12 @@ if strcmp(Tag,'BCaCI.PathsP') && FDRFlag
     temp(find(temp) > FDRp) = 0;
 end
 
-FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path_%s.nii',Tag));
-
-I = zeros(ModelInfo.DataHeader.dim);
-I(ModelInfo.Indices) = squeeze(temp);
-% Create the header for this image
-Vo = ModelInfo.DataHeader;
-Vo.fname = FileName;
-spm_write_vol(Vo,I);
-
+for i = 1:size(temp,1)
+    FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path1_level%d_%s.nii',i,Tag));
+    I = zeros(ModelInfo.DataHeader.dim);
+    I(ModelInfo.Indices) = squeeze(temp(i,:,:));
+    % Create the header for this image
+    Vo = ModelInfo.DataHeader;
+    Vo.fname = FileName;
+    spm_write_vol(Vo,I);
+end
