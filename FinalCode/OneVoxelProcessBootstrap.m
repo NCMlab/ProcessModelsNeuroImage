@@ -16,6 +16,7 @@ if Model.Nboot > 0
     % The bootstrap propcedure returns the bootstrap distributions from the
     % field names stated above. These same effects are then run through
     % the Jack-Knife procedure.
+    try 
     BootStrap = BootStrapFunction(Model,Model.Nboot,FieldNames);
 
     % Perform the jack-knife step
@@ -23,7 +24,9 @@ if Model.Nboot > 0
     
     % Calculate the BCaci values for each parameter
     Results.BCaCI = CreateBCaCI(Results,BootStrap,JackKnife,Model.Thresholds);
-  
+    catch me
+        Results = [];
+    end
 end
 
 

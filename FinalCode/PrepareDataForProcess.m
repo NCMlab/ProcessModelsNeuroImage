@@ -26,7 +26,6 @@ OutFolderName = sprintf('%s_%s_%02d-%02d',ModelInfo.Tag,date,c(4),c(5));
 % Create the full output folder name
 OutFolder = fullfile(ModelInfo.BaseDir,OutFolderName);
 
-
 % Actually create the folders if they do not exist already. 
 if ~exist(OutFolder)
     mkdir(OutFolder);

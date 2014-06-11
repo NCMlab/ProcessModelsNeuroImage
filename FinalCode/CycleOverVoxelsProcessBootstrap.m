@@ -47,17 +47,48 @@ Results = cell(Nvoxels,1);
 if Nvoxels > 1
     for i = 1:Nvoxels
         t = tic;
+        
         % Extract the data for this voxel
         OneVoxelModel = ExtractDataFromVoxel(ModelInfo,i);
-        % Perform the analysis for this voxel
-        Results{i} = OneVoxelProcessBootstrap(OneVoxelModel);
+        % Perform the analysis for this voxel.
+        % SOmetines the bootstrapping produces "bad" results where the BCa
+        % CI cannot be calculated. Therefore, a bad voxel is reprocessed
+        % again to see if it wotks better the second time. The while loop
+        % will repeat retying up to 20 times. If it cannot be fixed it is
+        % skipped.
+        
+        ResultsFlag = 1;
+        count = 0;
+        while ResultsFlag
+            Results{i} = OneVoxelProcessBootstrap(OneVoxelModel);
+            count = count + 1;
+            if isempty(Results{i})
+                fprintf(1,'Did not work!!!\n')
+            elseif count == 20
+                ResultsFlag = 0;
+            else
+                ResultsFlag = 0;
+            end
+        end
         fprintf(1,'%d of %d voxels in %0.2f seconds.\n',i,Nvoxels,toc(t));
     end
 else
     % Extract the data for this voxel
     OneVoxelModel = ExtractDataFromVoxel(ModelInfo,1);
     % Perform the analysis for this voxel
-    Results{1} = OneVoxelProcessBootstrap(OneVoxelModel);
+    ResultsFlag = 1;
+    count = 0;
+    while ResultsFlag
+        Results{1} = OneVoxelProcessBootstrap(OneVoxelModel);
+        count = count + 1;
+        if isempty(Results{1})
+            fprintf(1,'Did not work!!!\n')
+        elseif count == 20
+            ResultsFlag = 0;
+        else
+            ResultsFlag = 0;
+        end
+    end 
 end
 
 % Once everything is done, return the results to the calling function
