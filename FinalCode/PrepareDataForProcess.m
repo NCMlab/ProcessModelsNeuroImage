@@ -67,6 +67,7 @@ if ModelInfo.NJobSplit > 1
     
     switch ModelType
         case 'bootstrap'
+            cd(JobOutputFolder)
             % Here the data is split and saved as a series of small files.
             
             % Save the data
@@ -114,11 +115,17 @@ if ModelInfo.NJobSplit > 1
                 jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
                 fid = fopen(jobPath,'w');
                 % Create string of the command to be run with MatLab
-                Command = sprintf('Results = CycleOverVoxelsProcessBootstrap(''%s'')',InDataPath);
+                Command = sprintf('Results = CycleOverVoxelsProcessBootstrap(''%s'');',InDataPath);
                 % Create the cluster submission script
                 CreateClusterJobFile(Command,fid)
                 % Submit the script to the cluster
-                JobName = SubmitClusterJob(jobPath,JobOutputFolder);
+                % JobName = SubmitClusterJob(jobPath,JobOutputFolder);
+                % Replace this with the tools from FieldTrip
+                [JobName, puttime] = qsubfeval('CycleOverVoxelsProcessBootstrap',InDataPath,'memreq',1024^3,...
+                    'timreq',24*60*60,'matlabcmd','/usr/local/MATLAB/R2013b/bin/matlab',...
+                    'jvm','no','queue','short.q');
+                
+                
                 % Add job to wait list
                 WaitList = sprintf('%s,%s',WaitList,JobName);
             end
@@ -165,7 +172,7 @@ if ModelInfo.NJobSplit > 1
             fid = fopen(jobPath,'w');
             
             % Create string of the command to be run with MatLab
-            Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'')',InDataPath,0,0);
+            Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'');',InDataPath,0,0);
             % Create the cluster submission script
             CreateClusterJobFile(Command,fid)
             % Submit the script to the cluster
@@ -181,7 +188,7 @@ if ModelInfo.NJobSplit > 1
                 jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
                 fid = fopen(jobPath,'w');
                 % Create string of the command to be run with MatLab
-                Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'')',InDataPath,i,NPermPerJob);
+                Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'');',InDataPath,i,NPermPerJob);
                 % Create the cluster submission script
                 CreateClusterJobFile(Command,fid)
                 % Submit the script to the cluster

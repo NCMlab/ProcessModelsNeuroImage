@@ -46,11 +46,12 @@ Nvoxels = length(ModelInfo.Indices);
 Results = cell(Nvoxels,1);
 if Nvoxels > 1
     for i = 1:Nvoxels
-       % fprintf(1,'%d of %d voxels\n',i,Nvoxels);
+        t = tic;
         % Extract the data for this voxel
         OneVoxelModel = ExtractDataFromVoxel(ModelInfo,i);
         % Perform the analysis for this voxel
         Results{i} = OneVoxelProcessBootstrap(OneVoxelModel);
+        fprintf(1,'%d of %d voxels in %0.2f seconds.\n',i,Nvoxels,toc(t));
     end
 else
     % Extract the data for this voxel
