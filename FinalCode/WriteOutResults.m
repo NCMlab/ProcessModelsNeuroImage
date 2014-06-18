@@ -6,8 +6,6 @@ end
 
 
 
-
-
 % Check to see if there are Permute results
 if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute*.mat')))
     ModelType = 'permutation';
@@ -36,7 +34,7 @@ switch ModelType
         
         % Check to see if the analyses are completed
         if ~(NFiles == ModelInfo.NJobSplit)
-            errordlg('This analysis is not complete.');
+            errordlg('This analysis is not complete.');           
         end
         
         % load a single results fle to determine the size of the paths
@@ -69,7 +67,7 @@ switch ModelType
         % Load up the point estimate results
         F = dir(fullfile(ResultsFolder,'Results','PointEstimate*.mat'));
         load(fullfile(ResultsFolder,'Results',F(1).name))
-        
+
         % Reshape the path estimates for the next step of writing them out
         % as images
         PointEstimatePath = zeros(m,n,o,length(Parameters));
@@ -80,6 +78,11 @@ switch ModelType
             end
             PointEstimateB(:,:,i) = Parameters{i}.B;
         end
+        
+         % Display point estimate distribution
+%         figure      
+%         hist(PointEstimatePath(2,:,:,:),50)
+%         
         
         AllParameters = Parameters;
         clear Parameters;
@@ -275,9 +278,11 @@ for j = 1:length(ModelInfo.Thresholds)
         ModelInfo.Thresholds(j) = 1/ModelInfo.Nperm;
         c = 1;
     end
+    % cycle over columns
     for i = 1:ModelInfo.Nvar
         if sum(ModelInfo.Direct(:,i))
             % CONSTANT TERMS ARE ROW 1
+            
             % cycle over the rows in the model
             for j = 1:ModelInfo.Nvar
                 if ModelInfo.Direct(j,i)
@@ -302,6 +307,35 @@ for j = 1:length(ModelInfo.Thresholds)
                     Vo.fname = fullfile(ModelInfo.ResultsPath,FileName);
                     spm_write_vol(Vo,I);
                 end
+            end
+            % Interaction terms
+            if sum(ModelInfo.Inter(:,i))
+                InterVar = find(ModelInfo.Inter(:,i));
+                FileName = sprintf('Model%d_DEP%s_IND',i,ModelInfo.Names{i});
+                for j = 1:length(InterVar)
+                    FileName = sprintf('%s%sX',FileName,ModelInfo.Names{InterVar(j)});
+                end
+                FileName = sprintf('%s_%s.nii',FileName(1:end-1),Tag);
+
+                % sort the max and min permutation results
+                sMax = sort(squeeze(MaxB(ModelInfo.Nvar+2,i,:)),'descend');
+                sMin = sort(squeeze(MinB(ModelInfo.Nvar+2,i,:)));
+                % find the permutation value based on the sorted values
+                Mx = sMax(c);
+                Mn = sMin(c);
+                
+                temp = squeeze(PointEstimate(ModelInfo.Nvar+2,i,:));
+                temp(find((PointEstimate(ModelInfo.Nvar+2,i,:) < Mx)&(PointEstimate(ModelInfo.Nvar+2,i,:) >0))) = 0;
+                temp(find((PointEstimate(ModelInfo.Nvar+2,i,:) > Mn)&(PointEstimate(ModelInfo.Nvar+2,i,:) <0))) = 0;
+                
+                
+                
+                I = zeros(ModelInfo.DataHeader.dim);
+                I(ModelInfo.Indices) = squeeze(temp);
+                % Create the header for this image
+                Vo = ModelInfo.DataHeader;
+                Vo.fname = fullfile(ModelInfo.ResultsPath,FileName);
+                spm_write_vol(Vo,I);
             end
         end
     end

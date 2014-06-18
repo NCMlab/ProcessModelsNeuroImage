@@ -1,4 +1,4 @@
-function JobName = SubmitClusterJob(jobPath,JobOutputFolder,WaitList)
+function [JobName, ClusterCommand] = SubmitClusterJob(jobPath,JobOutputFolder,WaitList)
 % This is the function that makes the qsub call for submitting a job to the
 % cluster.
 % Return the job name so it can be used with a wait command for executing
@@ -14,20 +14,20 @@ function JobName = SubmitClusterJob(jobPath,JobOutputFolder,WaitList)
 if nargin == 2
     [PathName, JobName] = fileparts(jobPath);
     % Submit the job and explictly name the job.
-    Str = sprintf('! qsub -p -50 -e %s -o %s -N %s %s',...
+    ClusterCommand = sprintf('! qsub -q long.q -l h_vmem=8G,mem_free=6G,h_stack=256M -e %s -o %s -N %s %s',...
         JobOutputFolder,JobOutputFolder,JobName,jobPath);
    % Str = sprintf('! qsub -e %s -o %s -N %s %s',...
    %     JobOutputFolder,JobOutputFolder,JobName,jobPath);
     
     % Execute the job submission command
-    unix(Str);
+    unix(ClusterCommand);
 elseif nargin == 3
     % A wait list was entered
-    Str = sprintf('! qsub -hold_jid %s -p -10 -e %s -o %s %s',...
+    ClusterCommand = sprintf('! qsub -hold_jid %s -p -10 -e %s -o %s %s',...
         WaitList,JobOutputFolder,JobOutputFolder,jobPath);
    % Str = sprintf('! qsub -hold_jid %s -e %s -o %s %s',...
    %     WaitList,JobOutputFolder,JobOutputFolder,jobPath);
 
-    unix(Str);
+    unix(ClusterCommand);
 end
 

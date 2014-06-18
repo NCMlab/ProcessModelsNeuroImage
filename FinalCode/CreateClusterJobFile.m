@@ -18,13 +18,15 @@ fprintf(fid,'#PBS -m be\n');
 fprintf(fid,'#PBS -j oe\n');
 %fprintf(fid,'cd %s\n',BaseDir);
 % Start matlab using the nodisplay option
-fprintf(fid,'/usr/local/MATLAB/R2013b/bin/matlab -nodisplay << EOF\n');
+fprintf(fid,'/usr/local/MATLAB/R2013b/bin/matlab -nodisplay -singleCompThread -nodisplay -nojvm<< EOF\n');
 % The pathe to the spm software
 fprintf(fid,'%s\n','addpath /usr/local/SPM/v8');
 % The path to the Process toolbox
 fprintf(fid,'%s\n','addpath /home/js2746/DropBox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FinalCode');
 % Limit the number of cores/threads used to one
 % maxNumCompThreads(1);
+% Write out what host this is being run on
+fprintf(fid,'unix(''env | grep "HOSTNAME"'');\n');
 fprintf(fid,'%s\n',Command);
 fprintf(fid,'exit\n');
 fprintf(fid,'EOF\n');

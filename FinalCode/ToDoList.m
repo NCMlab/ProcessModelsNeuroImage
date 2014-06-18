@@ -35,3 +35,14 @@
 % Using 8 threads a process took 224 seconds on the head node. I want to
 % see if using 1 thread takes 1/8 of the time or not. 
 % Using one thread took 240 seconds!
+
+% I am having lots of problems committing jobs to the cluster due to memory
+% management. Jobs get almost done and then are killed. I am guessing that
+% this is due to the job exceeding the memory limits. It would be useful to
+% estimate the required memory of a job and use that value in the
+% submission of a qsub. The problem seems to be that the results structure
+% increases in size with every voxel. Therefore, by the end of a process
+% this structure can get TOO big. So if a single voxel is analyzed for the
+% selected model then the expected memory requirements would be estimated
+% from the number of voxels assigned to a job. Then recommendations to the
+% user can be provided based on these estimates.
