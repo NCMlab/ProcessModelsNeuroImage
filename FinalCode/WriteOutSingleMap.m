@@ -30,12 +30,19 @@ if strcmp(Tag,'BCaCI.PathsP') && FDRFlag
     kk = 1;
     alpha = ModelInfo.Thresholds(kk);
     % Cycle over each parameter
-    I = sort(squeeze(temp));
-    [FDRp, FDRpN] = FDR(I,alpha);
-    if isempty(FDRp)
-        FDRp = 1/ModelInfo.Nvoxels*alpha;
+    [m n p] = size(temp);
+    for i = 1:m
+        for j = 1:n
+            CurrentTemp = squeeze(temp(i,j,:));
+            I = sort(CurrentTemp);
+            [FDRp, FDRpN] = FDR(I,alpha);
+            if isempty(FDRp)
+                FDRp = 1/ModelInfo.Nvoxels*alpha;
+            end
+            CurrentTemp(find(CurrentTemp > FDRp)) = 0;
+            temp(i,j,:) =  CurrentTemp;
+        end
     end
-    temp(find(temp) > FDRp) = 0;
 end
 
 for i = 1:size(temp,1)

@@ -29,24 +29,28 @@ if strcmp(Tag,'BCaCI.p') && FDRFlag
     % Only use the first threshold
     kk = 1;
     alpha = ModelInfo.Thresholds(kk);
+    % cycle over each entry in the data and apply FDR to each
+    [m n p] = size(temp);
     % Cycle over each parameter
-    for i = 1:ModelInfo.Nvar
-        if sum(ModelInfo.Direct(:,i))
-            % CONSTANT TERMS ARE ROW 1
-            % cycle over the rows in the model
-            for j = 1:ModelInfo.Nvar
-                if ModelInfo.Direct(j,i)
-                    I = sort(squeeze(temp(j+1,i,:)));
-                    [FDRp, FDRpN] = FDR(I,alpha);
-                    if isempty(FDRp)
-                        FDRp = 1/ModelInfo.Nvoxels*alpha;
-                    end
-                    temp(j+1,i,find(temp(j+1,i,:) > FDRp)) = 0;
+    for i = 1:n%ModelInfo.Nvar
+        %if sum(ModelInfo.Direct(:,i))
+        % CONSTANT TERMS ARE ROW 1
+        % cycle over the rows in the model
+        for j = 1:m%ModelInfo.Nvar
+            %if ModelInfo.Direct(j,i)
+            
+            I = sort(squeeze(temp(j,i,:)));
+            if sum(abs(I)) > 0
+                [FDRp, FDRpN] = FDR(I,alpha);
+                if isempty(FDRp)
+                    FDRp = 1/ModelInfo.Nvoxels*alpha;
                 end
+                temp(j,i,find(temp(j,i,:) > FDRp)) = 0;
             end
         end
     end
 end
+
 
 % cycle over the columns in the model
 for i = 1:ModelInfo.Nvar 

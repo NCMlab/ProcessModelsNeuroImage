@@ -4,7 +4,7 @@ if nargin == 0
     ResultsFolder = spm_select(1,'dir','Select analysis directory');
 end
 
-
+fprintf(1,'%s\n',ResultsFolder);
 
 % Check to see if there are Permute results
 if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute*.mat')))
