@@ -46,3 +46,6 @@
 % selected model then the expected memory requirements would be estimated
 % from the number of voxels assigned to a job. Then recommendations to the
 % user can be provided based on these estimates.
+
+
+% Add robust regression option

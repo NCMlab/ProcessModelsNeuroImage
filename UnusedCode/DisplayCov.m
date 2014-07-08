@@ -96,7 +96,7 @@ else
     k = ExtentThr;
 end
     
-A     = spm_clusters26(XYZ);
+A     = spm_clusters(XYZ);
 Q     = [];
 % This selects cluster sizes. It places a threshold on the cluster size to
 % keep. Any clusters of a size lower than k are excluded.

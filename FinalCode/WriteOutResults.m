@@ -104,7 +104,9 @@ switch ModelType
         
         % load a single results fle to determine the size of the paths
         load(fullfile(ResultsFolder,'Results',F(1).name))
-        Parameters = Results;
+        if exist('Results','var')
+            Parameters = Results;
+        end
         [n m] = size(Parameters{1}.Paths{1});
         % Prespecify the data structures
         PointEstimate = zeros(m,n,ModelInfo.Nvoxels);
@@ -122,8 +124,11 @@ switch ModelType
         for k = 1:NFiles
             % get the indices
               % load each results file
-            load(fullfile(ResultsFolder,'Results',F(k).name))
-            Parameters = Results;
+              load(fullfile(ResultsFolder,'Results',F(k).name))
+              if exist('Results','var')
+                  Parameters = Results;
+              end
+
             %ModelInfo.Indices = [ModelInfo.Indices Parameters
             % cycle over the voxels in the results file
             for i = 1:length(Parameters)

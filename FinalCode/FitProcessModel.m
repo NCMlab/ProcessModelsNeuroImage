@@ -116,7 +116,7 @@ for j = 1:NumberOfPaths
                 %  probeValues = probeValues(:,1)*probeValues(:,2)';
             end
             
-            InteractionComponent = InteractionComponent + Results.beta(M+1+1,Col).*probeMod;
+            InteractionComponent = InteractionComponent + Results.beta(M+1+1,Col).*probeValues;
             ResultPath = ResultPath.*InteractionComponent;
             
         end
