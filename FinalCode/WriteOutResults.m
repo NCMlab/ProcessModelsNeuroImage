@@ -137,7 +137,11 @@ switch ModelType
                 
                 Index = (k-1)*NvoxelsPerJob + i;
                 AllParameters{Index} = Parameters{i};
-                PointEstimate(:,:,Index) = Parameters{i}.Paths{:};
+                for ii = 1:m
+                    for jj = 1:n
+                        PointEstimate(ii,jj,Index) = Parameters{i}.Paths{ii,jj};
+                    end
+                end
                 % cycle over thresholds
                 for j = 1:length(ModelInfo.Thresholds)
                     BCaCIUpper(:,:,j,Index) = squeeze(Parameters{i}.BCaCI.Paths(:,:,1,:,j));

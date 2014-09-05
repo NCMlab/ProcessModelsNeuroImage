@@ -1,4 +1,6 @@
 function RunCompiledBootStrap(command_line_arg)
+% /Applications/MATLAB_R2012b.app/bin/mcc -R -nodisplay -R -nojvm -R -singleCompThread -m -v -w enable -d ../CompiledCode RunCompiledBootStrap.m 
+
 message = ['Command line string: ',command_line_arg];
 disp(message)
 % Parse the comand line for the argument

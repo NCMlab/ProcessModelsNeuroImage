@@ -90,8 +90,8 @@ for i = 1:NPaths
         else
             fprintf(fid,'%10s%10s%10s\n','EffSize','LLBCa','UUBCa');
             fprintf(fid,'%10.4f%10.4f%10.3f\n',Results.Paths{i}(1),...
-                    Results.BCaCI.Paths(1,i,1,1,k),...
-                    Results.BCaCI.Paths(1,i,2,1,k));
+                    Results.BCaCI.Paths(1,1,1,i,k),...
+                    Results.BCaCI.Paths(1,1,2,i,k));
         end
     end
 end
