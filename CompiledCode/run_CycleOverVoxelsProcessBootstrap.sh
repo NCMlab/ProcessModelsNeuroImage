@@ -28,7 +28,7 @@ else
       args="${args} \"${token}\"" 
       shift
   done
-  eval "\"${exe_dir}/compileVoxelWiseProcessPermute\"" $args
+  eval "\"${exe_dir}/CycleOverVoxelsProcessBootstrap\"" $args
 fi
 exit
 

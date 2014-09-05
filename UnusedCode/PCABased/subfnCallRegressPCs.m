@@ -1,4 +1,10 @@
-function [beta, FVAL, EXITFLAG, fit] = subfnCallRegressPCs(data)
+function [beta, FVAL, EXITFLAG, fit] = subfnCallRegressPCs(data,coef)
+if nargin == 1
+    coef = [];
+    coefFlag = 0;
+else
+    coefFlag = 1;
+end
 % This function makes the decision, based on the model, on how to estimate
 % the parameters. The simple models can use linear regression but the
 % models with interactions need to use an iterative process. 
@@ -30,7 +36,11 @@ switch data.ModelNum
         NSSF = size(data.M,2);
         NMod = size(data.V,2);
         NCov = size(data.COV,2);
-        beta0 = zeros(1+NSSF+NMod+1+1+NCov,1);
+        if coefFlag == 0
+            beta0 = zeros(1+NSSF+NMod+1+1+NCov,1);
+        else
+            beta0 = coef;
+        end
         %beta0 = 1:1+NSSF+NMod+1+1+NCov
         [beta ,FVAL,EXITFLAG,OUTPUT] = fminsearch('subfnRegressPCs',beta0,'',data);
         

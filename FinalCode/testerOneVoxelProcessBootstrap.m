@@ -1,4 +1,7 @@
-function [Results, BootStrap] = OneVoxelProcessBootstrap(Model)
+function [Results, BootStrap] = testerOneVoxelProcessBootstrap(Model,lambda)
+if nargin == 1
+    lambda = 0.6;
+end
 % reset the random number generator. This is EXTREMEMLY important when
 % deploying these analyses to a cluster. Without this resetting then each
 % node of the cluster CAN choose the exact same random numbers.
@@ -20,12 +23,12 @@ if Model.Nboot > 0
        % Perform the jack-knife step
         JackKnife = JackKnifeFunction(Model,Results,FieldNames);    
         BootStrap = BootStrapFunction(Model,Model.Nboot,FieldNames);
-%        BoLBBcACI = BagOfBootStrapFunction(Model,100,FieldNames,JackKnife);
+        BoLBBcACI = BagOfBootStrapFunction(Model,100,FieldNames,JackKnife,lambda);
         % Calculate the BCaci values for each parameter
         Results.BCaCI = CreateBCaCI(Results,BootStrap,JackKnife,Model.Thresholds);
-%        Results.BoLBBCaCI = BoLBBcACI;
+        Results.BoLBBCaCI = BoLBBcACI;
     catch me
-%        error('error!');
+        error('error!');
         Results = [];
     end
 end

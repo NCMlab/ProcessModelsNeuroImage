@@ -34,7 +34,7 @@ switch ModelType
         
         % Check to see if the analyses are completed
         if ~(NFiles == ModelInfo.NJobSplit)
-            errordlg('This analysis is not complete.');           
+            error('This analysis is not complete.');           
         end
         
         % load a single results fle to determine the size of the paths
@@ -46,7 +46,7 @@ switch ModelType
         [m n o p] = size(MaxPaths);
         % Check to make sure all the files are there
         if ~(ModelInfo.Nperm == p*NFiles)
-            errordlg('There are not enough results files based onthe specified parameters.');
+            error('There are not enough results files based on the specified parameters.');
         end
         % Create the structures to hold the permutation results for the
         % path values and the standardized parameter estimates
@@ -99,7 +99,7 @@ switch ModelType
         
         % Check to see if the analyses are completed
         if ~(NFiles == ModelInfo.NJobSplit)
-            errordlg('This analysis is not complete.');
+            error('This analysis is not complete.');
         end
         
         % load a single results fle to determine the size of the paths
@@ -107,7 +107,7 @@ switch ModelType
         if exist('Results','var')
             Parameters = Results;
         end
-        [n m] = size(Parameters{1}.Paths{1});
+        [m n] = size(Parameters{1}.Paths);
         % Prespecify the data structures
         PointEstimate = zeros(m,n,ModelInfo.Nvoxels);
         % Create a structure to contain the parameters from all analysis chunks
@@ -140,8 +140,8 @@ switch ModelType
                 PointEstimate(:,:,Index) = Parameters{i}.Paths{:};
                 % cycle over thresholds
                 for j = 1:length(ModelInfo.Thresholds)
-                    BCaCIUpper(:,:,j,Index) = Parameters{i}.BCaCI.Paths(:,:,1,:,j);
-                    BCaCILower(:,:,j,Index) = Parameters{i}.BCaCI.Paths(:,:,2,:,j);
+                    BCaCIUpper(:,:,j,Index) = squeeze(Parameters{i}.BCaCI.Paths(:,:,1,:,j));
+                    BCaCILower(:,:,j,Index) = squeeze(Parameters{i}.BCaCI.Paths(:,:,2,:,j));
                 end
             end
         end

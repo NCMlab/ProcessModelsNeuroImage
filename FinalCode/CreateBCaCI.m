@@ -44,13 +44,14 @@ for i = 1:length(FieldNames)
                 % find the confidence intervals for these adjusted
                 % alpha limits
                 CurrentBCaCI(:,:,:,j,t) = CalculateBCaCI(BootStrapData,Alpha1,Alpha2,PointEstimate);
+                BCaCI.PathsZ(j,:) = Z;
+                BCaCI.PathsP(j,:) = p;
+
             end
         end
         % put the confidence interval data back into the structure
         % TO DO: somehow UNFLATTEN the data
         BCaCI = setfield(BCaCI,FieldNames{i},CurrentBCaCI);
-        BCaCI.PathsZ = Z;
-        BCaCI.PathsP = p;
     else
         CurrentBCaCI = zeros(size(getfield(BCaCI,FieldNames{i})));
         for t = 1:Nthresh

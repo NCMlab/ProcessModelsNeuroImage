@@ -30,7 +30,7 @@ switch ModelNum
         % coefficient for the x effect
         cP = coef(1+NMed+1);        
         % coefficient(s) for the moderator
-        v = coef(1+NMed+1+1:(NMod-1+NMed+1+2))';
+        v = coef(1+NMed+1+1:(NMod-1+NMed+1+2));
         % coefficients for the interaction term
         w = coef(1+NMed+1+NMod+1);
         % coefficients for the covariates

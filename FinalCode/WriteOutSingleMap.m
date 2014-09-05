@@ -44,13 +44,14 @@ if strcmp(Tag,'BCaCI.PathsP') && FDRFlag
         end
     end
 end
-
-for i = 1:size(temp,1)
-    FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path1_level%d_%s.nii',i,Tag));
-    I = zeros(ModelInfo.DataHeader.dim);
-    I(ModelInfo.Indices) = squeeze(temp(i,:,:));
-    % Create the header for this image
-    Vo = ModelInfo.DataHeader;
-    Vo.fname = FileName;
-    spm_write_vol(Vo,I);
+for j = 1:size(temp,2)
+    for i = 1:size(temp,1)
+        FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%s.nii',j,i,Tag));
+        I = zeros(ModelInfo.DataHeader.dim);
+        I(ModelInfo.Indices) = squeeze(temp(i,j,:));
+        % Create the header for this image
+        Vo = ModelInfo.DataHeader;
+        Vo.fname = FileName;
+        spm_write_vol(Vo,I);
+    end
 end

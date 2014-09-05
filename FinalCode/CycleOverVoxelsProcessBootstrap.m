@@ -32,7 +32,7 @@ if ~isstruct(ModelInfo)
         F = fieldnames(M);
         ModelInfo = getfield(M,F{1});
     else
-        errordlg('Wrong data type passed.')
+        error('Wrong data type passed.')
     end
 end
    

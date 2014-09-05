@@ -10,7 +10,7 @@ end
 load(fullfile(InFolder,'data','ModelInfo'))
 JobOutputFolder = fullfile(InFolder,'JobOutput');
 
-ResultFiles = dir(fullfile(InFolder,'Results','*.mat'));
+ResultFiles = dir(fullfile(InFolder,'Results','Permute*.mat'));
 
 NotFinishedJobs = ones(ModelInfo.NJobSplit,1);
 
@@ -21,7 +21,8 @@ if ModelInfo.NJobSplit ~= NFiles
         
         Funder = findstr(ResultFiles(i).name,'_');
         Fdot = findstr(ResultFiles(i).name,'.');
-        FileCount = str2double(ResultFiles(i).name(Funder+1:Fdot-1));
+        FileCount = str2double(ResultFiles(i).name(Funder(1)+6:Funder(2)-1));
+        
         NotFinishedJobs(FileCount) = 0;
     end
 end
