@@ -17,18 +17,23 @@ else
   LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;
   LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/bin/glnxa64 ;
   LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRROOT}/sys/os/glnxa64;
+	MCRJRE=${MCRROOT}/sys/java/jre/glnxa64/jre/lib/amd64 ;
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRJRE}/native_threads ; 
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRJRE}/server ;
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRJRE}/client ;
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MCRJRE} ;  
   XAPPLRESDIR=${MCRROOT}/X11/app-defaults ;
-  export XAPPLRESDIR;
   export LD_LIBRARY_PATH;
+  export XAPPLRESDIR;
   echo LD_LIBRARY_PATH is ${LD_LIBRARY_PATH};
   shift 1
   args=
   while [ $# -gt 0 ]; do
       token=$1
-      args="${args} \"${token}\"" 
+      args="${args} ${token}" 
       shift
   done
-  eval "\"${exe_dir}/RunCompiledBootStrap\"" $args
+  "${exe_dir}"/RunCompiledBootStrap $args
 fi
 exit
 

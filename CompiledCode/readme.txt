@@ -3,7 +3,7 @@ MATLAB Compiler
 1. Prerequisites for Deployment 
 
 . Verify the MATLAB Compiler Runtime (MCR) is installed and ensure you    
-  have installed version 8.2 (R2013b).   
+  have installed version 8.0 (R2012b).   
 
 . If the MCR is not installed, do the following:
   (1) enter
@@ -15,7 +15,7 @@ MATLAB Compiler
 
   (2) run the MCR Installer.
 
-Or download the Linux 64-bit version of the MCR for R2013b 
+Or download the Linux 64-bit version of the MCR for R2012b 
 from the MathWorks Web site by navigating to
 
    http://www.mathworks.com/products/compiler/mcr/index.html
@@ -38,14 +38,14 @@ Files to package for Standalone
        ./run_RunCompiledBootStrap.sh <mcr_directory> <argument_list>
        
     at Linux or Mac command prompt. <mcr_directory> is the directory 
-    where version 8.2 of MCR is installed or the directory where 
+    where version 8.0 of MCR is installed or the directory where 
     MATLAB is installed on the machine. <argument_list> is all the 
     arguments you want to pass to your application. For example, 
 
-    If you have version 8.2 of the MCR installed in 
-    /mathworks/home/application/v82, run the shell script as:
+    If you have version 8.0 of the MCR installed in 
+    /mathworks/home/application/v80, run the shell script as:
     
-       ./run_RunCompiledBootStrap.sh /mathworks/home/application/v82
+       ./run_RunCompiledBootStrap.sh /mathworks/home/application/v80
        
     If you have MATLAB installed in /mathworks/devel/application/matlab, 
     run the shell script as:
@@ -77,10 +77,13 @@ A. Linux x86-64 systems:
 
             setenv LD_LIBRARY_PATH
                 $LD_LIBRARY_PATH:
-                <mcr_root>/v82/runtime/glnxa64:
-                <mcr_root>/v82/bin/glnxa64:
-                <mcr_root>/v82/sys/os/glnxa64
-            setenv XAPPLRESDIR <mcr_root>/v82/X11/app-defaults
+                <mcr_root>/v80/runtime/glnxa64:
+                <mcr_root>/v80/bin/glnxa64:
+                <mcr_root>/v80/sys/os/glnxa64:
+                <mcr_root>/v80/sys/java/jre/glnxa64/jre/lib/amd64/native_threads:
+                <mcr_root>/v80/sys/java/jre/glnxa64/jre/lib/amd64/server:
+                <mcr_root>/v80/sys/java/jre/glnxa64/jre/lib/amd64 
+            setenv XAPPLRESDIR <mcr_root>/v80/X11/app-defaults
 
    For more detail information about setting MCR paths, see Distribution to End Users in 
    the MATLAB Compiler documentation in the MathWorks Documentation Center.
