@@ -40,7 +40,7 @@ def main():
                 fid.write('#!/bin/bash\n')
                 fid.write('#PBS -S /bin/bash\n\n')
                 fid.write('#Choose MCR directory\n')
-                fid.write('MCR=/usr/local/matlab-mcr/v82\n\n')
+                fid.write('MCR=/usr/local/matlab-mcr/v80\n\n')
                 fid.write('echo "Running on host: `hostname`"\n')
                 fid.write('cd $PBS_O_WORKDIR\n')
                 fid.write('echo "Current working directory is `pwd`"\n\n')
@@ -49,7 +49,8 @@ def main():
                 fid.write('echo "Job finished at: `date`"\n\n')
                 fid.close()
                 # For this to work the input to this compiled program has to be a parameter file
-                Qfid.write('qsub -e %s -o %s -l walltime=72:00:00:00,mem=3gb %s\n'%(JobOutDir,JobOutDir,JobFileName))                
+                Qfid.write('qsub -e %s -o %s -l walltime=72:00:00:00,mem=3gb %s\n'%(JobOutDir,JobOutDir,JobFileName))
+                
                 #Str='qsub -l walltime=72:00:00:00,mem=6gb %s'%JobFileName 
                 #os.system(Str)
             Qfid.close()
