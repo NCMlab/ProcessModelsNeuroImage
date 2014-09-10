@@ -36,9 +36,9 @@ def main():
                 # remove the .mat from the end of the filename
                 
                 fid=open(ParamFileName,'write')
-                fid.write('InputData=%s'%DataFile[:-4])
-                fid.write('Count=%s'%i)
-                fid.write('NPermPerJob=%s',%NPermPerJob)
+                fid.write('InputData=%s'%(DataFile[:-4]))
+                fid.write('Count=%s'%(i))
+                fid.write('NPermPerJob=%s',%(NPermPerJob))
                 
                 fid.close()
                 # Create the job files
