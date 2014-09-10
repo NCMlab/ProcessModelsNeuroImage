@@ -46,7 +46,7 @@ if strcmp(Tag,'BCaCI.PathsP') && FDRFlag
 end
 for j = 1:size(temp,2)
     for i = 1:size(temp,1)
-        FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%s.nii',j,i,Tag));
+        FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%s.nii',i,j,Tag));
         I = zeros(ModelInfo.DataHeader.dim);
         I(ModelInfo.Indices) = squeeze(temp(i,j,:));
         % Create the header for this image

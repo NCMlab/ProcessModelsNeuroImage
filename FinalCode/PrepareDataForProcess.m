@@ -240,7 +240,7 @@ else
             % Save the results
             ResultsPath = fullfile(OutFolder,'Results');
             mkdir(ResultsPath)
-            Str = sprintf('save %s %s',fullfile(ResultsPath,sprintf('Bootstrap_count%04d_%dSamp',1,ModelInfo.Nboot)),'Parameters');
+            Str = sprintf('save %s %s',fullfile(ResultsPath,sprintf('BootStrap_count%04d_%dSamp',1,ModelInfo.Nboot)),'Parameters');
             eval(Str)
             
         case 'permutation'

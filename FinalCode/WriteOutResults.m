@@ -138,9 +138,9 @@ switch ModelType
                 Index = (k-1)*NvoxelsPerJob + i;
                 AllParameters{Index} = Parameters{i};
                 for ii = 1:m
-                    for jj = 1:n
-                        PointEstimate(ii,jj,Index) = Parameters{i}.Paths{ii,jj};
-                    end
+                    
+                        PointEstimate(ii,:,Index) = Parameters{i}.Paths{ii};
+                    
                 end
                 % cycle over thresholds
                 for j = 1:length(ModelInfo.Thresholds)
