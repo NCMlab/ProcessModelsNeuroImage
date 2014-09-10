@@ -28,7 +28,7 @@ def main():
             Qfid=open(QSubFile,'write')
             # Number of permutes per job
             NPermPerJob = np.ceil(float(NPermute)/float(NJobSplit))
-            for i in range(0,NJobSplit,1):
+            for i in range(0,int(NJobSplit),1):
 
                 JobFileName = os.path.join(JobDir,('job_%s.sh'%(i)))
                 ParamFileName = os.path.join(JobDir,('param_%s.in'%(i)))
