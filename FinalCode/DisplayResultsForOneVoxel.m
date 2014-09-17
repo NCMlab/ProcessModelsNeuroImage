@@ -22,6 +22,7 @@ VOXind = inv(V.mat)*[VOXmm 1]';
 
 % Find the index
 [index] = sub2ind(V.dim,VOXind(1),VOXind(2),VOXind(3));
+fprintf(1,'Using index: %d\n',index); 
 
 % Find the data for this index
 % The data format will differ based on the type of analysis. 
@@ -41,26 +42,42 @@ if isempty(DataIndex)
     DataIndex = 1;
 end
 
+% Is the data broken into chunks or not
+if ModelInfo.NJobSplit > 1
+    DataSplitFlag = 1;
+else
+    DataSplitFlag = 0;
+end
 switch ModelType
     case 'bootstrap'
-        NVoxPerChunk = ceil(NVox/ModelInfo.NJobSplit);
-        DataFileIndex = ceil(DataIndex/NVoxPerChunk);
-        
-        % Load the data file
-        load(fullfile(SelectedPath,'data',[sprintf('data_%04d',DataFileIndex)]))
-        
-        % Load the results file
-        load(fullfile(SelectedPath,'Results',[sprintf('BootStrapResults_%04d',DataFileIndex)]))
-        
-        
-        % Find the index in the data file
-        dataChunkIndex = find(subModelInfo.Indices == DataIndex);
-        data1 = subModelInfo;
-        
-        
-        Parameters1 = Results{dataChunkIndex};
-        
-        SinglePointModel = ExtractDataFromVoxel(subModelInfo,dataChunkIndex);
+        if DataSplitFlag
+            NVoxPerChunk = ceil(NVox/ModelInfo.NJobSplit);
+            DataFileIndex = ceil(DataIndex/NVoxPerChunk);
+            
+            % Load the data file
+            load(fullfile(SelectedPath,'data',[sprintf('data_%04d',DataFileIndex)]))
+            
+            % Load the results file
+            load(fullfile(SelectedPath,'Results',[sprintf('BootStrapResults_%04d',DataFileIndex)]))
+            
+            
+            % Find the index in the data file
+            dataChunkIndex = find(subModelInfo.Indices == DataIndex);
+            data1 = subModelInfo;
+            
+            
+            Parameters1 = Results{dataChunkIndex};
+            
+            SinglePointModel = ExtractDataFromVoxel(subModelInfo,dataChunkIndex);
+        else
+            DataFileIndex = 1;
+            
+            % Load the results file
+            F = dir(fullfile(SelectedPath,'Results',sprintf('BootStrap*')));
+            load(fullfile(SelectedPath,'Results',F.name));
+            Parameters1 = Parameters{DataIndex};
+            SinglePointModel = ExtractDataFromVoxel(ModelInfo,DataIndex);
+        end
 end
 % Reprocess the data location
 %Parameters = subfnVoxelWiseProcessBatch(data1);

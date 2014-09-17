@@ -34,11 +34,11 @@ def main():
                 ParamFileName = os.path.join(JobDir,('param_%s.in'%(i)))
                 # create the parameter files
                 # remove the .mat from the end of the filename
-                
+                print '%s\n'%DataFile[0][:-4]
                 fid=open(ParamFileName,'write')
-                fid.write('InputData=%s'%(DataFile[:-4]))
-                fid.write('Count=%s'%(i))
-                fid.write('NPermPerJob=%s'%(NPermPerJob))
+                fid.write('InputData=%s\n'%(DataFile[:-4]))
+                fid.write('Count=%s\n'%(i))
+                fid.write('NPermPerJob=%s\n'%(NPermPerJob))
                 
                 fid.close()
                 # Create the job files

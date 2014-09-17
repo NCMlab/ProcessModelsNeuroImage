@@ -70,7 +70,7 @@ if Nvoxels > 1
                 ResultsFlag = 0;
             end
         end
-        fprintf(1,'%d of %d voxels in %0.2f seconds.\n',i,Nvoxels,toc(t));
+ %       fprintf(1,'%d of %d voxels in %0.2f seconds.\n',i,Nvoxels,toc(t));
     end
 else
     % Extract the data for this voxel
@@ -99,6 +99,3 @@ if ClusterJobFlag
     Str = sprintf('save %s Results',ResultsFile);
     eval(Str)
 end
-
-
-whos
