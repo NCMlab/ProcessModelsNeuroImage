@@ -6,26 +6,26 @@ elseif nargin == 2
     PrintFlag = 1;
 end
 cd(SelectedPath)
-if exist('AnalysisParameters.mat')
-    load AnalysisParameters
+if exist('ModelInfo.mat')
+    load ModelInfo
 else
     errordlg('this folder does not have the required AnalysticParameters.mat file');
 end
 % Get the header image from one image
-F = dir(fullfile(SelectedPath,'*.nii'));
+%F = dir(fullfile(SelectedPath,'*.nii'));
 
 
 %V = AnalysisParameters.V;
-V = spm_vol(F(1).name);
+%V = spm_vol(F(1).name);
 %VOXmm = [30 56 8];
 % Convert to locations
-VOXind = inv(V.mat)*[VOXmm 1]';
+VOXind = inv(ModelInfo.DataHeader.mat)*[VOXmm 1]';
 % Find the index
-[index] = sub2ind(V.dim,VOXind(1),VOXind(2),VOXind(3));
+[index] = sub2ind(ModelInfo.DataHeader.dim,VOXind(1),VOXind(2),VOXind(3));
 % Find the data for this index
-NVox = AnalysisParameters.Nvoxels;
-NVoxPerChunk = ceil(NVox/AnalysisParameters.NJobSplit);
-DataIndex = find(AnalysisParameters.Indices == index);
+NVox = ModelInfo.Nvoxels;
+NVoxPerChunk = ceil(NVox/ModelInfo.NJobSplit);
+DataIndex = find(ModelInfo.Indices == index);
 if isempty(DataIndex)
     DataIndex = 1;
 end

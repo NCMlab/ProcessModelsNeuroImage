@@ -107,7 +107,7 @@ switch ModelType
         if exist('Results','var')
             Parameters = Results;
         end
-        [m n] = size(Parameters{1}.Paths);
+        [m n] = size(Parameters{1}.Paths{1});
         % Prespecify the data structures
         PointEstimate = zeros(m,n,ModelInfo.Nvoxels);
         % Create a structure to contain the parameters from all analysis chunks
