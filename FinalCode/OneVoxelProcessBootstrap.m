@@ -2,8 +2,8 @@ function [Results, BootStrap] = OneVoxelProcessBootstrap(Model)
 % reset the random number generator. This is EXTREMEMLY important when
 % deploying these analyses to a cluster. Without this resetting then each
 % node of the cluster CAN choose the exact same random numbers.
-rng('shuffle','multFibonacci');
-
+%rng('shuffle','multFibonacci');
+rand('seed','reset');
 
 % Fit the model
 % The indirect paths (the Paths cell) is set to be an array of cells. This

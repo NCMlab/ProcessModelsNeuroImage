@@ -3,11 +3,12 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 % avoids each cluster node starting with the same seed and producing the
 % same results. An alternative futur direction is a precalculation of the permutations for
 % storage in the ModelInfo structure. 
-rng('shuffle','multFibonacci');
+%rng('shuffle','multFibonacci');
+rand('seed','reset');
 
 fprintf(1,'Started at: %s\n',datestr(now));
 tic
-
+fprintf(1,'%s\n',InDataPath);
 % load data
 if nargin == 3
     % Load the data and other variables
