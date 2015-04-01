@@ -44,9 +44,10 @@ end
 Nvoxels = length(ModelInfo.Indices);
 % Prepare the output structure
 Results = cell(Nvoxels,1);
+
 if Nvoxels > 1
-    for i = 1:Nvoxels
-        t = tic;
+   for i = 1:Nvoxels
+        %t = tic;
         
         % Extract the data for this voxel
         OneVoxelModel = ExtractDataFromVoxel(ModelInfo,i);
@@ -70,7 +71,9 @@ if Nvoxels > 1
                 ResultsFlag = 0;
             end
         end
- %       fprintf(1,'%d of %d voxels in %0.2f seconds.\n',i,Nvoxels,toc(t));
+        count = count + 1;
+        fprintf(1,'Finished %d out of %d.\n',i,Nvoxels);
+        %fprintf(1,'%d of %d voxels in %0.2f seconds.\n',i,Nvoxels,toc(t));
     end
 else
     % Extract the data for this voxel

@@ -1,4 +1,8 @@
 function [error img] = Commonality_2Pred(Y,X1,X2,names)
+% names are in the order:
+% names{1} == x1
+% names{2} == x2
+% names{3} == Y
 
 [B] = regress(Y,[X1 X2 ones(size(X1))]);
 pred = [X1 X2 ones(size(X1))]*B;

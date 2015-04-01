@@ -1,7 +1,7 @@
 function PrintResults(Model,Results)
 %%
 fid = 1;
-fprintf(fid,'==================================================\n');
+fprintf(fid,'-------------------------------------------\n');
 NVar = size(Model.data,2);
 % print each model
 for i = 1:NVar
@@ -80,6 +80,7 @@ for i = 1:NPaths
 %        fprintf(fid,'Indirect Effect size: %0.4f\n',Results.Paths{i});
 %        fprintf(fid,'At alpha = %0.4f, BCaCI = [%0.4f, %0.4f]\n',Model.Thresholds(k),Results.BCaCI.Paths(:,:,1,i,k),Results.BCaCI.Paths(:,:,2,i,k));
         fprintf(fid,'alpha = %0.3f\n',Model.Thresholds(k))
+        fprintf(fid, 'Number of bootstrap resamples: %d\n',Model.Nboot);
         if length(Results.ProbeValues{i}) > 0
             fprintf(fid,'%10s%10s%10s%10s%10s\n','ProbeVal','EffSize','LLBCa','UUBCa','BCaZ')
             for j = 1:length(Results.ProbeValues{i})
@@ -93,11 +94,29 @@ for i = 1:NPaths
             fprintf(fid,'%10.4f%10.4f%10.3f%10.3f\n',Results.Paths{i}(1),...
                     Results.BCaCI.Paths(1,1,1,i,k),...
                     Results.BCaCI.Paths(1,1,2,i,k),...
-                    Results.BCaCI.PathsZ(j));
+                    Results.BCaCI.PathsZ(i));
         end
     end
 end
+fprintf(fid,'-------------------------------------------\n');
 
-fprintf(fid,'\n==================================================\n');
-
+%% print the correlation matrix of the variables
+[r] = corr(Model.data);
+fprintf(1,' ==== Correlation Matrix of data ===\n');
+fprintf(1,'%10s','');
+for i = 1:Model.Nvar
+    fprintf(1,'%10s',Model.Names{i});
+end
+fprintf(1,'\n');
+for i = 1:Model.Nvar
+    fprintf(1,'%10s',Model.Names{i});
+    for j = 1:Model.Nvar
+        if j < i
+            fprintf(1,'%10.2f',r(i,j));
+        else
+            fprintf(1,'%10s','-');
+        end
+    end
+    fprintf(1,'\n');
+end
 

@@ -1,11 +1,11 @@
-function [Unstand, Stand, T] = mediateCorrMatrix(CorrMatrix,StandardDevations,N)
+function [Unstand, Stand, T] = mediateCorrMatrix(CorrMatrix,StandardDeviations,N)
 % Calculate the mediation model effects from a correlation matrix
 Nvar = size(CorrMatrix,1);
-if Nvar ~= length(StandardDevations)
+if Nvar ~= length(StandardDeviations)
     error('length of standard deviation vector does not match the size of the correlation matrix');
 else
     % convert the correlation matrix to a covariance matrix
-    CovMatrix = diag(StandardDevations)*CorrMatrix*diag(StandardDevations);
+    CovMatrix = diag(StandardDeviations)*CorrMatrix*diag(StandardDeviations);
     % calculate the parameters
     a = CovMatrix(1,2)/CovMatrix(1,1);
     Model2beta = CovMatrix([1 2],3)'/CovMatrix(1:2,1:2);
@@ -38,10 +38,10 @@ else
     % This has to be Y predicted by X
     R22cP = Stand.c*CorrMatrix(1,3);
 
-    Unstand.SEa = (StandardDevations(2)/StandardDevations(1))*sqrt((1-CorrMatrix(1,2)^2)/(N-2));
-    Unstand.SEb = (StandardDevations(3)/StandardDevations(2))*sqrt(1/(1-R21))*sqrt((1-R22)/(N-2-1));
-    Unstand.SEc = (StandardDevations(3)/StandardDevations(1))*sqrt((1-CorrMatrix(1,3)^2)/(N-2));
-    Unstand.SEcP =(StandardDevations(3)/StandardDevations(1))*sqrt(1/(1-R21))*sqrt((1-R22)/(N-2-1));
+    Unstand.SEa = (StandardDeviations(2)/StandardDeviations(1))*sqrt((1-CorrMatrix(1,2)^2)/(N-2));
+    Unstand.SEb = (StandardDeviations(3)/StandardDeviations(2))*sqrt(1/(1-R21))*sqrt((1-R22)/(N-2-1));
+    Unstand.SEc = (StandardDeviations(3)/StandardDeviations(1))*sqrt((1-CorrMatrix(1,3)^2)/(N-2));
+    Unstand.SEcP =(StandardDeviations(3)/StandardDeviations(1))*sqrt(1/(1-R21))*sqrt((1-R22)/(N-2-1));
     
     
     T = {};

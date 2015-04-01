@@ -15,6 +15,11 @@ if ismac
     BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks';
     Paal = fullfile(BaseDir,'raal.nii');
     Pba = fullfile(BaseDir, 'rbrodmann.nii');
+elseif isunix
+    BaseDir = '/home/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks';
+    Paal = fullfile(BaseDir,'raal.nii');
+    Pba = fullfile(BaseDir, 'rbrodmann.nii');
+
 else
     Paal = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/raal.nii';
     Pba = '/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/rbrodmann.nii';
@@ -117,6 +122,7 @@ for i = 1:size(ClusterMaxLocmm,2)
     fprintf(fid,'%5d\t%5d\t%5d\t',ClusterMaxLocmm(:,i));
     fprintf(fid,'%10.2f\t%10d\n', ClusterMaxStat(i),ClusterSize(i));
 end
+fprintf('Data saved to:\n\t%s\n',ClusterOutPutFileName);
 % TODO: Write the data for all voxels to file also.
 
 %% Do for the negative direction also
@@ -167,42 +173,45 @@ end
 % %     end
 % % end
 ClusterSize
-% find the locatio of the cluster maximum
-ClusterMaxLocmm = Vin.mat*[ClusterMaxLoc ones(size(ClusterMaxLoc,1),1)]';
-% ClusterMaxLocmm = ClusterMaxLocmm(1:3,:)';
-% find the location of all significant voxels within significant clusters
-xSign = x(find(SignVoxelsAndClusters));
-ySign = y(find(SignVoxelsAndClusters));
-zSign = z(find(SignVoxelsAndClusters));
-
-XYZ = [xSign ySign zSign];
-XYZmm = Vin.mat*[XYZ ones(length(XYZ),1)]';
-XYZmm = XYZmm(1:3,:)';
-
-% load the atlas maps
-Vba = spm_vol(Pba);
-Vaal = spm_vol(Paal);
-Iaal = spm_read_vols(Vaal);
-Iba = spm_read_vols(Vba);
-% find the AAL and BA locations
-%[AllAALList AllBAList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba);
-%[MaxAALList MaxBAList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba);
-
-[MaxAALList MaxBAList] = subfnLocalFindAALandBA(ClusterMaxLoc, Iaal, Iba);
-for i = 1:size(ClusterMaxLocmm,2)
-    fprintf(fid,'%20s\t%5s\t%5d\t',MaxAALList{i}(1:end-2), MaxAALList{i}(end),MaxBAList(i));
-    fprintf(fid,'%5d\t%5d\t%5d\t',ClusterMaxLocmm(:,i));
-    fprintf(fid,'%10.2f\t%10d\n', ClusterMaxStat(i),ClusterSize(i));
+if ~isempty(ClusterSize)
+    % find the locatio of the cluster maximum
+    ClusterMaxLocmm = Vin.mat*[ClusterMaxLoc ones(size(ClusterMaxLoc,1),1)]';
+    % ClusterMaxLocmm = ClusterMaxLocmm(1:3,:)';
+    % find the location of all significant voxels within significant clusters
+    xSign = x(find(SignVoxelsAndClusters));
+    ySign = y(find(SignVoxelsAndClusters));
+    zSign = z(find(SignVoxelsAndClusters));
+    
+    XYZ = [xSign ySign zSign];
+    XYZmm = Vin.mat*[XYZ ones(length(XYZ),1)]';
+    XYZmm = XYZmm(1:3,:)';
+    
+    % load the atlas maps
+    Vba = spm_vol(Pba);
+    Vaal = spm_vol(Paal);
+    Iaal = spm_read_vols(Vaal);
+    Iba = spm_read_vols(Vba);
+    % find the AAL and BA locations
+    %[AllAALList AllBAList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba);
+    %[MaxAALList MaxBAList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba);
+    
+    [MaxAALList MaxBAList] = subfnLocalFindAALandBA(ClusterMaxLoc, Iaal, Iba);
+    for i = 1:size(ClusterMaxLocmm,2)
+        fprintf(fid,'%20s\t%5s\t%5d\t',MaxAALList{i}(1:end-2), MaxAALList{i}(end),MaxBAList(i));
+        fprintf(fid,'%5d\t%5d\t%5d\t',ClusterMaxLocmm(:,i));
+        fprintf(fid,'%10.2f\t%10d\n', ClusterMaxStat(i),ClusterSize(i));
+    end
+    
+    fclose(fid);
+    fprintf('Data saved to:\n\t%s\n',ClusterOutPutFileName);
+    
 end
-
-fclose(fid);
-fprintf('Data saved to:\n\t%s\n',ClusterOutPutFileName);
-
-
     
 function [AALList BAList] = subfnLocalFindAALandBA(XYZ, Iaal, Iba)
 if ismac
      [aalCol1 aalCol2 aalCol3] = textread('/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks/aal.nii.txt','%d%s%d');
+elseif isunix
+     [aalCol1 aalCol2 aalCol3] = textread('/home/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/masks/aal.nii.txt','%d%s%d');
 else
     [aalCol1 aalCol2 aalCol3] = textread('/share/studies/CogRes/GroupAnalyses/ModMedCogRes/masks/aal.nii.txt','%d%s%d');
 end
