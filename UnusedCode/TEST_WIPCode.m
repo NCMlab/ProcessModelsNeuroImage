@@ -46,8 +46,8 @@ Model.Nboot = 500;
 Model.Stratify = [];
 Model.Nperm = 0;
 Model.NJobSplit = 1;
-Model.Thresh = [0.05];
-
+Model.Thresholds = [0.05];
+Model.Nsub = N;
 % View the model using the biograph toolbox
 % B = biograph(Model.Direct,Model.names)
 % view(B);

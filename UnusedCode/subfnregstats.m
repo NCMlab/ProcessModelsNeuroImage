@@ -8,6 +8,7 @@ if isequal(logical(y),y)
 else
     % Add a column of ones to the design matrix
     design = x2fx(design);
+    %design = [ones(size(design,1),1) design];
     [Q,R] = qr(design,0);
     beta = R\(Q'*y);
     yhat = design*beta;

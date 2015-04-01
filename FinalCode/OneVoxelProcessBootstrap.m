@@ -2,9 +2,10 @@ function [Results, BootStrap] = OneVoxelProcessBootstrap(Model)
 % reset the random number generator. This is EXTREMEMLY important when
 % deploying these analyses to a cluster. Without this resetting then each
 % node of the cluster CAN choose the exact same random numbers.
-%rng('shuffle','multFibonacci');
-rand('seed','reset');
 
+rng('shuffle','multFibonacci');
+
+t = tic;
 % Fit the model
 % The indirect paths (the Paths cell) is set to be an array of cells. This
 % is rather a pain in the neck for everything else. 
@@ -18,8 +19,12 @@ if Model.Nboot > 0
     % the Jack-Knife procedure.
     try 
        % Perform the jack-knife step
+       
         JackKnife = JackKnifeFunction(Model,Results,FieldNames);    
+
+        
         BootStrap = BootStrapFunction(Model,Model.Nboot,FieldNames);
+        
 %        BoLBBcACI = BagOfBootStrapFunction(Model,100,FieldNames,JackKnife);
         % Calculate the BCaci values for each parameter
         Results.BCaCI = CreateBCaCI(Results,BootStrap,JackKnife,Model.Thresholds);
@@ -29,6 +34,6 @@ if Model.Nboot > 0
         Results = [];
     end
 end
-
+toc(t);
 
 %% TO DO: unflatten the path BCaCI results

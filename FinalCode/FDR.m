@@ -19,4 +19,5 @@ cVID = 1;
 cVN = sum(1./(1:V));
 
 pID = p(max(find(p<=I/V*q/cVID)));
+fprintf(1,'Threshold = %0.04f\n',min(I/V*q/cVN));
 pN = p(max(find(p<=I/V*q/cVN)));

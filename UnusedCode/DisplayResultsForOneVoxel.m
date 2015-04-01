@@ -6,10 +6,10 @@ elseif nargin == 2
     PrintFlag = 1;
 end
 cd(SelectedPath)
-if exist('ModelInfo.mat')
-    load ModelInfo
+if exist('data/ModelInfo.mat')
+    load('data/ModelInfo')
 else
-    errordlg('this folder does not have the required AnalysticParameters.mat file');
+    errordlg('this folder does not have the required AnalyticParameters.mat file');
 end
 % Get the header image from one image
 %F = dir(fullfile(SelectedPath,'*.nii'));

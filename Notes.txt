@@ -13,5 +13,5 @@ split then put back together no problem.
 
 04/5/2013
 I need to modify subfnProcessModelFit so that it calculates the conditional 
-effects at multiple values of teh probe. This means I need to get rid of the 
+effects at multiple values of the probe. This means I need to get rid of the 
 if clause for checking the values of the interaction effect.

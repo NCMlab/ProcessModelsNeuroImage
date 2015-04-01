@@ -387,7 +387,8 @@ PrintResults(SinglePointModel,Results)
 
 %% Perform Model 3 analyses on a single data point and print out the results 
 SinglePointModel = Model3;
-SinglePointModel.data{2} = Model3.data{2}(:,45);
+SinglePointModel.data{1} = randn(Nsub,1);
+SinglePointModel.data{2} = Model3.data{2}(:,1);
 SinglePointModel.Indices = 1;
 SinglePointModel.Nvoxels = 1;
 SinglePointModel.Tag = 'SinglePointModel';
@@ -499,3 +500,39 @@ ResultsFolder = PrepareDataForProcess(ClusterModel1Perm);
 % transient times of large amounts of data in memory. I am afraid to
 % overload a single computer even transiently.
 % 
+%%
+Nsub = 1000;
+SinglePointModel = Model3;
+SinglePointModel.Nsub = Nsub;
+SinglePointModel.Thresholds = 0.05;
+SinglePointModel.Nboot = 1000;
+SinglePointModel.data{1} = randn(Nsub,1)+1;
+SinglePointModel.data{2} = randn(Nsub,1)+3;
+SinglePointModel.data{3} = randn(Nsub,1) + SinglePointModel.data{1} + 0.1.*SinglePointModel.data{1} + ...
+    (1).*0.08.*SinglePointModel.data{1}.*SinglePointModel.data{2};
+SinglePointModel.Direct = zeros(3,3);
+SinglePointModel.Direct([1 2],3) = 1;
+SinglePointModel.Paths = zeros(3,3);
+SinglePointModel.Paths(2,3) = 1;
+SinglePointModel.Indices = 1;
+SinglePointModel.Nvoxels = 1;
+SinglePointModel.Tag = 'SinglePointModel';
+SinglePointModel = ExtractDataFromVoxel(SinglePointModel,1);
+
+
+Results = OneVoxelProcessBootstrap(SinglePointModel);
+PrintResults(SinglePointModel,Results)
+
+%%
+figure(1)
+clf
+hold on
+plot(Results.ProbeValues{1}(2:end)*12+6,Results.Paths{1}(2:end)-0.12,'k')
+plot(Results.ProbeValues{1}(2:end)*12+6,Results.BCaCI.Paths(2:end,1,1)-0.12,'--k')
+plot(Results.ProbeValues{1}(2:end)*12+6,Results.BCaCI.Paths(2:end,1,2)-0.12,'--k')
+line([0 35],[0 0])
+line([15 15],[-0.4 0.3])
+xlabel('Years of Education')
+ylabel('Effect of Structure on Cognition')
+
+

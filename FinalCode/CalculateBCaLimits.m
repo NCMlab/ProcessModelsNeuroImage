@@ -1,4 +1,4 @@
-function [Alpha1 Alpha2 Z p] = WIPsubfnCalculateBCaLimits(JackKnifeData,PointEstimate, BootStrapData,alpha)    
+function [Alpha1, Alpha2, Z, p] = CalculateBCaLimits(JackKnifeData,PointEstimate, BootStrapData,alpha)    
 
     [m n] = size(PointEstimate);
     N = size(JackKnifeData,3);

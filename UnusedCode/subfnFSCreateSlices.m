@@ -1,11 +1,8 @@
-function subfnFSCreateOverlays(ResultsFolder, MaskList, MaskValues)
-if nargin == 2
-    Colors = [1 0.8 0]; % Yellow
-end
+function subfnFSCreateSlices(ResultsFolder, MaskList)
 %[BasePath FileName] = fileparts(InputImage);
 %BasePath = '/share/users/js2746_Jason/Studies/ModMedCogRes/Model58_XAgeGroup_MFreeSurfer_YFluid_WCogRes_VCogRes_COVnGMV_Sex_StudyID_Nboot5000_18-Mar-2013_11-11';
 %P = fullfile(ResultsFolder,'BrainToParameters_JASON.nii');
-P = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles/STANDARD_aparc+aseg.nii';
+P = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles/STANDARD_T1.nii';
 
 V = spm_vol(P);
 I = spm_read_vols(V);
@@ -60,11 +57,11 @@ for i = 1:Nslice
     BG = imrotate(squeeze(I(:,slices(i),:)),90);
     % dilate it so the cortical ribbon is a little wider which is better
     % for viewing
-    BG =spm_dilate(BG);
+%    BG =spm_dilate(BG);
     % invert the image
-    BG = imcomplement(BG);
-    % set all edge voxels to zero
-    BG(find(BG<0))=0;
+%    BG = imcomplement(BG);
+%    % set all edge voxels to zero
+%    BG(find(BG<0))=0;
     BG = imcrop(BG,rect);
     % Load the mask if needed
     
@@ -90,24 +87,14 @@ for i = 1:Nslice
 %     posS1 = S1(FposS1)./max(S1(FposS1));
  
     % set the color of the data voxels
-    % Create the color map
-    ColorMaps = colormap('hot');
-    % Map it to the supplied values
-    MinVal = 3.43;
-    MaxVal = max(MaskValues)
-    StepSize = (MaxVal - MinVal)/(length(ColorMaps)-1)
-    ColorScale = MinVal:StepSize:MaxVal;
-    InVal = 11;
-    ColorScaleValue = max(find(InVal>ColorScale))+1;
+%    outRGB1(Fm) = 1;
+%    outRGB2(Fm) = 0.8;
     
-    outRGB1(Fm) = ColorMaps(ColorScaleValue,1);
-    outRGB2(Fm) = ColorMaps(ColorScaleValue,2);
-    outRGB3(Fm) = ColorMaps(ColorScaleValue,3);
     %outRGB3(FnegS1) = negS1;
     % add this slice to the image montage
     Images(:,:,1,Nslice - i + 1) = outRGB1;
-    Images(:,:,2,Nslice - i + 1) = outRGB2;
-    Images(:,:,3,Nslice - i + 1) = outRGB3;
+    %Images(:,:,2,Nslice - i + 1) = outRGB2;
+    %Images(:,:,3,Nslice - i + 1) = outRGB3;
 end
 %colormap(hot(100))
 f = figure;

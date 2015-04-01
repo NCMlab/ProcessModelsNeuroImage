@@ -1,4 +1,4 @@
-function BCaCI = WIPsubfnCalculateBCaCI(data,Alpha1,Alpha2,PointEstimate)
+function BCaCI = CalculateBCaCI(data,Alpha1,Alpha2,PointEstimate)
 % calculate the bias corrected accelerated confidence intervals from the
 % pre-calculated alpha limites.
 

@@ -143,19 +143,19 @@ warning('off','all')
     
 
    
-    if spm('ver') == 'SPM8'
-    % There is an issue with calculation of the FDR values with SPM8.
-    % To circomnavigate this the defaults need to be changed.
-        OrigDefault = spm_get_defaults('stats.topoFDR');
-        spm_get_defaults('stats.topoFDR',0);
-        spm_get_defaults('stats.topoFDR')
-    end
+%     if spm('ver') == 'SPM8'
+%     % There is an issue with calculation of the FDR values with SPM8.
+%     % To circomnavigate this the defaults need to be changed.
+%         OrigDefault = spm_get_defaults('stats.topoFDR');
+%         spm_get_defaults('stats.topoFDR',0);
+%         spm_get_defaults('stats.topoFDR')
+%     end
     
      spm_list('list',xSPM,hReg)
-    if spm('ver') == 'SPM8'
-    % reset the default value
-        spm_get_defaults('stats.topoFDR',OrigDefault);
-    end
+%     if spm('ver') == 'SPM8'
+%     % reset the default value
+%         spm_get_defaults('stats.topoFDR',OrigDefault);
+%     end
         
 %%% Little add-on by Chris
 

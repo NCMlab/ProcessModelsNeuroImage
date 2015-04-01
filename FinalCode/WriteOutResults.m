@@ -114,9 +114,9 @@ switch ModelType
         AllParameters = cell(ModelInfo.Nvoxels,1);
         % m: path number
         % n: probed level in the path
-        BCaCIUpper = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
-        BCaCILower = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
-        
+%         BCaCIUpper = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
+%         BCaCILower = zeros(n,m,length(ModelInfo.Thresholds),ModelInfo.Nvoxels);
+%         
         NvoxelsPerJob = ceil(ModelInfo.Nvoxels/ModelInfo.NJobSplit);
         
         Indices = [];
@@ -143,14 +143,15 @@ switch ModelType
                     
                 end
                 % cycle over thresholds
-                for j = 1:length(ModelInfo.Thresholds)
-                    BCaCIUpper(:,:,j,Index) = squeeze(Parameters{i}.BCaCI.Paths(:,:,1,:,j));
-                    BCaCILower(:,:,j,Index) = squeeze(Parameters{i}.BCaCI.Paths(:,:,2,:,j));
-                end
+%                 PathNumber = 1;
+%                 for j = 1:length(ModelInfo.Thresholds)
+%                     BCaCIUpper(:,:,j,Index) = squeeze(Parameters{i}.BCaCI.Paths(:,:,1,PathNumber,j));
+%                     BCaCILower(:,:,j,Index) = squeeze(Parameters{i}.BCaCI.Paths(:,:,2,PathNumber,j));
+%                 end
             end
         end
-        WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
-        WriteOutParameterMaps('BCaCI.p',AllParameters,ModelInfo)
+       % WriteOutBootstrapPaths(ModelInfo,PointEstimate,BCaCIUpper,BCaCILower,m,n)
+       % WriteOutParameterMaps('BCaCI.p',AllParameters,ModelInfo)
         
 
         % Write out the FDR thresholded p maps also
