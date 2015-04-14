@@ -4,7 +4,8 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 % same results. An alternative futur direction is a precalculation of the permutations for
 % storage in the ModelInfo structure. 
 %rng('shuffle','multFibonacci');
-rand('seed','reset');
+
+RandStream('mt19937ar','Seed',sum(100*clock));
 
 fprintf(1,'Started at: %s\n',datestr(now));
 tic

@@ -2,3 +2,6 @@
 *~
 *.asv
 VoxelWiseMediation.m
+CreateClusterJobFile.m
+SubmitClusterJob.m
+.gitignore

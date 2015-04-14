@@ -45,6 +45,10 @@ switch ModelType
         % p: number of permutaions for this chunk of results
         [m n o p] = size(MaxPaths);
         % Check to make sure all the files are there
+	if ModelInfo.Nperm < p*NFiles
+		% extra permutations were done!
+		ModelInfo.Nperm = p*NFiles;
+	end	
         if ~(ModelInfo.Nperm == p*NFiles)
             error('There are not enough results files based on the specified parameters.');
         end

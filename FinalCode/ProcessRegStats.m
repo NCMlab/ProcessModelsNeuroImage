@@ -37,7 +37,7 @@ else
     covb = xtxi*mse;
     se = sqrt(diag(covb));
     t = beta./se;
-    %pval = 2*(tcdf(-abs(t), dfe));
+    pval = 2*(tcdf(-abs(t), dfe));
     S = {};
     S.beta = beta;
     S.B = beta.*(std(design)./std(y))';
@@ -45,7 +45,7 @@ else
     S.tstat = {};
     S.tstat.t = t;
     S.tstat.se = se;
-    %S.tstat.pval = pval;
+    S.tstat.pval = pval;
     S.tstat.dfe = dft;
     S.rsquare = 1 - sse/sst;
     S.adjrsquare = 1 - (sse./sst)*(dft./dfe);
@@ -55,7 +55,7 @@ else
     S.fstat.dfr = p - 1;
     S.fstat.ssr = ssr;
     S.fstat.f = (ssr/S.fstat.dfr)/(sse/dfe);
-    %S.fstat.pval = fcdf(1/S.fstat.f, dfe, S.fstat.dfr);
+    S.fstat.pval = fcdf(1/S.fstat.f, dfe, S.fstat.dfr);
     S.AIC =  nobs*log(sum(residuals.^2)/nobs) + 2*p*(p+1)/(dfe-1) + 2*p;
     S.CV = CV;
 end

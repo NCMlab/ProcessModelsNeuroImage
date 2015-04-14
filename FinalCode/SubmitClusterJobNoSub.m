@@ -14,13 +14,13 @@ function [JobName, ClusterCommand] = SubmitClusterJob(jobPath,JobOutputFolder,Wa
 if nargin == 2
     [PathName, JobName] = fileparts(jobPath);
     % Submit the job and explictly name the job.
-    ClusterCommand = sprintf('! qsub -q all.q -p -50 -l h_vmem=8G,mem_free=6G,h_stack=256M -e %s -o %s -N %s %s',...
+    ClusterCommand = sprintf('! qsub -q all.q -l h_vmem=8G,mem_free=6G,h_stack=256M -e %s -o %s -N %s %s',...
         JobOutputFolder,JobOutputFolder,JobName,jobPath);
    % Str = sprintf('! qsub -e %s -o %s -N %s %s',...
    %     JobOutputFolder,JobOutputFolder,JobName,jobPath);
     
     % Execute the job submission command
-    unix(ClusterCommand);
+    %unix(ClusterCommand);
 elseif nargin == 3
     % A wait list was entered
     ClusterCommand = sprintf('! qsub -hold_jid %s -p -10 -e %s -o %s %s',...
@@ -28,6 +28,6 @@ elseif nargin == 3
    % Str = sprintf('! qsub -hold_jid %s -e %s -o %s %s',...
    %     WaitList,JobOutputFolder,JobOutputFolder,jobPath);
 
-    unix(ClusterCommand);
+    %unix(ClusterCommand);
 end
 
