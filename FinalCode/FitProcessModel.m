@@ -112,6 +112,7 @@ for j = 1:NumberOfPaths
                 probeValues = probeMod;
             else
                 probeMod = prctile(Moderators,[10:10:90]);
+                probeMod = prctile(Moderators,[5:5:95]);
                 probeValues = [zeros(size(probeMod,1),1) probeMod];
                 %  probeValues = probeValues(:,1)*probeValues(:,2)';
             end

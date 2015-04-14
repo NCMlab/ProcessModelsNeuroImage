@@ -12,7 +12,7 @@ function [pID,pN] = FDR(p,q)
 
 p = p(isfinite(p));  % Toss NaN's
 p = sort(p(:));
-V = length(p);
+V = length(p)
 I = (1:V)';
 
 cVID = 1;
