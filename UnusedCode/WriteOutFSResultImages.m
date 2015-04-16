@@ -2,7 +2,13 @@ function WriteOutFSResultImages(Locations,Values,OutFile)
 
 %BasePath = '/share/users/js2746_Jason/Studies/ModMedCogRes/Model58_XAgeGroup_MFreeSurfer_YFluid_WCogRes_VCogRes_COVnGMV_Sex_StudyID_Nboot5000_18-Mar-2013_11-11';
 %P = fullfile(ResultsFolder,'BrainToParameters_JASON.nii');
-P = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles/STANDARD_aparc+aseg.nii';
+if ismac
+    BasePath = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
+elseif isunix
+    BasePath = '/home/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
+end
+
+P = fullfile(BasePath, 'STANDARD_aparc+aseg.nii');
 
 V = spm_vol(P);
 I = spm_read_vols(V);
@@ -18,7 +24,7 @@ I(I==41) = 0;
 % if nargin ~= 3
 %     MaskList = unique(I);
 % end
-load('/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles/Mapping.mat');
+load(fullfile(BasePath,'Mapping.mat'));
 Ibg = zeros(size(I));
 BGList = [1:84];
  for i = 1:length(BGList)

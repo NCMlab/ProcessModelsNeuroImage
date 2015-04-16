@@ -2,10 +2,15 @@ function subfnFSCreateOverlays(ResultsFolder, MaskList, MaskValues)
 if nargin == 2
     Colors = [1 0.8 0]; % Yellow
 end
+if ismac
+    BasePath = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
+elseif isunix
+    BasePath = '/home/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles';
+end
 %[BasePath FileName] = fileparts(InputImage);
 %BasePath = '/share/users/js2746_Jason/Studies/ModMedCogRes/Model58_XAgeGroup_MFreeSurfer_YFluid_WCogRes_VCogRes_COVnGMV_Sex_StudyID_Nboot5000_18-Mar-2013_11-11';
 %P = fullfile(ResultsFolder,'BrainToParameters_JASON.nii');
-P = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles/STANDARD_aparc+aseg.nii';
+P = fullfile(BasePath,'STANDARD_aparc+aseg.nii');
 
 V = spm_vol(P);
 I = spm_read_vols(V);
@@ -21,7 +26,7 @@ I(I==41) = 0;
 % if nargin ~= 3
 %     MaskList = unique(I);
 % end
-load('/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/FreeSurferFiles/Mapping.mat');
+load(fullfile(BasePath,'Mapping.mat'));
 Ibg = zeros(size(I));
 BGList = [1:84];
  for i = 1:length(BGList)
@@ -49,6 +54,7 @@ BGList = [1:84];
 % 
 [m n p] = size(I);
 slices = [75 85 95 105 115 125 135 145 155];
+slices = [76:11:155];
 %slices = [125];
 Nslice = length(slices);
 %%
@@ -97,7 +103,7 @@ for i = 1:Nslice
     MaxVal = max(MaskValues)
     StepSize = (MaxVal - MinVal)/(length(ColorMaps)-1)
     ColorScale = MinVal:StepSize:MaxVal;
-    InVal = 11;
+    InVal = MaxVal;
     ColorScaleValue = max(find(InVal>ColorScale))+1;
     
     outRGB1(Fm) = ColorMaps(ColorScaleValue,1);
