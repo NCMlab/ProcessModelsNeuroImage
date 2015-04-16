@@ -1,4 +1,10 @@
-BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/TFCE';
+if ismac
+    BaseDir = '/Users/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/TFCE';
+elseif isunix
+    BaseDir = '/home/jason/Dropbox/SteffenerColumbia/Scripts/ProcessModelsNeuroImage/TFCE';
+end
+setenv('FSLOUTPUTTYPE','NIFTI')
+
 Vo = {};
 Vo.fname = fullfile(BaseDir,'test1.nii');
 Vo.dim = [20 20 20];
@@ -6,7 +12,7 @@ Vo.dt = [64 0];
 Vo.mat = eye(4);
 signal = zeros(Vo.dim);
 signal(5:8,5:8,5:7) = 0.5;
-signal(14:17,14:17,14:17) = 0.3;
+signal(14:17,14:17,14:17) = -0.5;
 signal(5:8,5:8,14:17) = 1;
 Vs = Vo;
 Vs.fname = fullfile(BaseDir,'signal.nii');
@@ -23,7 +29,7 @@ spm_write_vol(Vm,mask);
 for i = 1:30
     Vo.fname = fullfile(BaseDir,sprintf('test_%04d.nii',i));
     I = signal + randn(Vo.dim);
-    spm_write_vol(Vo,I)
+    spm_write_vol(Vo,I);
 end
 
 t = tic;
@@ -32,20 +38,24 @@ I = randn(Vo.dim);
 
 
 %setenv('FSLOUTPUTTYPE','NIFTI')
+[a FSLMathsPath] = unix('! which fslmaths');
+[a FSLStatsPath] = unix('! which fslstats');
+[a FSLrandomisePath] = unix('! which randomise');
+[a FSLMergePath] = unix('! which fslmerge');
 
 inFile = Vo.fname;
 outFile = fullfile(BaseDir,'test1out.nii');
-Str = sprintf('! /usr/local/fsl/bin/fslmaths %s -mas %s -tfce 2 0.5 6 %s',Vo.fname,Vm.fname,outFile)
+Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1),Vo.fname,Vm.fname,outFile)
 unix(Str)
-Str = sprintf('! /usr/local/fsl/bin/fslstats %s -R',outFile);
+Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1), outFile);
 [a b] = unix(Str);
 findUnder = find(b == ' ');
 m = str2num(b(findUnder(1)+1:findUnder(2)-1))
 toc(t)
-Str = '! /usr/local/fsl/bin/fslmerge -t test4D test_0*';
+Str = sprintf('! %s -t test4D test_0*',FSLMergePath(1:end-1));
 unix(Str);
 
-Str =' ! /usr/local/fsl/bin/randomise -i test4D.nii.gz -o randomTest -d TFCE.mat -t TFCE.con --T2 -n 1000 -m mask'
+Str =sprintf(' ! %s -i test4D.nii.gz -o randomTest -d TFCE.mat -t TFCE.con --T2 -n 500 -m mask',FSLrandomisePath(1:end-1));
 unix(Str)
 
 %% run some stats 
@@ -79,10 +89,10 @@ for i = 1:Nperm
     Io(Indices) = temp;
     Vo.fname = fullfile(BaseDir,'temp.nii');
     spm_write_vol(Vo,Io);
-    % Rum tfce and get the max value
-    Str = sprintf('! /usr/local/fsl/bin/fslmaths %s -mas %s -tfce 2 0.5 6 %s',Vo.fname,Vm.fname,outFile);
+    % Run tfce and get the max value
+    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1),Vo.fname,Vm.fname,outFile);
     unix(Str);
-    Str = sprintf('! /usr/local/fsl/bin/fslstats %s -R',outFile);
+    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
     [a b] = unix(Str);
     findUnder = find(b == ' ');
     MaxStat(i) = str2num(b(findUnder(1)+1:findUnder(2)-1));
@@ -96,7 +106,7 @@ Vo.fname = fullfile(BaseDir,'PointEstimate.nii');
 outFile = fullfile(BaseDir,'PointEstimate_tfce.nii');
 spm_write_vol(Vo,abs(pe));
 % Run tfce and get the max value
-Str = sprintf('! /usr/local/fsl/bin/fslmaths %s -mas %s -tfce 2 0.5 6 %s',Vo.fname,Vm.fname,outFile);
+Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1),Vo.fname,Vm.fname,outFile);
 unix(Str);
 VpeTFCE = spm_vol(outFile);
 IpeTFCE = spm_read_vols(VpeTFCE);

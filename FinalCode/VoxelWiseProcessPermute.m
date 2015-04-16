@@ -4,8 +4,11 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 % same results. An alternative futur direction is a precalculation of the permutations for
 % storage in the ModelInfo structure. 
 %rng('shuffle','multFibonacci');
-
 RandStream('mt19937ar','Seed',sum(100*clock));
+
+% Find fslmaths
+[a FSLMathsPath] = unix('! which fslmaths');
+[a FSLStatsPath] = unix('! which fslstats');
 
 fprintf(1,'Started at: %s\n',datestr(now));
 tic
@@ -112,8 +115,8 @@ if Nperm > 0
     [Mbeta, Nbeta] = size(TestResults.B);
     
     % Create the empty array to hold the parameter estimates
-    PermResults.beta = zeros(Mbeta, Nbeta, Nvoxels, Nperm);
-    
+    PermResults.beta = zeros(Mbeta, Nbeta, Nvoxels);
+    PermResults.t = zeros(Mbeta, Nbeta, Nvoxels);
     % Determine the size of the calculated path values
     [PathSize1, PathSize2] = size(TestResults.Paths{1});
     
@@ -135,20 +138,37 @@ if Nperm > 0
     MinBeta = zeros([size(TestResults.B) Nperm]);
     MaxPaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
     MinPaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
+    posTFCEt = zeros([size(TestResults.B) Nperm]);
+    negTFCEt = zeros([size(TestResults.B) Nperm]);
+    posTFCEpaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
+    negTFCEpaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
 end
 %%
-
+tempData = ModelInfo;  
 % How long did it take to prepare the data
 fprintf(1,'Data prepared in %0.2f s.\n',toc);
 
 % Feedback for the user
 fprintf(1,'Starting first permutation at: %s\n',datestr(now));
 
+% Create the structures for saving the temp files for use with the TFCE
+% program in FSL
+Vo = tempData.DataHeader;
+Vo.fname = fullfile(tempData.BaseDir,'temp.nii');
+Vo.dt = [64 0];
+tempI = zeros(Vo.dim);
+% Create a temp mask image
+Im = zeros(Vo.dim);
+Im(tempData.Indices) = 1;
+Vm = Vo;
+Vm.fname = fullfile(tempData.BaseDir,'tempMask.nii');
+spm_write_vol(Vm,Im);
+outFile = fullfile(tempData.BaseDir,'tempTFCEout.nii');
 
 % Cycle over 
 for k = 1:size(Samp,2)
     tic
-    tempData = ModelInfo;    
+    % Cycle over all voxels
     for i = 1:Nvoxels
         % for this voxel
         % reset the data part
@@ -172,6 +192,7 @@ for k = 1:size(Samp,2)
             % only keep the path estimates
             PermResults.Paths{i} = Results.Paths;
             PermResults.beta(:,:,i) = Results.beta;
+            PermResults.t(:,:,i) = Results.t;
         end
         
         % Doing this is good to see progress but it SLOWS it down A LOT!!!
@@ -192,14 +213,80 @@ for k = 1:size(Samp,2)
                 for m = 1:PathSize2
                     MaxPaths(j,m,i,k) = max(squeeze(ThisPath(j,m,:)));
                     MinPaths(j,m,i,k) = min(squeeze(ThisPath(j,m,:)));
+                    
+                    % Need to add the TFCE calculations here also
+                    % Perform all TFCE steps
+                    % Take each t map and save it as a file
+                    t = squeeze(ThisPath(j,m,:));
+                    tempI(tempData.Indices) = t;
+                    spm_write_vol(Vo,tempI);
+                    % Use the fslmaths TFCE command on the saved file
+                    % I wonder if TFCE requires positive values only in the
+                    % image!
+                    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vo.fname,Vm.fname,outFile);
+                    unix(Str);
+                    % use fslstats to find the maximum in the file
+                    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
+                    [a b] = unix(Str);
+                    findUnder = find(b == ' ');
+                    % save this value
+                    posTFCEpaths(i,j,k) = str2double(b(findUnder(1)+1:findUnder(2)-1));
+                    % Now do it for the negative direction
+                    t = t.*(-1);
+                    tempI(tempData.Indices) = t;
+                    spm_write_vol(Vo,tempI);
+                    % Use the fslmaths TFCE command on the saved file
+
+                    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vo.fname,Vm.fname,outFile);
+                    unix(Str);
+                    % use fslstats to find the maximum in the file
+                    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
+                    [a b] = unix(Str);
+                    findUnder = find(b == ' ');
+                    % save this value
+                    negTFCEpaths(i,j,k) = str2double(b(findUnder(1)+1:findUnder(2)-1));
+
                 end
             end
         end
         % find the max and min beta values also
         for i = 1:Mbeta
             for j = 1:Nbeta
-                MaxBeta(i,j,k) = max(squeeze(PermResults.beta(i,j,:)));
-                MinBeta(i,j,k) = min(squeeze(PermResults.beta(i,j,:)));
+                if PermResults.beta(i,j,1) ~= 0
+                    
+                    
+                    MaxBeta(i,j,k) = max(squeeze(PermResults.beta(i,j,:)));
+                    MinBeta(i,j,k) = min(squeeze(PermResults.beta(i,j,:)));
+                    
+                    % Perform all TFCE steps
+                    % Take each t map and save it as a file
+                    t = squeeze(PermResults.t(i,j,:,1));
+                    tempI(tempData.Indices) = t;
+                    spm_write_vol(Vo,tempI);
+                    % Use the fslmaths TFCE command on the saved file
+                    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vo.fname,Vm.fname,outFile);
+                    unix(Str);
+                    % use fslstats to find the maximum in the file
+                    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
+                    [a b] = unix(Str);
+                    findUnder = find(b == ' ');
+                    % save this value
+                    posTFCEt(i,j,k) = str2double(b(findUnder(1)+1:findUnder(2)-1));
+                    % Now do it for the negative direction
+                    t = t.*(-1);
+                    tempI(tempData.Indices) = t;
+                    spm_write_vol(Vo,tempI);
+                    % Use the fslmaths TFCE command on the saved file
+                    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vo.fname,Vm.fname,outFile);
+                    unix(Str);
+                    % use fslstats to find the maximum in the file
+                    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
+                    [a b] = unix(Str);
+                    findUnder = find(b == ' ');
+                    % save this value
+                    negTFCEt(i,j,k) = str2double(b(findUnder(1)+1:findUnder(2)-1));
+                    
+                end
             end
         end
     end
@@ -215,7 +302,7 @@ if Nperm > 0
         mkdir(ResultsFolder)
     end
     OutFile = fullfile(ResultsFolder,sprintf('Permute_count%04d_%dSamp',count,Nperm));
-    Str = sprintf('save %s MaxPaths MinPaths MaxBeta MinBeta',OutFile);
+    Str = sprintf('save %s MaxPaths MinPaths MaxBeta MinBeta posTFCEt negTFCEt posTFCEpaths negTFCEpaths',OutFile);
     eval(Str)
 else
     [PathName FileName] = fileparts(InDataPath);
