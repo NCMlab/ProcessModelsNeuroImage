@@ -7,8 +7,11 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 RandStream('mt19937ar','Seed',sum(100*clock));
 
 % Find fslmaths
-[a FSLMathsPath] = unix('! which fslmaths');
-[a FSLStatsPath] = unix('! which fslstats');
+
+% [a FSLMathsPath] = unix('! which fslmaths');
+FSLMathsPath = '/usr/local/fsl/bin/fslmaths '
+% [a FSLStatsPath] = unix('! which fslstats');
+FSLStatsPath = '/usr/local/fsl/bin/fslstats '
 
 fprintf(1,'Started at: %s\n',datestr(now));
 tic
