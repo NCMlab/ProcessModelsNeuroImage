@@ -256,7 +256,7 @@ for k = 1:size(Samp,2)
         for i = 1:Mbeta
             for j = 1:Nbeta
                 if PermResults.beta(i,j,1) ~= 0
-                    
+                    %fprintf(1,'%d, %d\n',i,j);
                     
                     MaxBeta(i,j,k) = max(squeeze(PermResults.beta(i,j,:)));
                     MinBeta(i,j,k) = min(squeeze(PermResults.beta(i,j,:)));
