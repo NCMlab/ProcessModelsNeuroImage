@@ -20,9 +20,17 @@ ModelInfo.ResultsPath = ResultsFolder;
 % Remove the data from the structure to preserve memory
 ModelInfo.data = [];
 
+%% WRITE OUT ALL IMAGES from the regression models
+        % Load up the point estimate results
+        F = dir(fullfile(ResultsFolder,'Results','PointEstimate*.mat'));
+        load(fullfile(ResultsFolder,'Results',F(1).name))
+
+WriteOutParameterMaps('beta', Parameters, ModelInfo)
+WriteOutParameterMaps('B', Parameters, ModelInfo)
+WriteOutParameterMaps('t', Parameters, ModelInfo)
 
 
-% Find the number of results files
+%% Find the number of results files
 switch ModelType
     case 'permutation'
         % Load the data/parameters used in this analysis
@@ -59,7 +67,8 @@ switch ModelType
         [mB nB pB] = size(MaxBeta);
         MaxPermB = zeros(mB,nB,pB*NFiles);
         MinPermB = zeros(mB,nB,pB*NFiles);
-        
+        MaxTFCEt = zeros(mB,nB,pB*NFiles);
+        MinTFCEt = zeros(mB,nB,pB*NFiles);
         % load the data and put the permutation results in these structures
         for i = 1:NFiles
             load(fullfile(ResultsFolder,'Results',F(i).name))
@@ -67,32 +76,40 @@ switch ModelType
             MinPermPaths(:,:,:,(i-1)*p+1:i*p) = MinPaths;
             MaxPermB(:,:,(i-1)*p+1:i*p) = MaxBeta;
             MinPermB(:,:,(i-1)*p+1:i*p) = MinBeta;
+            MaxTFCEt(:,:,(i-1)*p+1:i*p) = TFCEtMax;
+            MinTFCEt(:,:,(i-1)*p+1:i*p) = TFCEtMin;
         end
-        % Load up the point estimate results
-        F = dir(fullfile(ResultsFolder,'Results','PointEstimate*.mat'));
-        load(fullfile(ResultsFolder,'Results',F(1).name))
+        
 
         % Reshape the path estimates for the next step of writing them out
         % as images
         PointEstimatePath = zeros(m,n,o,length(Parameters));
         PointEstimateB = zeros(mB, nB, length(Parameters));
+        PointEstimatet = zeros(mB, nB, length(Parameters));
+        PointEstimatettfce = zeros(mB, nB, length(Parameters));
         for i = 1:length(Parameters)
             for kk = 1:o
                 PointEstimatePath(:,:,kk,i) = Parameters{i}.Paths{kk};
             end
             PointEstimateB(:,:,i) = Parameters{i}.B;
+            PointEstimatet(:,:,i) = Parameters{i}.t;
         end
+        for i = 1:mB
+            for j = 1:nB
+                if PointEstimatet(i,j,1) ~= 0
+                    DataForThisTest = squeeze(PointEstimatet(i,j,:));
+                    PointEstimatettfce(i,j,:) = subfnCalcTFCE(DataForThisTest, ModelInfo);
+                end
+            end
+        end
+        % For this to work with the TFCE estimation the Parameter maps,
+        % which are saved to files need to be TFCE converted.
+        %%%%%%% TO DO
+        % Create the TFCE parameter estimate images
         
-         % Display point estimate distribution
-%         figure      
-%         hist(PointEstimatePath(2,:,:,:),50)
-%         
-        
-        AllParameters = Parameters;
-        clear Parameters;
         WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,o,m)
-        WriteOutPermutationB(ModelInfo,MaxPermB,MinPermB,PointEstimateB)
-        
+        WriteOutPermutationB(ModelInfo,MaxPermB,MinPermB,PointEstimateB,'permB')
+        WriteOutPermutationB(ModelInfo,MaxTFCEt,MinTFCEt,PointEstimatettfce,'tfceT')
     case 'bootstrap'
         % There is a problem here fusing the split results back together
         
@@ -167,10 +184,6 @@ switch ModelType
          WriteOutSingleMap('BCaCI.PathsP',AllParameters,ModelInfo,1)
 end
 
-%% WRITE OUT ALL IMAGES from the regression models
-WriteOutParameterMaps('beta',AllParameters,ModelInfo)
-WriteOutParameterMaps('B',AllParameters,ModelInfo)
-WriteOutParameterMaps('t',AllParameters,ModelInfo)
 
 
 %%
@@ -275,11 +288,11 @@ for j = 1:length(ModelInfo.Thresholds)
     end
 end
 
-function WriteOutPermutationB(ModelInfo,MaxB,MinB,PointEstimate)
+function WriteOutPermutationB(ModelInfo,MaxB,MinB,PointEstimate,InTag)
 
 % cycle over the thresholds requested
 for j = 1:length(ModelInfo.Thresholds)
-    Tag = sprintf('%s_%0.4f','Bperm',ModelInfo.Thresholds(j));
+    Tag = sprintf('%s_%0.4f',InTag,ModelInfo.Thresholds(j));
     % Find the number in a sorted list of permutations that corresponds to
     % the threshold.
     c = floor(ModelInfo.Thresholds(j)*ModelInfo.Nperm);
