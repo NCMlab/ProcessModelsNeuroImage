@@ -6,13 +6,6 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 %rng('shuffle','multFibonacci');
 RandStream('mt19937ar','Seed',sum(100*clock));
 
-% Find fslmaths
-setenv('FSLOUTPUTTYPE','NIFTI')
-% [a FSLMathsPath] = unix('! which fslmaths');
-FSLMathsPath = '/usr/local/fsl/bin/fslmaths '
-% [a FSLStatsPath] = unix('! which fslstats');
-FSLStatsPath = '/usr/local/fsl/bin/fslstats '
-
 fprintf(1,'Started at: %s\n',datestr(now));
 tic
 fprintf(1,'%s\n',InDataPath);
@@ -141,10 +134,10 @@ if Nperm > 0
     MinBeta = zeros([size(TestResults.B) Nperm]);
     MaxPaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
     MinPaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
-    posTFCEt = zeros([size(TestResults.B) Nperm]);
-    negTFCEt = zeros([size(TestResults.B) Nperm]);
-    posTFCEpaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
-    negTFCEpaths = zeros(PathSize1,PathSize2,NPaths,Nperm);
+    TFCEtMax = zeros([size(TestResults.B) Nperm]);
+    TFCEtMin = zeros([size(TestResults.B) Nperm]);
+    TFCEpathsMax = zeros(PathSize1,PathSize2,NPaths,Nperm);
+    TFCEpathsMin = zeros(PathSize1,PathSize2,NPaths,Nperm);
 end
 %%
 tempData = ModelInfo;  
@@ -157,7 +150,7 @@ fprintf(1,'Starting first permutation at: %s\n',datestr(now));
 % Create the structures for saving the temp files for use with the TFCE
 % program in FSL
 Vo = tempData.DataHeader;
-Vo.fname = fullfile(tempData.BaseDir,'temp.nii');
+Vo.fname = fullfile(tempData.BaseDir,'TestTemp.nii');
 Vo.dt = [64 0];
 tempI = zeros(Vo.dim);
 % Create a temp mask image
@@ -198,6 +191,10 @@ for k = 1:size(Samp,2)
             PermResults.t(:,:,i) = Results.t;
         end
         
+        % Need to calculate the cluster enhanced point estimate values!
+        
+        
+        
         % Doing this is good to see progress but it SLOWS it down A LOT!!!
         % if ~mod(i,1000)
         %     fprintf(1,'Finished voxel %d of %d in %0.2f s.\n',i,Nvox,toc);
@@ -223,31 +220,11 @@ for k = 1:size(Samp,2)
                     t = squeeze(ThisPath(j,m,:));
                     tempI(tempData.Indices) = t;
                     spm_write_vol(Vo,tempI);
-                    % Use the fslmaths TFCE command on the saved file
-                    % I wonder if TFCE requires positive values only in the
-                    % image!
-                    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vo.fname,Vm.fname,outFile);
-                    unix(Str);
-                    % use fslstats to find the maximum in the file
-                    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
-                    [a b] = unix(Str);
-                    findUnder = find(b == ' ');
-                    % save this value
-                    posTFCEpaths(i,j,k) = str2double(b(findUnder(1)+1:findUnder(2)-1));
-                    % Now do it for the negative direction
-                    t = t.*(-1);
-                    tempI(tempData.Indices) = t;
-                    spm_write_vol(Vo,tempI);
-                    % Use the fslmaths TFCE command on the saved file
-
-                    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vo.fname,Vm.fname,outFile);
-                    unix(Str);
-                    % use fslstats to find the maximum in the file
-                    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
-                    [a b] = unix(Str);
-                    findUnder = find(b == ' ');
-                    % save this value
-                    negTFCEpaths(i,j,k) = str2double(b(findUnder(1)+1:findUnder(2)-1));
+                    
+                    [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname);
+                    
+                    TFCEpathsMax(i,j,k) = maxTFCE;
+                    TFCEpathsMin(i,j,k) = minTFCE;
 
                 end
             end
@@ -266,28 +243,11 @@ for k = 1:size(Samp,2)
                     t = squeeze(PermResults.t(i,j,:,1));
                     tempI(tempData.Indices) = t;
                     spm_write_vol(Vo,tempI);
-                    % Use the fslmaths TFCE command on the saved file
-                    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vo.fname,Vm.fname,outFile);
-                    unix(Str);
-                    % use fslstats to find the maximum in the file
-                    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
-                    [a b] = unix(Str);
-                    findUnder = find(b == ' ');
-                    % save this value
-                    posTFCEt(i,j,k) = str2double(b(findUnder(1)+1:findUnder(2)-1));
-                    % Now do it for the negative direction
-                    t = t.*(-1);
-                    tempI(tempData.Indices) = t;
-                    spm_write_vol(Vo,tempI);
-                    % Use the fslmaths TFCE command on the saved file
-                    Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vo.fname,Vm.fname,outFile);
-                    unix(Str);
-                    % use fslstats to find the maximum in the file
-                    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
-                    [a b] = unix(Str);
-                    findUnder = find(b == ' ');
-                    % save this value
-                    negTFCEt(i,j,k) = str2double(b(findUnder(1)+1:findUnder(2)-1));
+                    
+                    [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname);
+                    
+                    TFCEtMax(i,j,k) = maxTFCE;
+                    TFCEtMin(i,j,k) = minTFCE;
                     
                 end
             end
@@ -305,7 +265,7 @@ if Nperm > 0
         mkdir(ResultsFolder)
     end
     OutFile = fullfile(ResultsFolder,sprintf('Permute_count%04d_%dSamp',count,Nperm));
-    Str = sprintf('save %s MaxPaths MinPaths MaxBeta MinBeta posTFCEt negTFCEt posTFCEpaths negTFCEpaths',OutFile);
+    Str = sprintf('save %s MaxPaths MinPaths MaxBeta MinBeta TFCEtMax TFCEtMin TFCEpathsMax TFCEpathsMin',OutFile);
     eval(Str)
 else
     [PathName FileName] = fileparts(InDataPath);
