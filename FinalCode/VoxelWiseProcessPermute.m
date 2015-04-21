@@ -4,6 +4,12 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 % same results. An alternative futur direction is a precalculation of the permutations for
 % storage in the ModelInfo structure. 
 %rng('shuffle','multFibonacci');
+
+setenv('FSLOUTPUTTYPE','NIFTI');
+path1 = getenv('PATH');
+path1 = [path1 ':/usr/local/fsl/bin'];
+setenv('PATH', path1);
+
 RandStream('mt19937ar','Seed',sum(100*clock));
 
 fprintf(1,'Started at: %s\n',datestr(now));
@@ -218,7 +224,10 @@ for k = 1:size(Samp,2)
                     % Perform all TFCE steps
                     % Take each t map and save it as a file
                     t = squeeze(ThisPath(j,m,:));
-                    tempI(tempData.Indices) = t;
+                    
+                    % Z norm the path values so they are in the correct
+                    % range for the TFCE algorithm
+                    tempI(tempData.Indices) = Znorm(t);
                     spm_write_vol(Vo,tempI);
                     
                     [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname);
