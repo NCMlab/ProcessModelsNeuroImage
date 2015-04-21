@@ -15,9 +15,14 @@ spm_write_vol(Vi,I);
 
 % calculate TFCE on stat image
 setenv('FSLOUTPUTTYPE','NIFTI');
- [a FSLMathsPath] = unix('! which fslmaths');
+path1 = getenv('PATH');
+path1 = [path1 ':/usr/local/fsl/bin'];
+setenv('PATH', path1);
+FSLMathsPath = 'fslmaths  ';
+FSLStatsPath = 'fslstats  ';
+ %[a FSLMathsPath] = unix('! which fslmaths');
 % FSLMathsPath = '/usr/local/fsl/bin/fslmaths ';
- [a FSLStatsPath] = unix('! which fslstats');
+ %[a FSLStatsPath] = unix('! which fslstats');
  
  
 [PathName, FileName] = fileparts(Vi.fname);
@@ -32,7 +37,7 @@ if a == 1 % Check to see if there are any errors
     Itfce = spm_read_vols(Vtfce);
     posTFCEvalues = Itfce(ModelInfo.Indices);
 else
-    posTFCEvalues = zeros(1,ModelInfo.Nvoxels);
+    posTFCEvalues = zeros(ModelInfo.Nvoxels,1);
 end
 
 % Negative voxels
@@ -47,7 +52,7 @@ if a == 1 % Check to see if there are any errors
     Itfce = spm_read_vols(Vtfce);
     negTFCEvalues = -1.*Itfce(ModelInfo.Indices);
 else
-    negTFCEvalues = zeros(1,ModelInfo.Nvoxels);
+    negTFCEvalues = zeros(ModelInfo.Nvoxels,1);
 end
 TFCEvalues = posTFCEvalues + negTFCEvalues;
 
