@@ -14,6 +14,8 @@ InJobFolder = fullfile(ResultsFolder,'JobFiles');
 InDataPath = fullfile(ResultsFolder,'data','ModelInfo');
 JobOutputFolder = fullfile(ResultsFolder,'JobOutput');
 
+NJobSplit = ceil(ToDoPerm/NPermPerJob);
+
 % Create a list of submitted jobs to be used for executing
 % clean up commands after the jobs have finished.
 WaitList = '';
@@ -35,7 +37,7 @@ JobName = SubmitClusterJob(jobPath,JobOutputFolder);
 WaitList = sprintf('%s,%s',WaitList,JobName);
 
 % Submit all of the permutation jobs
-for i = 1:ModelInfo.NJobSplit
+for i = 1:NJobSplit
     % Create the cluster submission job
     jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
     fid = fopen(jobPath,'w');
