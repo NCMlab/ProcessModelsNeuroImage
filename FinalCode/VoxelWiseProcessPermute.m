@@ -227,9 +227,9 @@ for k = 1:size(Samp,2)
                     
                     % Z norm the path values so they are in the correct
                     % range for the TFCE algorithm
-                    tempI(tempData.Indices) = Znorm(t);
+                    tempI(tempData.Indices) = t;
                     spm_write_vol(Vo,tempI);
-                    
+%%%% THIS NEEDS TO BE RESHAPED %%%%%%%%%%%%%%%%5                    
                     [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname);
                     
                     TFCEpathsMax(i,j,k) = maxTFCE;
