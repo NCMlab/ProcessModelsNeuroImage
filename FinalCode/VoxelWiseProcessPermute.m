@@ -10,7 +10,8 @@ path1 = getenv('PATH');
 path1 = [path1 ':/usr/local/fsl/bin'];
 setenv('PATH', path1);
 
-RandStream('mt19937ar','Seed',sum(100*clock));
+%RandStream('mt19937ar','Seed',sum(100*clock));
+rng shuffle
 
 fprintf(1,'Started at: %s\n',datestr(now));
 tic

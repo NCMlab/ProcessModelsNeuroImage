@@ -1,5 +1,5 @@
 function BootStrap = BootStrapFunction(data,Nboot,FieldNames)
-
+rng shuffle
 PointEstResults  = FitProcessModel(data);
 
 % initialize bootstrap values based on the size of the results structure.
