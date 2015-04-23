@@ -86,8 +86,8 @@ switch ModelType
             MinPermB(:,:,(i-1)*p+1:i*p) = MinBeta;
             MaxTFCEt(:,:,(i-1)*p+1:i*p) = TFCEtMax;
             MinTFCEt(:,:,(i-1)*p+1:i*p) = TFCEtMin;
-            MaxTFCEpaths(:,:,:,(i-1)*p+1:i*p) = reshape(TFCEpathsMax, 1,1,o,p);
-            MinTFCEpaths(:,:,:,(i-1)*p+1:i*p) = reshape(TFCEpathsMin, 1,1,o,p);
+            MaxTFCEpaths(:,:,:,(i-1)*p+1:i*p) = reshape(squeeze(TFCEpathsMax(:,1,1)), 1,1,o,p);
+            MinTFCEpaths(:,:,:,(i-1)*p+1:i*p) = reshape(squeeze(TFCEpathsMin(:,1,1)), 1,1,o,p);
         end
         
         
