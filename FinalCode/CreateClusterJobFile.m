@@ -19,7 +19,9 @@ fprintf(fid,'#PBS -j oe\n');
 %fprintf(fid,'cd %s\n',BaseDir);
 % Start matlab using the nodisplay option
 fprintf(fid,'/usr/local/bin/matlab -nodisplay -singleCompThread -nodisplay -nojvm<< EOF\n');
-% The pathe to the spm software
+% reset the random number seed
+fprintf(fid,'rng shuffle');
+% The path to the spm software
 fprintf(fid,'%s\n','addpath /opt/share/spm12');
 % The path to the Process toolbox
 fprintf(fid,'%s\n','addpath /home/steffejr/Scripts/ProcessModelsNeuroimage/FinalCode');

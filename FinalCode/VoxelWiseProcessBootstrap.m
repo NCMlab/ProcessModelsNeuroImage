@@ -3,8 +3,8 @@ function Results = OneVoxelProcessBootstrap(Model)
 % deploying these analyses to a cluster. Without this resetting then each
 % node of the cluster CAN choose the exact same random numbers.
 % RandStream.setDefaultStream(RandStream('mt19937ar','Seed',sum(100*clock)));
-RandStream('mt19937ar','Seed',sum(100*clock));
-
+% RandStream('mt19937ar','Seed',sum(100*clock));
+rng shuffle 
 % Fit the model
 % The indirect paths (the Paths cell) is set to be an array of cells. This
 % is rather a pain in the neck for everything else. 
