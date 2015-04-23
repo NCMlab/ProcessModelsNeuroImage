@@ -75,6 +75,8 @@ switch ModelType
         MinPermB = zeros(mB,nB,pB*NFiles);
         MaxTFCEt = zeros(mB,nB,pB*NFiles);
         MinTFCEt = zeros(mB,nB,pB*NFiles);
+        MaxTFCEpaths = zeros(m,n,o,pB*NFiles);
+        MinTFCEpaths = zeros(m,n,o,pB*NFiles);
         % load the data and put the permutation results in these structures
         for i = 1:NFiles
             load(fullfile(ResultsFolder,'Results',F(i).name))
@@ -84,6 +86,8 @@ switch ModelType
             MinPermB(:,:,(i-1)*p+1:i*p) = MinBeta;
             MaxTFCEt(:,:,(i-1)*p+1:i*p) = TFCEtMax;
             MinTFCEt(:,:,(i-1)*p+1:i*p) = TFCEtMin;
+            MaxTFCEpaths(:,:,:,(i-1)*p+1:i*p) = reshape(TFCEpathsMax, 1,1,o,p);
+            MinTFCEpaths(:,:,:,(i-1)*p+1:i*p) = reshape(TFCEpathsMin, 1,1,o,p);
         end
         
         
@@ -129,7 +133,7 @@ switch ModelType
         % Create the TFCE parameter estimate images
         
         WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,o,m,'perm')
-        WriteOutPermutationPaths(ModelInfo,TFCEpathsMax,TFCEpathsMin,PointEstimatePathtfce,o,m,'tfce')
+        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MaxTFCEpaths,PointEstimatePathtfce,o,m,'tfce')
         WriteOutPermutationB(ModelInfo,MaxPermB,MinPermB,PointEstimateB,'permB')
         WriteOutPermutationB(ModelInfo,MaxTFCEt,MinTFCEt,PointEstimatettfce,'tfceT')
     case 'bootstrap'
@@ -276,7 +280,7 @@ for kk = 1:o % cycle over the number of paths
         
         % write unthresholed path estimate
         Vo = ModelInfo.DataHeader;
-        Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d.nii',kk,i)));
+        Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_pe_%s.nii',kk,i,Tag)));
         % Prepare the data matrix
         I = zeros(ModelInfo.DataHeader.dim);
         % Extract the path data values

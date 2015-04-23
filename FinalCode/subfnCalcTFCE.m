@@ -29,7 +29,7 @@ FSLStatsPath = 'fslstats  ';
 outFile = fullfile(PathName,'TFCEtemp.nii');
 
 % Positive voxels
-Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vi.fname,Vm.fname,outFile);
+Str = sprintf('! %s %s -mas %s -nan -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vi.fname,Vm.fname,outFile);
 [a b] = unix(Str);
 % load TFCE image
 if a == 1 % Check to see if there are any errors
@@ -44,7 +44,7 @@ end
 % Now do it for the negative direction
 Str = sprintf('! %s %s -mul -1 -thr 0 %s',FSLMathsPath(1:end-1), Vi.fname, outFile);
 [a b] = unix(Str);
-Str = sprintf('! %s %s -mas %s -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), outFile,Vm.fname,outFile);
+Str = sprintf('! %s %s -mas %s -nan -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), outFile,Vm.fname,outFile);
 [a b] = unix(Str);
 % load TFCE image
 if a == 1 % Check to see if there are any errors
