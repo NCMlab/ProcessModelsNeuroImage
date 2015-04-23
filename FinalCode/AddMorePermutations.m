@@ -20,22 +20,6 @@ NJobSplit = ceil(ToDoPerm/NPermPerJob);
 % clean up commands after the jobs have finished.
 WaitList = '';
 
-% Submit the point estimate job
-% Create the cluster submission job
-jobPath = fullfile(InJobFolder,sprintf('PointEst_job.sh'));
-fid = fopen(jobPath,'w');
-
-% Create string of the command to be run with MatLab
-Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'');',InDataPath,0,0);
-% Create the cluster submission script
-CreateClusterJobFile(Command,fid)
-% Submit the script to the cluster
-JobName = SubmitClusterJob(jobPath,JobOutputFolder);
-            
-
-% Add job to wait list
-WaitList = sprintf('%s,%s',WaitList,JobName);
-
 % Submit all of the permutation jobs
 for i = 1:NJobSplit
     % Create the cluster submission job
