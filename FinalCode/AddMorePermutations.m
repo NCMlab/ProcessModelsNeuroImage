@@ -21,7 +21,7 @@ NJobSplit = ceil(ToDoPerm/NPermPerJob);
 WaitList = '';
 
 % Submit all of the permutation jobs
-for i = 1:NJobSplit
+for i = MaxPerm+1:MaxPerm+NJobSplit
     % Create the cluster submission job
     jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
     fid = fopen(jobPath,'w');
