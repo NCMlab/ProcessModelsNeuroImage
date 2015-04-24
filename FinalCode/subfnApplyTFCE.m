@@ -26,7 +26,7 @@ Str = sprintf('! %s %s -mas %s -nan -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vi.
 if a == 1 % Check to see if there are any errors
     % Errors arise if all values in an image are negative
     % use fslstats to find the maximum in the file
-    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
+    Str = sprintf('! %s %s -n -R',FSLStatsPath(1:end-1),outFile);
     [a b] = unix(Str);
     findUnder = find(b == ' ');
     % save this value
@@ -45,7 +45,7 @@ Str = sprintf('! %s %s -mas %s -nan -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), out
 [a b] = unix(Str);
 if a == 1    
     % use fslstats to find the maximum in the file
-    Str = sprintf('! %s %s -R',FSLStatsPath(1:end-1),outFile);
+    Str = sprintf('! %s %s -n -R',FSLStatsPath(1:end-1),outFile);
     [a b] = unix(Str);
     findUnder = find(b == ' ');
     % save this value

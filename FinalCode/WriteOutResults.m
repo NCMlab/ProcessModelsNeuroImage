@@ -48,7 +48,10 @@ switch ModelType
         
         % Check to see if the analyses are completed
         if ~(NFiles == ModelInfo.NJobSplit)
-            error('This analysis is not complete.');
+            Button = questdlg('The analysis is not complete, continue anyway?','Continue?','Yes','No','Yes');
+            if strmatch(Button, 'No')
+                error('This analysis is not complete.');
+            end
         end
         
         % load a single results fle to determine the size of the paths
@@ -63,31 +66,46 @@ switch ModelType
             % extra permutations were done!
             ModelInfo.Nperm = p*NFiles;
         end
-        if ~(ModelInfo.Nperm == p*NFiles)
-            error('There are not enough results files based on the specified parameters.');
+        % The files may each contain different number of permutations
+        Nperm = 0;
+        PermPerFile = zeros(NFiles,1);
+        RunningSum = zeros(NFiles+1,1);
+        for i = 1:NFiles
+            FindUnder = findstr(F(i).name,'_');
+            FindSamp = findstr(F(i).name,'Samp');
+            NumPermThisFile = str2double(F(i).name(FindUnder(end)+1:FindSamp(1)-1));
+            Nperm = Nperm + NumPermThisFile;
+            PermPerFile(i) = NumPermThisFile;
+            RunningSum(i+1) = RunningSum(i) + NumPermThisFile;
         end
+        RunningSum = RunningSum(2:end);
         % Create the structures to hold the permutation results for the
         % path values and the standardized parameter estimates
-        MaxPermPaths = zeros(m,n,o,p*NFiles);
-        MinPermPaths = zeros(m,n,o,p*NFiles);
+        MaxPermPaths = zeros(m,n,o,Nperm);
+        MinPermPaths = zeros(m,n,o,Nperm);
         [mB nB pB] = size(MaxBeta);
-        MaxPermB = zeros(mB,nB,pB*NFiles);
-        MinPermB = zeros(mB,nB,pB*NFiles);
-        MaxTFCEt = zeros(mB,nB,pB*NFiles);
-        MinTFCEt = zeros(mB,nB,pB*NFiles);
-        MaxTFCEpaths = zeros(m,n,o,pB*NFiles);
-        MinTFCEpaths = zeros(m,n,o,pB*NFiles);
+        MaxPermB = zeros(mB,nB,Nperm);
+        MinPermB = zeros(mB,nB,Nperm);
+        MaxTFCEt = zeros(mB,nB,Nperm);
+        MinTFCEt = zeros(mB,nB,pB*Nperm);
+        MaxTFCEpaths = zeros(m,n,o,Nperm);
+        MinTFCEpaths = zeros(m,n,o,Nperm);
         % load the data and put the permutation results in these structures
         for i = 1:NFiles
+            Indices = (RunningSum(i)-PermPerFile(i)+1):RunningSum(i);
             load(fullfile(ResultsFolder,'Results',F(i).name))
-            MaxPermPaths(:,:,:,(i-1)*p+1:i*p) = MaxPaths;
-            MinPermPaths(:,:,:,(i-1)*p+1:i*p) = MinPaths;
-            MaxPermB(:,:,(i-1)*p+1:i*p) = MaxBeta;
-            MinPermB(:,:,(i-1)*p+1:i*p) = MinBeta;
-            MaxTFCEt(:,:,(i-1)*p+1:i*p) = TFCEtMax;
-            MinTFCEt(:,:,(i-1)*p+1:i*p) = TFCEtMin;
-            MaxTFCEpaths(:,:,:,(i-1)*p+1:i*p) = reshape(squeeze(TFCEpathsMax(:,1,1)), 1,1,o,p);
-            MinTFCEpaths(:,:,:,(i-1)*p+1:i*p) = reshape(squeeze(TFCEpathsMin(:,1,1)), 1,1,o,p);
+            MaxPermPaths(:,:,:,Indices) = MaxPaths;
+            MinPermPaths(:,:,:,Indices) = MinPaths;
+            MaxPermB(:,:,Indices) = MaxBeta;
+            MinPermB(:,:,Indices) = MinBeta;
+            MaxTFCEt(:,:,Indices) = TFCEtMax;
+            MinTFCEt(:,:,Indices) = TFCEtMin;
+            if sum(size(TFCEpathsMax) == [3 1 3])==3
+                TFCEpathsMax = TFCEpathsMax(:,:,1);
+                TFCEpathsMin = TFCEpathsMin(:,:,1);
+            end
+            MaxTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMax(:,1,:)), 1,1,o,PermPerFile(i));
+            MinTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMin(:,1,:)), 1,1,o,PermPerFile(i));
         end
         
         
