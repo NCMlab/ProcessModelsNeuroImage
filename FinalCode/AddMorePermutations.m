@@ -2,10 +2,10 @@ function AddMorePermutations(ResultsFolder,TotalPerm,NPermPerJob)
 % How many permutations have been done?
 Results = fullfile(ResultsFolder,'Results');
 Fres = dir(fullfile(ResultsFolder,'Results','Permute_count*.mat'));
-NpermDone = length(Fres)
+NpermDone = length(Fres);
 % What is the max permutation number
 LastName = Fres(end).name;
-FindUnder = strfind(LastName,'_')
+FindUnder = strfind(LastName,'_');
 MaxPerm = str2double(LastName(FindUnder(2)-4:FindUnder(2)-1));
 % How many more are needed?
 ToDoPerm = TotalPerm - NpermDone;
