@@ -10,8 +10,10 @@ function [maxTFCE, minTFCE] = subfnApplyTFCE(ImagePath,MaskPath)
 % Find fslmaths
 setenv('FSLOUTPUTTYPE','NIFTI');
 path1 = getenv('PATH');
-path1 = [path1 ':/usr/local/fsl/bin'];
-setenv('PATH', path1);
+if isempty(strfind(path1,'fsl'))
+    path1 = [path1 ':/usr/local/fsl/bin'];
+    setenv('PATH', path1);
+end
 
 FSLMathsPath = 'fslmaths  ';
 FSLStatsPath = 'fslstats  ';

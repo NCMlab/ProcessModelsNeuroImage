@@ -16,8 +16,11 @@ spm_write_vol(Vi,I);
 % calculate TFCE on stat image
 setenv('FSLOUTPUTTYPE','NIFTI');
 path1 = getenv('PATH');
-path1 = [path1 ':/usr/local/fsl/bin'];
-setenv('PATH', path1);
+if isempty(strfind(path1,'fsl'))
+    path1 = [path1 ':/usr/local/fsl/bin'];
+    setenv('PATH', path1);
+end
+
 FSLMathsPath = 'fslmaths  ';
 FSLStatsPath = 'fslstats  ';
  %[a FSLMathsPath] = unix('! which fslmaths');

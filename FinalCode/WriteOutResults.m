@@ -100,10 +100,10 @@ switch ModelType
             MinPermB(:,:,Indices) = MinBeta;
             MaxTFCEt(:,:,Indices) = TFCEtMax;
             MinTFCEt(:,:,Indices) = TFCEtMin;
-            if sum(size(TFCEpathsMax) == [3 1 3])==3
-                TFCEpathsMax = TFCEpathsMax(:,:,1);
-                TFCEpathsMin = TFCEpathsMin(:,:,1);
-            end
+%            if sum(size(TFCEpathsMax) == [3 1 3])==3
+%                TFCEpathsMax = TFCEpathsMax(:,:,1);
+%                TFCEpathsMin = TFCEpathsMin(:,:,1);
+%            end
             MaxTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMax(:,1,:)), 1,1,o,PermPerFile(i));
             MinTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMin(:,1,:)), 1,1,o,PermPerFile(i));
         end

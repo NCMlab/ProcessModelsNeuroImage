@@ -7,8 +7,10 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 
 setenv('FSLOUTPUTTYPE','NIFTI');
 path1 = getenv('PATH');
-path1 = [path1 ':/usr/local/fsl/bin'];
-setenv('PATH', path1);
+if isempty(strfind(path1,'fsl'))
+    path1 = [path1 ':/usr/local/fsl/bin'];
+    setenv('PATH', path1);
+end
 
 %RandStream('mt19937ar','Seed',sum(100*clock));
 rng shuffle
@@ -64,7 +66,16 @@ end
 % How many voxels 
 Nvoxels = length(ModelInfo.Indices);
 %%
+[PathName FileName] = fileparts(InDataPath);
+[PathName FileName] = fileparts(PathName);
+ResultsFolder = fullfile(PathName,'Results');
+if ~exist(ResultsFolder,'dir')
+    mkdir(ResultsFolder)
+end
+
+
 if Nperm > 0
+
     
     % Create the structure to hold the permutation resample results.
     % Test one voxel to determine the correct size for all of the results.
@@ -262,7 +273,12 @@ for k = 1:size(Samp,2)
                 end
             end
         end
+        
+         OutFile = fullfile(ResultsFolder,sprintf('Path_count%04d',k));
+    Str = sprintf('save %s PermResults',OutFile);
+    eval(Str)   
     end
+
     fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
 end
 fprintf(1,'Saving data to file now.\n\n');
