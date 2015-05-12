@@ -78,6 +78,8 @@ end
 % the number of dimensions an array of cells was chosen. 
 NumberOfPaths = size(data.Paths,3);
 Results.Paths = cell(NumberOfPaths,1);
+Results.PathsSE = cell(NumberOfPaths,1);
+Results.PathsTnorm = cell(NumberOfPaths,1);
 Results.ProbeValues = cell(MaxNumberInter,MaxNumberInter);
 %% add a row of zeros so that the indexing matchs with the beta matrix
 Paths = [zeros(1,M,NumberOfPaths); data.Paths];
@@ -85,7 +87,11 @@ Paths = [zeros(1,M,NumberOfPaths); data.Paths];
 for j = 1:NumberOfPaths
     % step through the path
     ResultPath = 1;
+    ResultPathbetas = zeros(max(max(Paths(:,:,j))),1);
+    ResultPathSE = zeros(max(max(Paths(:,:,j))),1);
+    
     for i = 1:max(max(Paths(:,:,j)))
+        
         index = find(Paths(:,:,j)==i);
         [Row Col] = ind2sub(size(Paths),index);
         % is there an interaction on this step?
@@ -94,6 +100,8 @@ for j = 1:NumberOfPaths
         if isempty(find(tempInter))
             probeValues = [];
             ResultPath = ResultPath.*Results.beta(Row,Col);
+            ResultPathbetas(i) = Results.beta(Row,Col);
+            ResultPathSE(i) = Results.se(Row,Col);
         else
             % There is an interaction here
             InteractionComponent = Results.beta(Row,Col);
@@ -125,4 +133,14 @@ for j = 1:NumberOfPaths
     % Store the probe values and the resultant path values.
     Results.ProbeValues{j} = probeValues;
     Results.Paths{j} = ResultPath;
+    if length(ResultPathSE) == 2
+        Results.PathsSE{j} = sqrt(sum((ResultPathbetas.^2).*flipud((ResultPathSE.^2))));
+    elseif length(ResultPathSE) == 3
+        Results.PathsSE{j} = sqrt((prod(ResultPathbetas(1:2).^2).*(ResultPathSE(3).^2)) + ...
+        (prod(ResultPathbetas([1 3]).^2)).*(ResultPathSE(2).^2) + ...
+        (prod(ResultPathbetas([2 3]).^2)).*(ResultPathSE(1).^2));
+    else
+        Results.PathsSE{j} = 0;
+    end
+    Results.PathsTnorm{j} = ResultPath/Results.PathsSE{j};
 end

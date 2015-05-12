@@ -205,8 +205,10 @@ for k = 1:size(Samp,2)
         else
             % only keep the path estimates
             PermResults.Paths{i} = Results.Paths;
+            PermResults.PathsTnorm{i} = Results.PathsTnorm;
             PermResults.beta(:,:,i) = Results.beta;
             PermResults.t(:,:,i) = Results.t;
+            
         end
         
         % Need to calculate the cluster enhanced point estimate values!
