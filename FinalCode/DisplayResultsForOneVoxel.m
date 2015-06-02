@@ -37,7 +37,7 @@ end
 
 NVox = ModelInfo.Nvoxels;
 
-DataIndex = find(ModelInfo.Indices == index);
+DataIndex = find(ModelInfo.Indices == index)
 if isempty(DataIndex)
     DataIndex = 1;
 end

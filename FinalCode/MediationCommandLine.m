@@ -66,23 +66,23 @@ Model1.Nperm = 0;
 Model1.Indices = 1;
 Model1.NJobSplit = 1;
 Model1.Thresholds = alpha;
-Startification is used when the resamples are created and needs to be a
-binomial parameter for right now. The use of a stratification variable is
-so that when the reampling is performed each resample maintains the
-number of subjects as in the stratification parameter. This is most
-applicable when there are multiple groups with different sample sizes.
+% Stratification is used when the resamples are created and needs to be a
+% binomial parameter for right now. The use of a stratification variable is
+% so that when the reampling is performed each resample maintains the
+% number of subjects as in the stratification parameter. This is most
+% applicable when there are multiple groups with different sample sizes.
 Model1.STRAT = [];
 Model1.Nsub = NSub;
 Model1.Nvar = Nvar;
 Model1.Nvoxels = 1;
 
-Prepare the output data header
+% Prepare the output data header
 DataHeader.fname = '';
 DataHeader.descrip = '';
 DataHeader.dt = [16 0];
 Model1.DataHeader = DataHeader;
-Create the direct effects model assuming the covariates are for all
-variables
+% Create the direct effects model assuming the covariates are for all
+% variables
 Direct = zeros(Nvar);
 Direct(1,[2 3]) = 1;
 Direct(2,[3]) = 1;
