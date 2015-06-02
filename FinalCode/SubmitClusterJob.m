@@ -31,3 +31,6 @@ elseif nargin == 3
     unix(ClusterCommand);
 end
 
+
+%% THE FOLLOWING MAY LIMIT THE NUMBER OF CONCURRENT JOBS
+% qsub script.sh -t 0-99%10

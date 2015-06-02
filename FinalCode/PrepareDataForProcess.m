@@ -260,9 +260,9 @@ else
             eval(Str);
             
             % Perform the point estimate calculation
-            VoxelWiseProcessPermute(InDataPath,0,0)
+            VoxelWiseProcessPermute(InDataPath,0,0,ModelInfo.TFCEparams)
             % Perform the permutation tests
-            VoxelWiseProcessPermute(InDataPath,1,ModelInfo.Nperm)
+            VoxelWiseProcessPermute(InDataPath,1,ModelInfo.Nperm,ModelInfo.TFCEparams)
             
     end
     fprintf(1,' Done!\n');

@@ -28,6 +28,7 @@ switch N
         %%
         r = corr([independent dependent]);
         R2 = r.^2;
+        % Total PVAF between depedent and each independent
         R2_1 = corr(dependent,independent(:,1))^2;
         R2_2 = corr(dependent,independent(:,2))^2;
         R2_3 = corr(dependent,independent(:,3))^2;
