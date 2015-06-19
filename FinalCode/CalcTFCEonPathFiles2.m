@@ -19,11 +19,32 @@ MaxTmaps = zeros(M,N,NFiles);
 MinTmaps = zeros(M,N,NFiles);
 MaxTFCE = zeros(NFiles,NPaths);
 MinTFCE = zeros(NFiles,NPaths);
+% Check to see if the data has been loaded previously and only reload the
+% new permutations.
+if exist(fullfile(pwd,'CalcTFCEResults.mat'))
+    PrevRes = load(fullfile(pwd,'CalcTFCEResults.mat'));
+    % Only need to start where the previous load left off
+    StartPoint = length(PrevRes.MinTFCE)+1;
+    
+    % Put these results into the respective matrices
+    MaxTmaps(:,:,1:StartPoint - 1) = PrevRes.MaxTmaps;
+    MinTmaps(:,:,1:StartPoint - 1) = PrevRes.MinTmaps;
+    MaxTFCE(1:StartPoint - 1,:) = PrevRes.MaxTFCE;
+    MinTFCE(1:StartPoint - 1,:) = PrevRes.MinTFCE;
+else
+    StartPoint = 1;
+end
 
 
-TFCEParams = [2 0.5 26];
 
-for i = 1:100%NFiles
+
+
+TFCEParams = ModelInfo.TFCEparams;
+% Check to see if results have been processed yet
+
+
+
+for i = StartPoint:NFiles
     fprintf(1,'File %d of %d\n',i,NFiles);
     load(F(i).name)
     % Extract the path data
@@ -54,7 +75,7 @@ for i = 1:100%NFiles
     end
 end
 
-
+save CalcTFCEResults MaxTmaps MinTmaps MaxTFCE MinTFCE
 
 
 PathPE = zeros(length(Parameters),NPaths);
@@ -76,12 +97,12 @@ for k = 1:NPaths
             %PathPERMpVal(i) = (length(find(PathPE(i) > MinPerm(:,k))))/(NFiles);
         end
     end
-    
-    Vo.fname = fullfile(BaseDir,sprintf('Path%02d_TFCEpVal.nii',k));
+    Tag = sprintf('TFCEPval_%dperm',NFiles);
+    Vo.fname = fullfile(fileparts(BaseDir),sprintf('Path%02d_%s.nii',k,Tag));
     I = zeros(Vo.dim);
     I(ModelInfo.Indices) = PathTFCEpVal;
     spm_write_vol(Vo,I)
-    Vo.fname = fullfile(BaseDir,sprintf('Path%02d_TFCEpe.nii',k));
+    Vo.fname = fullfile(fileparts(BaseDir),sprintf('Path%02d_TFCEpe.nii',k));
     I = zeros(Vo.dim);
     I(ModelInfo.Indices) = PathPETFCE;
     spm_write_vol(Vo,I)
@@ -107,19 +128,34 @@ for j = 2:M
                 end
             end
             % Write images to files
-            Tag = 'TtfcePval';
+            Tag = sprintf('TtfcePval_%dperm',NFiles);
             FileName = sprintf('Model%d_DEP%s_IND%s_%s.nii',k,ModelInfo.Names{k},ModelInfo.Names{j-1},Tag);
-            Vo.fname = fullfile(BaseDir,FileName);
+            Vo.fname = fullfile(fileparts(BaseDir),FileName);
             I = zeros(Vo.dim);
             I(ModelInfo.Indices) = pValDirect;
             spm_write_vol(Vo,I)
             % Write images to files
             Tag = 't';
             FileName = sprintf('Model%d_DEP%s_IND%s_%s.nii',k,ModelInfo.Names{k},ModelInfo.Names{j-1},Tag);
-            Vo.fname = fullfile(BaseDir,FileName);
+            Vo.fname = fullfile(fileparts(BaseDir),FileName);
             I = zeros(Vo.dim);
             I(ModelInfo.Indices) = tempDirect;
             spm_write_vol(Vo,I)
+            
+            % Write out the beta maps also
+            tempDirect = zeros(Nvoxels,1);
+            for i = 1:Nvoxels
+                tempDirect(i) = Parameters{i}.beta(j,k);
+            end
+            % Write images to files
+            Tag = 'beta';
+            FileName = sprintf('Model%d_DEP%s_IND%s_%s.nii',k,ModelInfo.Names{k},ModelInfo.Names{j-1},Tag);
+            Vo.fname = fullfile(fileparts(BaseDir),FileName);
+            I = zeros(Vo.dim);
+            I(ModelInfo.Indices) = tempDirect;
+            spm_write_vol(Vo,I)
+
+            
         end
     end
 end

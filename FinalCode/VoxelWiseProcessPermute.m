@@ -1,4 +1,4 @@
-function VoxelWiseProcessPermute(InDataPath,count,Nperm,TFCEparams)
+function VoxelWiseProcessPermute(InDataPath,count,Nperm,TFCEparams,StartIndex)
 % Make sure the random number seed is reset for every function call. This
 % avoids each cluster node starting with the same seed and producing the
 % same results. An alternative futur direction is a precalculation of the permutations for
@@ -19,12 +19,19 @@ fprintf(1,'Started at: %s\n',datestr(now));
 tic
 fprintf(1,'%s\n',InDataPath);
 % load data
-if nargin == 4
+if nargin == 5
     % Load the data and other variables
     load(InDataPath)
     % The cluster function calls pass strings
     if isstr(count); count = str2num(count); end
     if isstr(Nperm); Nperm = str2num(Nperm); end
+elseif nargin == 4
+    % Load the data and other variables
+    load(InDataPath)
+    % The cluster function calls pass strings
+    if isstr(count); count = str2num(count); end
+    if isstr(Nperm); Nperm = str2num(Nperm); end
+    StartIndex = 1;
 elseif nargin == 3
     % Load the data and other variables
     load(InDataPath)
@@ -32,6 +39,7 @@ elseif nargin == 3
     if isstr(count); count = str2num(count); end
     if isstr(Nperm); Nperm = str2num(Nperm); end
     TFCEparams = [2 0.5 6];
+    StartIndex = 1;
 elseif nargin == 2
     % If the number of permutations field is left blank then assume that
     % only point estimate is being calculated.
@@ -39,17 +47,24 @@ elseif nargin == 2
     if isstr(count); count = str2num(count); end
     Nperm = 0;
      TFCEparams = [2 0.5 6];
+     StartIndex = 1;
 elseif nargin == 1
     % point estimate
     load(InDataPath)
     count = 0;
     Nperm = 0;
      TFCEparams = [2 0.5 6];
+     StartIndex = 1;
 else 
     error('Expected at least one input.');
 end
 
-
+% Check the data path 
+if ispc
+    ModelInfo.BaseDir = strrep(ModelInfo.BaseDir,'/Users/','/home/');
+elseif ismac
+    ModelInfo.BaseDir = strrep(ModelInfo.BaseDir,'/home/','/Users/');
+end
 % Ensure that the InDataPath actually contained the ModelInfo structure
 if ~exist('ModelInfo','var')
     errordlg('The data passed does not contain the ModelInfo structure.');
@@ -188,7 +203,7 @@ spm_write_vol(Vm,Im);
 outFile = fullfile(tempData.BaseDir,'tempTFCEout.nii');
 
 % Cycle over 
-for k = 1:size(Samp,2)
+for k = StartIndex:size(Samp,2)
     tic
     % Cycle over all voxels
     for i = 1:Nvoxels
