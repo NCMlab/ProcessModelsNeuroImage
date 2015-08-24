@@ -1,17 +1,21 @@
-function [maxTFCE, minTFCE] = subfnApplyTFCE(ImagePath,MaskPath)
+function [maxTFCE, minTFCE] = subfnApplyTFCE(ImagePath,MaskPath, TFCEparams)
 % Take a single input image and find the max and min TFCE values using the
 % FSL commands
 
 % If only files names are given assume the file is in the current
 % directory.
-
+if nargin == 2
+    TFCEparams = [2 0.5 6];
+end
 
 
 % Find fslmaths
 setenv('FSLOUTPUTTYPE','NIFTI');
 path1 = getenv('PATH');
-path1 = [path1 ':/usr/local/fsl/bin'];
-setenv('PATH', path1);
+if isempty(strfind(path1,'fsl'))
+    path1 = [path1 ':/usr/local/fsl/bin'];
+    setenv('PATH', path1);
+end
 
 FSLMathsPath = 'fslmaths  ';
 FSLStatsPath = 'fslstats  ';
@@ -21,7 +25,7 @@ Vm = spm_vol(MaskPath);
 [PathName, FileName] = fileparts(Vi.fname);
 outFile = fullfile(PathName,'TFCEtemp.nii');
 
-Str = sprintf('! %s %s -mas %s -nan -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), Vi.fname,Vm.fname,outFile);
+Str = sprintf('! %s %s -mas %s -nan -tfce %0.2f %0.2f %0.2f %s',FSLMathsPath(1:end-1), Vi.fname,Vm.fname,TFCEparams(1), TFCEparams(2),TFCEparams(3),outFile);
 [a b] = unix(Str);
 if a == 1 % Check to see if there are any errors
     % Errors arise if all values in an image are negative
@@ -41,7 +45,8 @@ Str = sprintf('! %s %s -mul -1 -thr 0 %s',FSLMathsPath(1:end-1), Vi.fname, outFi
 [a b] = unix(Str);
 
 % Use the fslmaths TFCE command on the saved file
-Str = sprintf('! %s %s -mas %s -nan -tfce 2 0.5 6 %s',FSLMathsPath(1:end-1), outFile,Vm.fname,outFile);
+Str = sprintf('! %s %s -mas %s -nan -tfce %0.2f %0.2f %0.2f %s',FSLMathsPath(1:end-1), Vi.fname,Vm.fname,TFCEparams(1), TFCEparams(2),TFCEparams(3),outFile);
+
 [a b] = unix(Str);
 if a == 1    
     % use fslstats to find the maximum in the file

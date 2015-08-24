@@ -98,7 +98,7 @@ for i = 1:Nperm
     MaxStat(i) = str2num(b(findUnder(1)+1:findUnder(2)-1));
 end
 % Point estimate
-pe = mean(I,4);
+pe = mean(I,4)+2;
 
 
 % Run TFCE on this

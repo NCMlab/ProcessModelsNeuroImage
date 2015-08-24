@@ -1,4 +1,4 @@
-function VoxelWiseProcessPermute(InDataPath,count,Nperm)
+function VoxelWiseProcessPermute(InDataPath,count,Nperm,TFCEparams,StartIndex)
 % Make sure the random number seed is reset for every function call. This
 % avoids each cluster node starting with the same seed and producing the
 % same results. An alternative futur direction is a precalculation of the permutations for
@@ -7,8 +7,10 @@ function VoxelWiseProcessPermute(InDataPath,count,Nperm)
 
 setenv('FSLOUTPUTTYPE','NIFTI');
 path1 = getenv('PATH');
-path1 = [path1 ':/usr/local/fsl/bin'];
-setenv('PATH', path1);
+if isempty(strfind(path1,'fsl'))
+    path1 = [path1 ':/usr/local/fsl/bin'];
+    setenv('PATH', path1);
+end
 
 %RandStream('mt19937ar','Seed',sum(100*clock));
 rng shuffle
@@ -17,29 +19,52 @@ fprintf(1,'Started at: %s\n',datestr(now));
 tic
 fprintf(1,'%s\n',InDataPath);
 % load data
-if nargin == 3
+if nargin == 5
     % Load the data and other variables
     load(InDataPath)
     % The cluster function calls pass strings
     if isstr(count); count = str2num(count); end
     if isstr(Nperm); Nperm = str2num(Nperm); end
-
+elseif nargin == 4
+    % Load the data and other variables
+    load(InDataPath)
+    % The cluster function calls pass strings
+    if isstr(count); count = str2num(count); end
+    if isstr(Nperm); Nperm = str2num(Nperm); end
+    StartIndex = 1;
+elseif nargin == 3
+    % Load the data and other variables
+    load(InDataPath)
+    % The cluster function calls pass strings
+    if isstr(count); count = str2num(count); end
+    if isstr(Nperm); Nperm = str2num(Nperm); end
+    TFCEparams = [2 0.5 6];
+    StartIndex = 1;
 elseif nargin == 2
     % If the number of permutations field is left blank then assume that
     % only point estimate is being calculated.
     load(InDataPath)
     if isstr(count); count = str2num(count); end
     Nperm = 0;
+     TFCEparams = [2 0.5 6];
+     StartIndex = 1;
 elseif nargin == 1
     % point estimate
     load(InDataPath)
     count = 0;
     Nperm = 0;
-else
+     TFCEparams = [2 0.5 6];
+     StartIndex = 1;
+else 
     error('Expected at least one input.');
 end
 
-
+% Check the data path 
+if ispc
+    ModelInfo.BaseDir = strrep(ModelInfo.BaseDir,'/Users/','/home/');
+elseif ismac
+    ModelInfo.BaseDir = strrep(ModelInfo.BaseDir,'/home/','/Users/');
+end
 % Ensure that the InDataPath actually contained the ModelInfo structure
 if ~exist('ModelInfo','var')
     errordlg('The data passed does not contain the ModelInfo structure.');
@@ -64,7 +89,16 @@ end
 % How many voxels 
 Nvoxels = length(ModelInfo.Indices);
 %%
+[PathName FileName] = fileparts(InDataPath);
+[PathName FileName] = fileparts(PathName);
+ResultsFolder = fullfile(PathName,'Results');
+if ~exist(ResultsFolder,'dir')
+    mkdir(ResultsFolder)
+end
+
+
 if Nperm > 0
+
     
     % Create the structure to hold the permutation resample results.
     % Test one voxel to determine the correct size for all of the results.
@@ -169,7 +203,7 @@ spm_write_vol(Vm,Im);
 outFile = fullfile(tempData.BaseDir,'tempTFCEout.nii');
 
 % Cycle over 
-for k = 1:size(Samp,2)
+for k = StartIndex:size(Samp,2)
     tic
     % Cycle over all voxels
     for i = 1:Nvoxels
@@ -185,17 +219,20 @@ for k = 1:size(Samp,2)
             end
         end
         % Shuffle the specified column
-        tempData.data(:,tempData.ColumnToShuffle) = tempData.data(Samp(:,k),tempData.ColumnToShuffle);
+        % tempData.data(:,tempData.ColumnToShuffle) = tempData.data(Samp(:,k),tempData.ColumnToShuffle);
 
-        Results = FitProcessModel(tempData);
+        Results = FitProcessModelPermute(tempData,Samp(:,k));
+        
         if Nperm == 0
             % this is the point estimate, keep everything
             Parameters{i} = Results;
         else
             % only keep the path estimates
             PermResults.Paths{i} = Results.Paths;
+            PermResults.PathsTnorm{i} = Results.PathsTnorm;
             PermResults.beta(:,:,i) = Results.beta;
             PermResults.t(:,:,i) = Results.t;
+            
         end
         
         % Need to calculate the cluster enhanced point estimate values!
@@ -231,7 +268,7 @@ for k = 1:size(Samp,2)
                     tempI(tempData.Indices) = t;
                     spm_write_vol(Vo,tempI);
 %%%% THIS NEEDS TO BE RESHAPED %%%%%%%%%%%%%%%%5                    
-                    [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname);
+                    [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname,TFCEparams);
                     
                     TFCEpathsMax(i,j,k) = maxTFCE;
                     TFCEpathsMin(i,j,k) = minTFCE;
@@ -254,7 +291,7 @@ for k = 1:size(Samp,2)
                     tempI(tempData.Indices) = t;
                     spm_write_vol(Vo,tempI);
                     
-                    [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname);
+                    [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname,TFCEparams);
                     
                     TFCEtMax(i,j,k) = maxTFCE;
                     TFCEtMin(i,j,k) = minTFCE;
@@ -262,7 +299,12 @@ for k = 1:size(Samp,2)
                 end
             end
         end
+        
+         OutFile = fullfile(ResultsFolder,sprintf('Path_count%04d',k));
+    Str = sprintf('save %s PermResults',OutFile);
+    eval(Str)   
     end
+
     fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
 end
 fprintf(1,'Saving data to file now.\n\n');

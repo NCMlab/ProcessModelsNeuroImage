@@ -1,4 +1,4 @@
-function Results = FitProcessModel(data)
+function Results = FitProcessModelPermute(data,Samp)
 % This is the program that fits the multiple regression models defined by
 % this analysis.
 % For the direct effects the unstandardized parameter estimates are
@@ -47,7 +47,11 @@ for i = 1:M
         % sub-function would need to be optimized. This could be done be
         % eliminating all the regression metrics/tests that are performed
         % and only leave the absolute minimum.
-        S = ProcessRegStats(data.data(:,i),[data.data(:,Col) Interaction]);
+        
+        
+        S = ProcessRegStats(data.data(Samp,i),[data.data(:,Col) Interaction]);
+        
+        
         % Once the regression model is fit, extract the required estimated
         % values.
         Results.beta([1; 1+find(data.Direct(:,i))],i) = S.beta(1:length(Col)+1);
