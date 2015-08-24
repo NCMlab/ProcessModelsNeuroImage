@@ -20,7 +20,7 @@ fprintf(fid,'#PBS -j oe\n');
 % Start matlab using the nodisplay option
 fprintf(fid,'/usr/local/bin/matlab -nodisplay -singleCompThread -nodisplay -nojvm<< EOF\n');
 % reset the random number seed
-fprintf(fid,'rng shuffle');
+fprintf(fid,'rng shuffle\n');
 % The path to the spm software
 fprintf(fid,'%s\n','addpath /opt/share/spm12');
 % The path to the Process toolbox
