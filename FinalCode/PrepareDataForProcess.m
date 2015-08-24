@@ -190,7 +190,8 @@ if ModelInfo.NJobSplit > 1
             fid = fopen(jobPath,'w');
             
             % Create string of the command to be run with MatLab
-            Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'');',InDataPath,0,0);
+            %Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'');',InDataPath,0,0,ModelInfo.TFCEparams);
+            Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'',[''%0.2f'' ''%0.2f'' %0.2f''])',InDataPath,0,0,ModelInfo.TFCEparams(1),ModelInfo.TFCEparams(2),ModelInfo.TFCEparams(3));
             % Create the cluster submission script
             CreateClusterJobFile(Command,fid)
             % Submit the script to the cluster
@@ -206,7 +207,8 @@ if ModelInfo.NJobSplit > 1
                 jobPath = fullfile(InJobFolder,sprintf('job_%04d.sh',i));
                 fid = fopen(jobPath,'w');
                 % Create string of the command to be run with MatLab
-                Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'');',InDataPath,i,NPermPerJob);
+                %Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'');',InDataPath,i,NPermPerJob);
+                Command = sprintf('VoxelWiseProcessPermute(''%s'',''%d'',''%d'',[''%0.2f'' ''%0.2f'' %0.2f''])',InDataPath,i,NPermPerJob,ModelInfo.TFCEparams(1),ModelInfo.TFCEparams(2),ModelInfo.TFCEparams(3));
                 % Create the cluster submission script
                 CreateClusterJobFile(Command,fid)
                 % Submit the script to the cluster
