@@ -251,7 +251,7 @@ for k = StartIndex:size(Samp,2)
         for i = 1:NPaths
             ThisPath = zeros(PathSize1,PathSize2,Nvoxels);
             for j = 1:Nvoxels
-                ThisPath(:,:,j) = PermResults.Paths{j}{i};
+                ThisPath(:,:,j) = PermResults.PathsTnorm{j}{i};
             end
             for j = 1:PathSize1
                 for m = 1:PathSize2
@@ -272,7 +272,8 @@ for k = StartIndex:size(Samp,2)
                     
                     TFCEpathsMax(i,j,k) = maxTFCE;
                     TFCEpathsMin(i,j,k) = minTFCE;
-
+                    PermResults.TFCEpathsMax = maxTFCE;
+                    PermResults.TFCEpathsMin = minTFCE;
                 end
             end
         end
@@ -295,7 +296,8 @@ for k = StartIndex:size(Samp,2)
                     
                     TFCEtMax(i,j,k) = maxTFCE;
                     TFCEtMin(i,j,k) = minTFCE;
-                    
+                    PermResults.TFCEtMax = maxTFCE;
+                    PermResults.TFCEtMin = minTFCE;
                 end
             end
         end
@@ -304,7 +306,6 @@ for k = StartIndex:size(Samp,2)
     Str = sprintf('save %s PermResults',OutFile);
     eval(Str)   
     end
-
     fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
 end
 fprintf(1,'Saving data to file now.\n\n');

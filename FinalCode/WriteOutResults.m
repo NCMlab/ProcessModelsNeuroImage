@@ -13,7 +13,7 @@ end
 fprintf(1,'%s\n',ResultsFolder);
 
 % Check to see if there are Permute results
-if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute*.mat')))
+if ~isempty(dir(fullfile(ResultsFolder,'Results','Path_*.mat')))
     ModelType = 'permutation';
 elseif ~isempty(dir(fullfile(ResultsFolder,'Results','BootStrap*.mat')))
     ModelType = 'bootstrap';
@@ -43,7 +43,7 @@ switch ModelType
         
         
         % locate the results files
-        F = dir(fullfile(ResultsFolder,'Results','Permute*.mat'));
+        F = dir(fullfile(ResultsFolder,'Results','Path_*.mat'));
         NFiles = length(F);
         
         % Check to see if the analyses are completed
@@ -60,7 +60,7 @@ switch ModelType
         % n: steps in this moderated path for dimension 2
         % o: number of paths
         % p: number of permutaions for this chunk of results
-        [m n o p] = size(MaxPaths);
+        [m n o p] = size(PermResults.TFCEpathsMax);
         % Check to make sure all the files are there
         if ModelInfo.Nperm < p*NFiles
             % extra permutations were done!

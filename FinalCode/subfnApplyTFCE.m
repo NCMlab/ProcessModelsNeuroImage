@@ -23,14 +23,16 @@ FSLStatsPath = 'fslstats  ';
 Vi = spm_vol(ImagePath);
 Vm = spm_vol(MaskPath);
 [PathName, FileName] = fileparts(Vi.fname);
-outFile = fullfile(PathName,'TFCEtemp.nii');
 
-Str = sprintf('! %s %s -mas %s -nan -tfce %0.2f %0.2f %0.2f %s',FSLMathsPath(1:end-1), Vi.fname,Vm.fname,TFCEparams(1), TFCEparams(2),TFCEparams(3),outFile);
+%% POSITIVE DIRECTION
+POSoutFile = fullfile(PathName,'posTFCEtemp.nii');
+
+Str = sprintf('! %s %s -mas %s -nan -tfce %0.2f %0.2f %0.2f %s',FSLMathsPath(1:end-1), Vi.fname,Vm.fname,TFCEparams(1), TFCEparams(2),TFCEparams(3),POSoutFile);
 [a b] = unix(Str);
 if a == 1 % Check to see if there are any errors
     % Errors arise if all values in an image are negative
     % use fslstats to find the maximum in the file
-    Str = sprintf('! %s %s -n -R',FSLStatsPath(1:end-1),outFile);
+    Str = sprintf('! %s %s -n -R',FSLStatsPath(1:end-1),POSoutFile);
     [a b] = unix(Str);
     findUnder = find(b == ' ');
     % save this value
@@ -40,17 +42,21 @@ else
     posMaxTFCE = 0;
     posMinTFCE = 0;
 end
+%% NEGATIVE DIRECTION
 % Now do it for the negative direction
-Str = sprintf('! %s %s -mul -1 -thr 0 %s',FSLMathsPath(1:end-1), Vi.fname, outFile);
+NEGoutFile = fullfile(PathName,'negTFCEtemp.nii');
+
+Str = sprintf('! %s %s -mul -1 -thr 0 %s',FSLMathsPath(1:end-1), Vi.fname, NEGoutFile);
 [a b] = unix(Str);
 
+
 % Use the fslmaths TFCE command on the saved file
-Str = sprintf('! %s %s -mas %s -nan -tfce %0.2f %0.2f %0.2f %s',FSLMathsPath(1:end-1), Vi.fname,Vm.fname,TFCEparams(1), TFCEparams(2),TFCEparams(3),outFile);
+Str = sprintf('! %s %s -mas %s -nan -tfce %0.2f %0.2f %0.2f %s',FSLMathsPath(1:end-1), NEGoutFile,Vm.fname,TFCEparams(1), TFCEparams(2),TFCEparams(3),NEGoutFile);
 
 [a b] = unix(Str);
 if a == 1    
     % use fslstats to find the maximum in the file
-    Str = sprintf('! %s %s -n -R',FSLStatsPath(1:end-1),outFile);
+    Str = sprintf('! %s %s -n -R',FSLStatsPath(1:end-1),NEGoutFile);
     [a b] = unix(Str);
     findUnder = find(b == ' ');
     % save this value
@@ -60,7 +66,7 @@ else
     negMaxTFCE = 0;
     negMinTFCE = 0;
 end 
-% Combine the two directions
+%% Combine the two directions
 if posMaxTFCE > negMinTFCE
     maxTFCE = posMaxTFCE;
 else

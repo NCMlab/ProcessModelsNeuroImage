@@ -144,7 +144,7 @@ for j = 1:NumberOfPaths
         (prod(ResultPathbetas([1 3]).^2)).*(ResultPathSE(2).^2) + ...
         (prod(ResultPathbetas([2 3]).^2)).*(ResultPathSE(1).^2));
     else
-        Results.PathsSE{j} = 0;
+        Results.PathsSE{j} = ResultPathSE;
     end
     Results.PathsTnorm{j} = ResultPath/Results.PathsSE{j};
 end
