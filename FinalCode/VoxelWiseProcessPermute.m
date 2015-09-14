@@ -1,4 +1,4 @@
-function VoxelWiseProcessPermute(InDataPath,count,Nperm,TFCEparams,StartIndex)
+function VoxelWiseProcessPermute(InDataPath,Nperm,TFCEparams,StartIndex)
 % Make sure the random number seed is reset for every function call. This
 % avoids each cluster node starting with the same seed and producing the
 % same results. An alternative futur direction is a precalculation of the permutations for
@@ -19,24 +19,17 @@ fprintf(1,'Started at: %s\n',datestr(now));
 tic
 fprintf(1,'%s\n',InDataPath);
 % load data
-if nargin == 5
+if nargin == 4
     % Load the data and other variables
     load(InDataPath)
     % The cluster function calls pass strings
-    if isstr(count); count = str2num(count); end
     if isstr(Nperm); Nperm = str2num(Nperm); end
-elseif nargin == 4
-    % Load the data and other variables
-    load(InDataPath)
-    % The cluster function calls pass strings
-    if isstr(count); count = str2num(count); end
-    if isstr(Nperm); Nperm = str2num(Nperm); end
-    StartIndex = 1;
+    if isstr(StartIndex); StartIndex = str2num(StartIndex); end
 elseif nargin == 3
+    
     % Load the data and other variables
     load(InDataPath)
     % The cluster function calls pass strings
-    if isstr(count); count = str2num(count); end
     if isstr(Nperm); Nperm = str2num(Nperm); end
     TFCEparams = [2 0.5 6];
     StartIndex = 1;
@@ -44,14 +37,13 @@ elseif nargin == 2
     % If the number of permutations field is left blank then assume that
     % only point estimate is being calculated.
     load(InDataPath)
-    if isstr(count); count = str2num(count); end
     Nperm = 0;
      TFCEparams = [2 0.5 6];
      StartIndex = 1;
 elseif nargin == 1
     % point estimate
     load(InDataPath)
-    count = 0;
+
     Nperm = 0;
      TFCEparams = [2 0.5 6];
      StartIndex = 1;
@@ -203,7 +195,12 @@ spm_write_vol(Vm,Im);
 outFile = fullfile(tempData.BaseDir,'tempTFCEout.nii');
 
 % Cycle over 
-for k = StartIndex:size(Samp,2)
+if Nperm > 0
+    NRuns = Nperm;
+else
+    NRuns = 1;
+end
+for k = 1:NRuns
     tic
     % Cycle over all voxels
     for i = 1:Nvoxels
@@ -302,9 +299,9 @@ for k = StartIndex:size(Samp,2)
             end
         end
         
-         OutFile = fullfile(ResultsFolder,sprintf('Path_count%04d',k));
-    Str = sprintf('save %s PermResults',OutFile);
-    eval(Str)   
+%         OutFile = fullfile(ResultsFolder,sprintf('Path_count%04d',k));
+%    Str = sprintf('save %s PermResults',OutFile);
+%    eval(Str)   
     end
     fprintf(1,'Finished permutation %d of %d in %0.2f s.\n',k,Nperm,toc);
 end
@@ -317,7 +314,7 @@ if Nperm > 0
     if ~exist(ResultsFolder,'dir')
         mkdir(ResultsFolder)
     end
-    OutFile = fullfile(ResultsFolder,sprintf('Permute_count%04d_%dSamp',count,Nperm));
+    OutFile = fullfile(ResultsFolder,sprintf('Permute_count%04d_%dSamp',StartIndex,Nperm));
     Str = sprintf('save %s MaxPaths MinPaths MaxBeta MinBeta TFCEtMax TFCEtMin TFCEpathsMax TFCEpathsMin',OutFile);
     eval(Str)
 else
@@ -333,6 +330,7 @@ else
     fprintf(1,'Saved point estimate results to file.\n\n');
 end
     
+%% UPDATE THE ModelInfo File to reflect the additional permutations
 
   
     

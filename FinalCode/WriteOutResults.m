@@ -10,10 +10,11 @@ if nargin == 0
     ResultsFolder = spm_select(1,'dir','Select analysis directory');
 end
 
+
 fprintf(1,'%s\n',ResultsFolder);
 
 % Check to see if there are Permute results
-if ~isempty(dir(fullfile(ResultsFolder,'Results','Path_*.mat')))
+if ~isempty(dir(fullfile(ResultsFolder,'Results','Permute_*.mat')))
     ModelType = 'permutation';
 elseif ~isempty(dir(fullfile(ResultsFolder,'Results','BootStrap*.mat')))
     ModelType = 'bootstrap';
@@ -23,9 +24,7 @@ end
 load(fullfile(ResultsFolder,'data','ModelInfo'))
 ModelInfo.ResultsPath = ResultsFolder;
 
-% Remove the data from the structure to preserve memory
-ModelInfo.data = [];
-
+ModelInfo.BaseDir = ResultsFolder;
 %% WRITE OUT ALL IMAGES from the regression models
 % Load up the point estimate results
 F = dir(fullfile(ResultsFolder,'Results','PointEstimate*.mat'));
@@ -43,7 +42,7 @@ switch ModelType
         
         
         % locate the results files
-        F = dir(fullfile(ResultsFolder,'Results','Path_*.mat'));
+        F = dir(fullfile(ResultsFolder,'Results','Permute_count*.mat'));
         NFiles = length(F);
         
         % Check to see if the analyses are completed
@@ -60,16 +59,13 @@ switch ModelType
         % n: steps in this moderated path for dimension 2
         % o: number of paths
         % p: number of permutaions for this chunk of results
-        [m n o p] = size(PermResults.TFCEpathsMax);
-        % Check to make sure all the files are there
-        if ModelInfo.Nperm < p*NFiles
-            % extra permutations were done!
-            ModelInfo.Nperm = p*NFiles;
-        end
+        [m n o p] = size(MaxPaths);
+
         % The files may each contain different number of permutations
         Nperm = 0;
         PermPerFile = zeros(NFiles,1);
         RunningSum = zeros(NFiles+1,1);
+        
         for i = 1:NFiles
             FindUnder = findstr(F(i).name,'_');
             FindSamp = findstr(F(i).name,'Samp');
@@ -79,6 +75,13 @@ switch ModelType
             RunningSum(i+1) = RunningSum(i) + NumPermThisFile;
         end
         RunningSum = RunningSum(2:end);
+        % Update the ModelInfo structure if needed
+        if ~(ModelInfo.Nperm == Nperm)
+            ModelInfo.Nperm = Nperm;
+            Str = sprintf('save %s ModelInfo',fullfile(ResultsFolder,'data','ModelInfo'));
+            eval(Str);
+        end
+        
         % Create the structures to hold the permutation results for the
         % path values and the standardized parameter estimates
         MaxPermPaths = zeros(m,n,o,Nperm);
@@ -151,7 +154,17 @@ switch ModelType
         % Create the TFCE parameter estimate images
         
         WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,o,m,'perm')
-        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MaxTFCEpaths,PointEstimatePathtfce,o,m,'tfce')
+
+        
+        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MinTFCEpaths,PointEstimatePathtfce,o,m,'tfce')
+        figure
+        subplot(311)
+        hist(squeeze(MaxTFCEpaths(1,1,1,:)))
+        subplot(312)
+        hist(squeeze(PointEstimatePathtfce(1,1,1,:)))
+        subplot(313)
+        hist(squeeze(MinTFCEpaths(1,1,1,:)))
+        
         WriteOutPermutationB(ModelInfo,MaxPermB,MinPermB,PointEstimateB,'permB')
         WriteOutPermutationB(ModelInfo,MaxTFCEt,MinTFCEt,PointEstimatettfce,'tfceT')
     case 'bootstrap'
@@ -317,7 +330,7 @@ for kk = 1:o % cycle over the number of paths
             end
         end
         % Create the thresholded path output file name.
-        Vo.fname=(fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%s.nii',kk,i,Tag)));
+        Vo.fname=(fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%s_NPerm_%d.nii',kk,i,Tag,Nperm)));
         I = zeros(Vo.dim);
         I(ModelInfo.Indices) = probTemp;
         % Write the image.
@@ -344,7 +357,7 @@ for i = 1:ModelInfo.Nvar
             if ModelInfo.Direct(j,i)
                 % create the filename describing the dependent and
                 % independent effects
-                FileName = sprintf('Model%d_DEP%s_IND%s_%s.nii',i,ModelInfo.Names{i},ModelInfo.Names{j},Tag);
+                FileName = sprintf('Model%d_DEP%s_IND%s_%s_NPerm_%d.nii',i,ModelInfo.Names{i},ModelInfo.Names{j},Tag,ModelInfo.Nperm);
                 % sort the max and min permutation results
                 sMax = sort(squeeze(MaxB(j+1,i,:)),'descend');
                 sMin = sort(squeeze(MinB(j+1,i,:)));

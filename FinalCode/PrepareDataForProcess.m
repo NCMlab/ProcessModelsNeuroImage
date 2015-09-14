@@ -262,10 +262,18 @@ else
             eval(Str);
             
             % Perform the point estimate calculation
-            VoxelWiseProcessPermute(InDataPath,0,0,ModelInfo.TFCEparams)
+            VoxelWiseProcessPermute(InDataPath,0,ModelInfo.TFCEparams)
             % Perform the permutation tests
-            VoxelWiseProcessPermute(InDataPath,1,ModelInfo.Nperm,ModelInfo.TFCEparams)
-            
+            % VoxelWiseProcessPermute(InDataPath,1,ModelInfo.Nperm,ModelInfo.TFCEparams)
+            % Break the full number of permutations into chunks. Therefore,
+            % each chunk is saved and the entire process does not need to
+            % finish before results can be investigated. This is also
+            % advantageous because if the host computer fails the results
+            % up to that point are saved.
+            ChunkSize = 2;
+            for i = 1:ceil(ModelInfo.Nperm/ChunkSize)
+                VoxelWiseProcessPermute(InDataPath,ChunkSize,ModelInfo.TFCEparams,(i-1)*ChunkSize+1);
+            end
     end
     fprintf(1,' Done!\n');
 end

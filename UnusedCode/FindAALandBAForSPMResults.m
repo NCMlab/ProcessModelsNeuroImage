@@ -110,9 +110,13 @@ if OtherImage
     FindAALandBAForCurrentSPMResultsinOTHERImage(XYZmm,xSPM);
 end
 
-fprintf(1,'%s\tLat\tBA\tx\ty\tz\tT\tk\n','Region');
+fprintf(1,'ClId\t%s\tLat\tBA\tx\ty\tz\tT\tk\n','Region');
+count = 0;
 for i = 1:NClust
-    fprintf(1,'%s\t%s\t%s\t',AALList{i}(1:end-2), AALList{i}(end),BAList{i});
+    if isempty(strmatch(ClList{i},'--'))
+        count = count + 1;
+    end
+    fprintf(1,'%d\t%s\t%s\t%s\t',count,AALList{i}(1:end-2), AALList{i}(end),BAList{i});
     fprintf(1,'%d\t%d\t%d\t',XYZmm(i,:));
 %    fprintf(fid,'%0.2f\t%0.2f\t%0.2f\t%d\n',TList(i,1),ZList(i,1),pList(i,1),ClList(i,1));
     fprintf(1,'%0.3f\t%s\n',TList(i,1),ClList{i});

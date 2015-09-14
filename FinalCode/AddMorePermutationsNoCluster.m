@@ -16,7 +16,7 @@ load(InDataPath)
 %JobOutputFolder = fullfile(ResultsFolder,'JobOutput');
 
 
-VoxelWiseProcessPermute(InDataPath,1,ModelInfo.Nperm,ModelInfo.TFCEparams,MaxPerm + 1);
+VoxelWiseProcessPermute(InDataPath,1,ToDoPerm,ModelInfo.TFCEparams,MaxPerm + 1);
             
 % Write out the resultant images
 % Command = sprintf('WriteOutResults(''%s'')',OutFolder);
