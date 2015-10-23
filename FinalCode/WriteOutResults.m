@@ -34,7 +34,7 @@ WriteOutParameterMaps('beta', Parameters, ModelInfo)
 WriteOutParameterMaps('B', Parameters, ModelInfo)
 WriteOutParameterMaps('t', Parameters, ModelInfo)
 
-
+WriteOutPathPointEstimate(Parameters,ModelInfo)
 %% Find the number of results files
 switch ModelType
     case 'permutation'
@@ -46,12 +46,12 @@ switch ModelType
         NFiles = length(F);
         
         % Check to see if the analyses are completed
-        if ~(NFiles == ModelInfo.NJobSplit)
-            Button = questdlg('The analysis is not complete, continue anyway?','Continue?','Yes','No','Yes');
-            if strmatch(Button, 'No')
-                error('This analysis is not complete.');
-            end
-        end
+%         if ~(NFiles == ModelInfo.NJobSplit)
+%             Button = questdlg('The analysis is not complete, continue anyway?','Continue?','Yes','No','Yes');
+%             if strmatch(Button, 'No')
+%                 error('This analysis is not complete.');
+%             end
+%         end
         
         % load a single results fle to determine the size of the paths
         load(fullfile(ResultsFolder,'Results',F(1).name))
@@ -76,23 +76,23 @@ switch ModelType
         end
         RunningSum = RunningSum(2:end);
         % Update the ModelInfo structure if needed
-        if ~(ModelInfo.Nperm == Nperm)
-            ModelInfo.Nperm = Nperm;
-            Str = sprintf('save %s ModelInfo',fullfile(ResultsFolder,'data','ModelInfo'));
-            eval(Str);
-        end
+%         if ~(ModelInfo.Nperm == Nperm)
+%             ModelInfo.Nperm = Nperm;
+%             Str = sprintf('save %s ModelInfo',fullfile(ResultsFolder,'data','ModelInfo'));
+%             eval(Str);
+%         end
         
         % Create the structures to hold the permutation results for the
         % path values and the standardized parameter estimates
-        MaxPermPaths = zeros(m,n,o,Nperm);
-        MinPermPaths = zeros(m,n,o,Nperm);
+        MaxPermPaths = -99999*ones(m,n,o,Nperm);
+        MinPermPaths = -99999*ones(m,n,o,Nperm);
         [mB nB pB] = size(MaxBeta);
-        MaxPermB = zeros(mB,nB,Nperm);
-        MinPermB = zeros(mB,nB,Nperm);
-        MaxTFCEt = zeros(mB,nB,Nperm);
-        MinTFCEt = zeros(mB,nB,pB*Nperm);
-        MaxTFCEpaths = zeros(m,n,o,Nperm);
-        MinTFCEpaths = zeros(m,n,o,Nperm);
+        MaxPermB = -99999*ones(mB,nB,Nperm);
+        MinPermB = -99999*ones(mB,nB,Nperm);
+        MaxTFCEt = -99999*ones(mB,nB,Nperm);
+        MinTFCEt = -99999*ones(mB,nB,Nperm);
+        MaxTFCEpaths = -99999*ones(m,n,o,Nperm);
+        MinTFCEpaths = -99999*ones(m,n,o,Nperm);
         % load the data and put the permutation results in these structures
         for i = 1:NFiles
             Indices = (RunningSum(i)-PermPerFile(i)+1):RunningSum(i);
@@ -121,7 +121,7 @@ switch ModelType
         PointEstimatettfce = zeros(mB, nB, length(Parameters));
         for i = 1:length(Parameters)
             for kk = 1:o
-                PointEstimatePath(:,:,kk,i) = Parameters{i}.Paths{kk};
+                PointEstimatePath(:,:,kk,i) = Parameters{i}.PathsTnorm{kk};
             end
             PointEstimateB(:,:,i) = Parameters{i}.B;
             PointEstimatet(:,:,i) = Parameters{i}.t;
@@ -134,7 +134,7 @@ switch ModelType
                     DataForThisTest = squeeze(PointEstimatePath(ii,jj,kk,:));
                     % Since the TFCE expects t maps, Z normalize the path
                     % coefficients so that they are in the expected range.
-                    PointEstimatePathtfce(ii,jj,kk,:) = subfnCalcTFCE(Znorm(DataForThisTest), ModelInfo);
+                    PointEstimatePathtfce(ii,jj,kk,:) = subfnCalcTFCE((DataForThisTest), ModelInfo, ModelInfo.TFCEparams);
                 end
             end
         end
@@ -144,7 +144,7 @@ switch ModelType
                 if PointEstimatet(i,j,1) ~= 0
                     fprintf(1,'i = %d, j = %d\n',i,j);
                     DataForThisTest = squeeze(PointEstimatet(i,j,:));
-                    PointEstimatettfce(i,j,:) = subfnCalcTFCE(DataForThisTest, ModelInfo);
+                    PointEstimatettfce(i,j,:) = subfnCalcTFCE(DataForThisTest, ModelInfo, ModelInfo.TFCEparams);
                 end
             end
         end
@@ -153,20 +153,21 @@ switch ModelType
         %%%%%%% TO DO
         % Create the TFCE parameter estimate images
         
-        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,o,m,'perm')
+        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,o,m,'perm',Nperm)
 
         
-        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MinTFCEpaths,PointEstimatePathtfce,o,m,'tfce')
-        figure
-        subplot(311)
-        hist(squeeze(MaxTFCEpaths(1,1,1,:)))
-        subplot(312)
-        hist(squeeze(PointEstimatePathtfce(1,1,1,:)))
-        subplot(313)
-        hist(squeeze(MinTFCEpaths(1,1,1,:)))
+        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MinTFCEpaths,PointEstimatePathtfce,o,m,'tfce',Nperm)
+%         figure
+%         subplot(311)
+%         hist(squeeze(MaxTFCEpaths(1,1,1,:)),100)
+%         subplot(312)
+%         hist(squeeze(PointEstimatePathtfce(1,1,1,:)),100)
+%         subplot(313)
+%         hist(squeeze(MinTFCEpaths(1,1,1,:)),100)
         
-        WriteOutPermutationB(ModelInfo,MaxPermB,MinPermB,PointEstimateB,'permB')
-        WriteOutPermutationB(ModelInfo,MaxTFCEt,MinTFCEt,PointEstimatettfce,'tfceT')
+        WriteOutPermutationB(ModelInfo,MaxPermB,MinPermB,PointEstimateB,'permB',Nperm)
+        WriteOutPermutationB(ModelInfo,MaxTFCEt,MinTFCEt,PointEstimatettfce,'tfceT',Nperm)
+        
     case 'bootstrap'
         % There is a problem here fusing the split results back together
         
@@ -285,12 +286,12 @@ end
 
 
 
-function WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate,o,m,Tag)
+function WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimate,o,m,Tag,Nperm)
 %% WRITE OUT THE PATH IMAGES FOR THE PERMUTATION TEST
 % cycle over the thresholds requested
 % This allows the images to be written out even if the processing is not
 % complete;
-Nperm = size(MaxPermPaths,4);
+%Nperm = size(MaxPermPaths,4);
 
 
 
@@ -309,7 +310,7 @@ for kk = 1:o % cycle over the number of paths
         % find the permutation value based on the sorted values
         
         
-        % write unthresholed path estimate
+        % write unthresholded path estimate
         Vo = ModelInfo.DataHeader;
         Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_pe_%s.nii',kk,i,Tag)));
         % Prepare the data matrix
@@ -324,9 +325,9 @@ for kk = 1:o % cycle over the number of paths
         probTemp = zeros(ModelInfo.Nvoxels,1);
         for ind = 1:ModelInfo.Nvoxels
             if temp(ind) > 0
-                probTemp(ind) = length(find(temp(ind) > sMax))/ModelInfo.Nperm;
+                probTemp(ind) = length(find(temp(ind) > sMax))/Nperm;
             else
-                probTemp(ind) = length(find(temp(ind) < sMin))/ModelInfo.Nperm;
+                probTemp(ind) = length(find(temp(ind) < sMin))/Nperm;
             end
         end
         % Create the thresholded path output file name.
@@ -339,7 +340,7 @@ for kk = 1:o % cycle over the number of paths
 end
 
 
-function WriteOutPermutationB(ModelInfo,MaxB,MinB,PointEstimate,InTag)
+function WriteOutPermutationB(ModelInfo,MaxB,MinB,PointEstimate,InTag,Nperm)
 
 % cycle over the thresholds requested
 
@@ -357,7 +358,7 @@ for i = 1:ModelInfo.Nvar
             if ModelInfo.Direct(j,i)
                 % create the filename describing the dependent and
                 % independent effects
-                FileName = sprintf('Model%d_DEP%s_IND%s_%s_NPerm_%d.nii',i,ModelInfo.Names{i},ModelInfo.Names{j},Tag,ModelInfo.Nperm);
+                FileName = sprintf('Model%d_DEP%s_IND%s_%s_NPerm_%d.nii',i,ModelInfo.Names{i},ModelInfo.Names{j},Tag,Nperm);
                 % sort the max and min permutation results
                 sMax = sort(squeeze(MaxB(j+1,i,:)),'descend');
                 sMin = sort(squeeze(MinB(j+1,i,:)));
@@ -366,13 +367,17 @@ for i = 1:ModelInfo.Nvar
                 probTemp = zeros(ModelInfo.Nvoxels,1);
                 for ind = 1:ModelInfo.Nvoxels
                     if temp(ind) > 0
-                        probTemp(ind) = length(find(temp(ind) > sMax))/ModelInfo.Nperm;
+                        probTemp(ind) = length(find(temp(ind) > sMax))/Nperm;
                     else
-                        probTemp(ind) = length(find(temp(ind) < sMin))/ModelInfo.Nperm;
+                        probTemp(ind) = length(find(temp(ind) < sMin))/Nperm;
                     end
                 end
                 
+              
+                
+                
                 I = zeros(ModelInfo.DataHeader.dim);
+%                whos temps(ModelInfo.DataHeader.dim);
                 I(ModelInfo.Indices) = probTemp;
                 % Create the header for this image
                 Vo = ModelInfo.DataHeader;
@@ -398,9 +403,9 @@ for i = 1:ModelInfo.Nvar
             probTemp = zeros(ModelInfo.Nvoxels,1);
             for ind = 1:ModelInfo.Nvoxels
                 if temp(ind) > 0
-                    probTemp(ind) = length(find(temp(ind) > sMax))/ModelInfo.Nperm;
+                    probTemp(ind) = length(find(temp(ind) > sMax))/Nperm;
                 else
-                    probTemp(ind) = length(find(temp(ind) < sMin))/ModelInfo.Nperm;
+                    probTemp(ind) = length(find(temp(ind) < sMin))/Nperm;
                 end
             end
             

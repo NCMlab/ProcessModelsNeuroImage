@@ -192,6 +192,7 @@ Im(tempData.Indices) = 1;
 Vm = Vo;
 Vm.fname = fullfile(tempData.BaseDir,'tempMask.nii');
 spm_write_vol(Vm,Im);
+
 outFile = fullfile(tempData.BaseDir,'tempTFCEout.nii');
 
 % Cycle over 

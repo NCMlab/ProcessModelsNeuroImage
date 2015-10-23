@@ -1,4 +1,4 @@
-function [C, V, T,r, R2, R2_13, R2_12, R2_23] = subfnCommonality(dependent, independent)
+function [C, V, T, r, R2, R2_13, R2_12, R2_23] = subfnCommonality(dependent, independent)
 [M N] = size(independent);
 C = 0;
 V = 0;
@@ -66,6 +66,9 @@ switch N
         T = R2_123;
         
     case 5
+        
+        r = corr([independent dependent]);
+        R2 = r.^2;
         R2_1 = corr(dependent,independent(:,1))^2;
         R2_2 = corr(dependent,independent(:,2))^2;
         R2_3 = corr(dependent,independent(:,3))^2;
@@ -173,9 +176,9 @@ switch N
         V(3,4) = R2_1235 + R2_1245 - R2_125 - R2_12345;
         V(3,5) = R2_1234 + R2_1245 - R2_124 - R2_12345;
         V(4,5) = R2_1234 + R2_1235 - R2_123 - R2_12345;
-        V = V*100;
+        %V = V*100;
         C = -99;
-        T = R2_12345*100;
+        T = R2_12345;
     
 end
     

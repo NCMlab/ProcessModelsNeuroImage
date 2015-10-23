@@ -29,6 +29,7 @@ Results.t = zeros(M+1+MaxNumberInter,M);
 Results.se = zeros(M+1+MaxNumberInter,M);
 Results.p = zeros(M+1+MaxNumberInter,M);
 Results.df = zeros(M+1+MaxNumberInter,M);
+Results.r2 = zeros(1,M);
 for i = 1:M
     Col = find(data.Direct(:,i));
     if ~isempty(Col)
@@ -64,6 +65,7 @@ for i = 1:M
             Results.p(M+2:end,i) = S.tstat.pval(length(Col)+2:end);
             
         end
+        Results.r2(i) = S.rsquare;
     end
 end
 
