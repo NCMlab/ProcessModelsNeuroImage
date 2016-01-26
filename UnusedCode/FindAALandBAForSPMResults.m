@@ -172,8 +172,8 @@ BAList = {};
 for i = 1:NVoxels
     CurrentMMLoc = XYZmm(i,:)';
     CurrentAALLoc = inv(VMat)*[CurrentMMLoc; 1];
-    CurrentValue = Iaal(CurrentAALLoc(1), CurrentAALLoc(2), CurrentAALLoc(3));
-    BAList{i} = num2str(Iba(CurrentAALLoc(1), CurrentAALLoc(2), CurrentAALLoc(3)));
+    CurrentValue = Iaal(round(CurrentAALLoc(1)), round(CurrentAALLoc(2)), round(CurrentAALLoc(3)));
+    BAList{i} = num2str(Iba(round(CurrentAALLoc(1)), round(CurrentAALLoc(2)), round(CurrentAALLoc(3))));
     if CurrentValue
         AALList{i} = aalCol2{CurrentValue};
     else

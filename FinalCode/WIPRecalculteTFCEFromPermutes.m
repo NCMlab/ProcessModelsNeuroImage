@@ -52,3 +52,10 @@ for k = 1:N
 end
 
 save RecalutePermTFCEv2 MaxTFCE_PathsTNorm MinTFCE_PathsTNorm MaxTFCE_t MinTFCE_t
+
+
+
+%% 
+   WriteOutPermutationPaths(ModelInfo,MaxTFCE_PathsTNorm,MinTFCE_PathsTNorm,PointEstimatePathtfce,o,m,'RECALCtfce',Nperm)
+   WriteOutPermutationB(ModelInfo,MaxTFCE_t,MinTFCE_t,PointEstimatettfce,'RECALCtfceT',Nperm)
+        
