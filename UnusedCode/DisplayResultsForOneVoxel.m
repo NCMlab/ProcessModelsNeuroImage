@@ -21,7 +21,7 @@ end
 % Convert to locations
 VOXind = inv(ModelInfo.DataHeader.mat)*[VOXmm 1]';
 % Find the index
-[index] = sub2ind(ModelInfo.DataHeader.dim,VOXind(1),VOXind(2),VOXind(3));
+[index] = sub2ind(ModelInfo.DataHeader.dim,VOXind(1),VOXind(2),VOXind(3))
 % Find the data for this index
 NVox = ModelInfo.Nvoxels;
 NVoxPerChunk = ceil(NVox/ModelInfo.NJobSplit);
@@ -31,7 +31,11 @@ if isempty(DataIndex)
 end
 DataFileIndex = ceil(DataIndex/NVoxPerChunk);
 % Load the data file
-load(fullfile(SelectedPath,'data',[sprintf('data_%04d',DataFileIndex)]))
+if ModelInfo.NJobSplit == 1
+    load(fullfile(SelectedPath,'data','ModelInfo'));
+else
+    load(fullfile(SelectedPath,'data',[sprintf('data_%04d',DataFileIndex)]));
+end
 % Load the results file
 load(fullfile(SelectedPath,'Results',[sprintf('Results_%04d',DataFileIndex)]))
 % Find the indeex in the data file

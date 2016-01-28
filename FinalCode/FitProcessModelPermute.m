@@ -115,22 +115,26 @@ for j = 1:NumberOfPaths
             % order interactions, I think.
             F = find(tempInter) + 1;
             % probe the one NOT in the path
-            F(find(F == Col)) = 0;
-            % do not probe a 
-            Fmod = F(find(F)) - 1;
-            Moderators = data.data(:,Fmod);
-            if length(unique(Moderators)) == 2
-                probeMod = unique(Moderators);
-                probeValues = probeMod;
+            % Check to see if the interaction effect is even in the path
+            if ~isempty(find(F == Col))
+                F(find(F == Col)) = 0;
+                % do not probe a
+                Fmod = F(find(F)) - 1;
+                Moderators = data.data(:,Fmod);
+                if length(unique(Moderators)) == 2
+                    probeMod = unique(Moderators);
+                    probeValues = probeMod;
+                else
+                    %probeMod = prctile(Moderators,[10:10:90]);
+                    probeMod = prctile(Moderators,[5:5:95]);
+                    probeValues = [zeros(size(probeMod,1),1) probeMod];
+                    %  probeValues = probeValues(:,1)*probeValues(:,2)';
+                end
+                InteractionComponent = InteractionComponent + Results.beta(M+1+1,Col).*probeValues;
+                ResultPath = ResultPath.*InteractionComponent;
             else
-                probeMod = prctile(Moderators,[10:10:90]);
-                probeMod = prctile(Moderators,[5:5:95]);
-                probeValues = [zeros(size(probeMod,1),1) probeMod];
-                %  probeValues = probeValues(:,1)*probeValues(:,2)';
+                ResultPath = ResultPath.*Results.beta(Row,Col);
             end
-            
-            InteractionComponent = InteractionComponent + Results.beta(M+1+1,Col).*probeValues;
-            ResultPath = ResultPath.*InteractionComponent;
             
         end
     end
