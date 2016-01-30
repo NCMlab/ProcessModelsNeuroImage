@@ -59,6 +59,7 @@ for i = 1:M
         Results.t([1; 1+find(data.Direct(:,i))],i) = S.tstat.t(1:length(Col)+1);
         Results.se([1; 1+find(data.Direct(:,i))],i) = S.tstat.se(1:length(Col)+1);
         Results.p([1; 1+find(data.Direct(:,i))],i) = S.tstat.pval(1:length(Col)+1);
+        % Results.covb = S.covb;
         if ~isempty(Interaction)
             % Add the interaction terms
             Results.beta(M+2:end,i) = S.beta(length(Col)+2:end);

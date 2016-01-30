@@ -104,8 +104,10 @@ switch ModelType
             MaxTFCEt(:,:,Indices) = TFCEtMax;
             MinTFCEt(:,:,Indices) = TFCEtMin;
 
-            MaxTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMax(:,1,:)), 1,1,o,PermPerFile(i));
-            MinTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMin(:,1,:)), 1,1,o,PermPerFile(i));
+            %MaxTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMax(:,:,1,:)), 1,n,o,PermPerFile(i));
+            MaxTFCEpaths(:,:,:,Indices) = TFCEpathsMax;
+            %MinTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMin(:,1,:)), 1,1,o,PermPerFile(i));
+            MinTFCEpaths(:,:,:,Indices) = TFCEpathsMin;
         end
         
         
