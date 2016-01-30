@@ -10,6 +10,12 @@ function Results = FitProcessModel(data)
 % p: p-value
 % df: degrees of freedom for the t-test
 
+% The interaction matrix can actually be three dimensional. This is so a
+% single model effect can have multiple interaction effects in it. If there
+% are multiple interactions in a full model but each path step only has one
+% interaction, then the interaction matrix is only 2-D.
+% This loop checks to see if there are more than on interaction effect in a
+% single path step.
 
 [N M] = size(data.data);
 MaxNumberInter = 0;
@@ -82,7 +88,6 @@ for i = 1:M
             % The following does it for the interaction term and each
             % direct effect.
             for j = 1:length(colsForInteractions)
-                S.covb(:,length(colsForParameters)+j)
                 Results.covb(colsForInteractions(j),[colsForParameters; colsForInteractions],i) = S.covb(:,length(colsForParameters)+j)';
                 Results.covb([colsForParameters; colsForInteractions]',colsForInteractions(j),i) = S.covb(:,length(colsForParameters)+j);
             end
@@ -155,9 +160,6 @@ for j = 1:NumberOfPaths
             else
                 ResultPath = ResultPath.*Results.beta(Row,Col);
             end
-            
-            
-            
         end
     end
     % Store the probe values and the resultant path values.
