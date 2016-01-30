@@ -1,4 +1,9 @@
 function S = ProcessRegStats(y,design)
+% To do
+% This proram needs to retrun the covariance of the betas. These are needed
+% when calculating the standard error of a modulated path. --- DONE
+
+
 % This is a version of the regstats MatLab program but slimmed down to only
 % values needed.
 % THis function could also be slimmed down more to only calculate the

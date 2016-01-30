@@ -30,6 +30,7 @@ Results.se = zeros(M+1+MaxNumberInter,M);
 Results.p = zeros(M+1+MaxNumberInter,M);
 Results.df = zeros(M+1+MaxNumberInter,M);
 Results.r2 = zeros(1,M);
+Results.covb = zeros(M+1+MaxNumberInter,M+1+MaxNumberInter,M);
 for i = 1:M
     Col = find(data.Direct(:,i));
     if ~isempty(Col)
@@ -51,11 +52,25 @@ for i = 1:M
         S = ProcessRegStats(data.data(:,i),[data.data(:,Col) Interaction]);
         % Once the regression model is fit, extract the required estimated
         % values.
+        %
         Results.beta([1; 1+find(data.Direct(:,i))],i) = S.beta(1:length(Col)+1);
         Results.B([1; 1+find(data.Direct(:,i))],i) = S.B(1:length(Col)+1);
         Results.t([1; 1+find(data.Direct(:,i))],i) = S.tstat.t(1:length(Col)+1);
         Results.se([1; 1+find(data.Direct(:,i))],i) = S.tstat.se(1:length(Col)+1);
         Results.p([1; 1+find(data.Direct(:,i))],i) = S.tstat.pval(1:length(Col)+1);
+        % Add the covariance of the betas to the Results structure.
+        % 
+        % THis works. It fills in all of the covariance structure for the
+        % direct effects.
+        colsForParameters = [1; 1+find(data.Direct(:,i))];
+        colsForInteractions = max(colsForParameters)+1:max(colsForParameters)+MaxNumberInter;
+        
+        for j = 1:length(colsForParameters)
+            Results.covb(colsForParameters,colsForParameters(j),i) = S.covb(1:length(Col)+1,j);
+        end
+           
+            
+            
         if ~isempty(Interaction)
             % Add the interaction terms
             Results.beta(M+2:end,i) = S.beta(length(Col)+2:end);
@@ -63,7 +78,15 @@ for i = 1:M
             Results.t(M+2:end,i) = S.tstat.t(length(Col)+2:end);
             Results.se(M+2:end,i) = S.tstat.se(length(Col)+2:end);
             Results.p(M+2:end,i) = S.tstat.pval(length(Col)+2:end);
-            
+            % Fill in the covariance for the interaction term
+            % The following does it for the interaction term and each
+            % direct effect.
+            for j = 1:length(colsForInteractions)
+                S.covb(:,length(colsForParameters)+j)
+                Results.covb(colsForInteractions(j),[colsForParameters; colsForInteractions],i) = S.covb(:,length(colsForParameters)+j)';
+                Results.covb([colsForParameters; colsForInteractions]',colsForInteractions(j),i) = S.covb(:,length(colsForParameters)+j);
+            end
+         
         end
         Results.r2(i) = S.rsquare;
     end
