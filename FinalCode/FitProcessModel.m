@@ -111,68 +111,77 @@ Results.Paths = cell(NumberOfPaths,1);
 Results.PathsSE = cell(NumberOfPaths,1);
 Results.PathsTnorm = cell(NumberOfPaths,1);
 Results.ProbeValues = cell(MaxNumberInter,MaxNumberInter);
-%% add a row of zeros so that the indexing matchs with the beta matrix
-Paths = [zeros(1,M,NumberOfPaths); data.Paths];
+[OutPath, OutSE, ProbeValues] = subfnCalculatePathSE(Results, data);
+Results.Paths{1} = OutPath;
+Results.PathsSE{1} = OutSE;
+Results.PathsTnorm{1} = OutPath./OutSE;
+Results.ProbeValues{1} = ProbeValues;
+%[PathsParameters, PathsStandardErrors] = subfnCalculatePathSE(Results, data)
 
-for j = 1:NumberOfPaths
-    % step through the path
-    ResultPath = 1;
-    ResultPathbetas = zeros(max(max(Paths(:,:,j))),1);
-    ResultPathSE = zeros(max(max(Paths(:,:,j))),1);
-    
-    for i = 1:max(max(Paths(:,:,j)))
-        
-        index = find(Paths(:,:,j)==i);
-        [Row Col] = ind2sub(size(Paths),index);
-        % is there an interaction on this step?
-        tempInter = data.Inter(:,Col);
-        
-        if isempty(find(tempInter))
-            ResultPath = ResultPath.*Results.beta(Row,Col);
-            ResultPathbetas(i) = Results.beta(Row,Col);
-            ResultPathSE(i) = Results.se(Row,Col);
-        else
-            % There is an interaction here
-            InteractionComponent = Results.beta(Row,Col);
-            % which variable do you probe?
-            
-            % find the probe values,this even works for higher
-            % order interactions, I think.
-            F = find(tempInter) + 1;
-            % probe the one NOT in the path
-            % Check to see if the interaction effect is even in the path
-            if ~isempty(find(F == Col))
-                F(find(F == Col)) = 0;
-                % do not probe a
-                Fmod = F(find(F)) - 1;
-                Moderators = data.data(:,Fmod);
-                if length(unique(Moderators)) == 2
-                    probeMod = unique(Moderators);
-                    probeValues = probeMod;
-                else
-                    %probeMod = prctile(Moderators,[10:10:90]);
-                    probeMod = prctile(Moderators,[5:5:95]);
-                    probeValues = [zeros(size(probeMod,1),1) probeMod];
-                    %  probeValues = probeValues(:,1)*probeValues(:,2)';
-                end
-                InteractionComponent = InteractionComponent + Results.beta(M+1+1,Col).*probeValues;
-                ResultPath = ResultPath.*InteractionComponent;
-            else
-                ResultPath = ResultPath.*Results.beta(Row,Col);
-            end
-        end
-    end
-    % Store the probe values and the resultant path values.
-    Results.ProbeValues{j} = probeValues;
-    Results.Paths{j} = ResultPath;
-    if length(ResultPathSE) == 2
-        Results.PathsSE{j} = sqrt(sum((ResultPathbetas.^2).*flipud((ResultPathSE.^2))));
-    elseif length(ResultPathSE) == 3
-        Results.PathsSE{j} = sqrt((prod(ResultPathbetas(1:2).^2).*(ResultPathSE(3).^2)) + ...
-        (prod(ResultPathbetas([1 3]).^2)).*(ResultPathSE(2).^2) + ...
-        (prod(ResultPathbetas([2 3]).^2)).*(ResultPathSE(1).^2));
-    else
-        Results.PathsSE{j} = 0;
-    end
-    Results.PathsTnorm{j} = ResultPath/Results.PathsSE{j};
-end
+%% add a row of zeros so that the indexing matchs with the beta matrix
+% Paths = [zeros(1,M,NumberOfPaths); data.Paths];
+% 
+% for j = 1:NumberOfPaths
+%     % step through the path
+%     ResultPath = 1;
+%     ResultPathbetas = zeros(max(max(Paths(:,:,j))),1);
+%     ResultPathSE = zeros(max(max(Paths(:,:,j))),1);
+%     
+%     for i = 1:max(max(Paths(:,:,j)))
+%         
+%         index = find(Paths(:,:,j)==i);
+%         [Row Col] = ind2sub(size(Paths),index);
+%         % is there an interaction on this step?
+%         tempInter = data.Inter(:,Col);
+%         
+%         if isempty(find(tempInter))
+%             ResultPath = ResultPath.*Results.beta(Row,Col);
+%             ResultPathbetas(i) = Results.beta(Row,Col);
+%             ResultPathSE(i) = Results.se(Row,Col);
+%         else
+%             % There is an interaction here
+%             InteractionComponent = Results.beta(Row,Col);
+%             % which variable do you probe?
+%             
+%             % find the probe values,this even works for higher
+%             % order interactions, I think.
+%             F = find(tempInter) + 1;
+%             % probe the one NOT in the path
+%             % Check to see if the interaction effect is even in the path
+%             if ~isempty(find(F == Col))
+%                 F(find(F == Col)) = 0;
+%                 % do not probe a
+%                 Fmod = F(find(F)) - 1;
+%                 Moderators = data.data(:,Fmod);
+%                 if length(unique(Moderators)) == 2
+%                     probeMod = unique(Moderators);
+%                     probeValues = probeMod;
+%                 else
+%                     %probeMod = prctile(Moderators,[10:10:90]);
+%                     probeMod = prctile(Moderators,[5:5:95]);
+%                     probeValues = [zeros(size(probeMod,1),1) probeMod];
+%                     %  probeValues = probeValues(:,1)*probeValues(:,2)';
+%                 end
+%                 InteractionComponent = InteractionComponent + Results.beta(M+1+1,Col).*probeValues;
+%                 ResultPath = ResultPath.*InteractionComponent;
+%             else
+%                 ResultPath = ResultPath.*Results.beta(Row,Col);
+%             end
+%         end
+%     end
+%     % Store the probe values and the resultant path values.
+%     Results.ProbeValues{j} = probeValues;
+%     Results.Paths{j} = ResultPath;
+%     if length(ResultPathSE) == 2
+%         Results.PathsSE{j} = sqrt(sum((ResultPathbetas.^2).*flipud((ResultPathSE.^2))));
+%     elseif length(ResultPathSE) == 3
+%         Results.PathsSE{j} = sqrt((prod(ResultPathbetas(1:2).^2).*(ResultPathSE(3).^2)) + ...
+%         (prod(ResultPathbetas([1 3]).^2)).*(ResultPathSE(2).^2) + ...
+%         (prod(ResultPathbetas([2 3]).^2)).*(ResultPathSE(1).^2));
+%     else
+%         Results.PathsSE{j} = 0;
+%     end
+%     Results.PathsTnorm{j} = ResultPath/Results.PathsSE{j};
+% end
+% 
+% 

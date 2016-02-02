@@ -1,5 +1,5 @@
-function subfnCalculatePathSE(Results, Direct, Inter, Paths)
-
+function [OutPath, OutSE, probeValues] = subfnCalculatePathSE(Results, data)
+[N M] = size(data.data);
 Direct = data.Direct;
 Inter = data.Inter;
 Paths = data.Paths;
@@ -32,15 +32,17 @@ for j = 1:size(Paths,3)
             if ~isempty(find(F == Col))
                 % YES it is
                 % which variable do you probe?
-            
-            % find the probe values,this even works for higher
-            % order interactions, I think.
-            
-          
                 F(find(F == Col)) = 0;
-                % do not probe a
+                % The following are in "parameter space"
+                ParameterToProbe = F(find(F));
+                DirectEffectParameter = Row + 1;
+                % Find the data variable to probe
                 Fmod = F(find(F)) - 1;
+                % do not probe a dichotomous variable
+                
                 Moderators = data.data(:,Fmod);
+               % find the probe values,this even works for higher
+               % order interactions, I think.
                 if length(unique(Moderators)) == 2
                     probeMod = unique(Moderators);
                     probeValues = probeMod;
@@ -50,5 +52,42 @@ for j = 1:size(Paths,3)
                     probeValues = [zeros(size(probeMod,1),1) probeMod];
                     %  probeValues = probeValues(:,1)*probeValues(:,2)';
                 end
-                InteractionComponent = InteractionComponent + Results.beta(M+1+1,Col).*probeValues;
-                ResultPath = ResultPath.*InteractionComponent;
+                % What is the effect for this step of teh path?
+                % It is the parameter for the direct effect PLUS the
+                % interaction effect multiplied by the moderator at the
+                % probed values.
+                PathsParameters{i} = Results.beta(DirectEffectParameter,Col) + Results.beta(M+1+1,Col).*probeValues;
+                % Get the standard error of the direct component
+                % Standard error of the interaction term
+                PathsStandardErrors{i} = Results.covb(DirectEffectParameter,DirectEffectParameter,Col) + ...
+                2.*Results.covb(M+1+1,DirectEffectParameter,Col).*probeValues + ...
+                Results.covb(M+1+1,M+1+1,Col).*probeValues.^2;
+            else
+                PathsParameters{i} = Results.beta(Row,Col);
+                PathsStandardErrors{i} = sqrt(Results.covb(Row,Row,Col));
+            end
+        end
+    end
+end
+     
+Path = 1;
+for i = 1:length(PathsParameters)
+    Path = PathsParameters{i}.*Path;
+end
+
+OutPath = Path;
+OutSE = 0;
+for i = 1:NSteps
+    AllSteps = 1:NSteps;
+    CurrentStep = i;
+    AllSteps(i) = 0;
+    OtherSteps = AllSteps(find(AllSteps));
+    ThisStepSE = 1;
+    for j = 1:length(OtherSteps)
+        ThisStepSE = ThisStepSE.*PathsParameters{OtherSteps(j)}.^2;
+    end
+    ThisStepSE = ThisStepSE.*PathsStandardErrors{CurrentStep};
+    OutSE = OutSE + ThisStepSE;
+end
+OutSE = sqrt(OutSE);
+    
