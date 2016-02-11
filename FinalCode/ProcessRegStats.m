@@ -6,7 +6,9 @@ function S = ProcessRegStats(y,design)
 %
 % Check to see if the y variable is dichotomous. If the dependent measure
 % is in fact dichotomous then logistic regression is used.
-if isequal(logical(y),y)
+if iscell(y)
+    error('The input data is a cell and it should be a vector. Please check the data setup.')
+elseif isequal(logical(y),y)
     S = subfnLogisticRegressStats(y,design);
 else
     % Add a column of ones to the design matrix

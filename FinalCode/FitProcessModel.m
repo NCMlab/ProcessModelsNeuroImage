@@ -91,7 +91,7 @@ for j = 1:NumberOfPaths
     ResultPath = 1;
     ResultPathbetas = zeros(max(max(Paths(:,:,j))),1);
     ResultPathSE = zeros(max(max(Paths(:,:,j))),1);
-    
+    probeValues = [];
     for i = 1:max(max(Paths(:,:,j)))
         
         index = find(Paths(:,:,j)==i);
@@ -131,10 +131,7 @@ for j = 1:NumberOfPaths
                 ResultPath = ResultPath.*InteractionComponent;
             else
                 ResultPath = ResultPath.*Results.beta(Row,Col);
-            end
-            
-            
-            
+            end    
         end
     end
     % Store the probe values and the resultant path values.

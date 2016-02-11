@@ -27,14 +27,14 @@ ModelInfo.ResultsPath = ResultsFolder;
 ModelInfo.BaseDir = ResultsFolder;
 %% WRITE OUT ALL IMAGES from the regression models
 % Load up the point estimate results
-F = dir(fullfile(ResultsFolder,'Results','PointEstimate*.mat'));
-load(fullfile(ResultsFolder,'Results',F(1).name))
+%F = dir(fullfile(ResultsFolder,'Results','PointEstimate*.mat'));
+%load(fullfile(ResultsFolder,'Results',F(1).name))
 
-WriteOutParameterMaps('beta', Parameters, ModelInfo)
-WriteOutParameterMaps('B', Parameters, ModelInfo)
-WriteOutParameterMaps('t', Parameters, ModelInfo)
+%WriteOutParameterMaps('beta', Parameters, ModelInfo)
+%WriteOutParameterMaps('B', Parameters, ModelInfo)
+%WriteOutParameterMaps('t', Parameters, ModelInfo)
 
-WriteOutPathPointEstimate(Parameters,ModelInfo)
+%WriteOutPathPointEstimate(Parameters,ModelInfo)
 %% Find the number of results files
 switch ModelType
     case 'permutation'
