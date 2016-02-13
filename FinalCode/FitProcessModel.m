@@ -116,7 +116,7 @@ Results.Paths{1} = OutPath;
 Results.PathsSE{1} = OutSE;
 Results.PathsTnorm{1} = OutPath./OutSE;
 Results.ProbeValues{1} = ProbeValues;
-%[PathsParameters, PathsStandardErrors] = subfnCalculatePathSE(Results, data)
+
 
 %% add a row of zeros so that the indexing matchs with the beta matrix
 % Paths = [zeros(1,M,NumberOfPaths); data.Paths];
