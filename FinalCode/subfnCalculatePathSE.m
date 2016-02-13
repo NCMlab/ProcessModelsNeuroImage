@@ -3,6 +3,7 @@ function [OutPath, OutSE, probeValues] = subfnCalculatePathSE(Results, data)
 Direct = data.Direct;
 Inter = data.Inter;
 Paths = data.Paths;
+probeValues = [];
 % cycle over the different paths
 for j = 1:size(Paths,3)
     % cycle over the steps in the path
@@ -23,8 +24,8 @@ for j = 1:size(Paths,3)
         tempInter = data.Inter(:,Col);
         if isempty(find(tempInter))
             % No interaction for this model
-            PathsParameters{i} = Results.beta(Row,Col);
-            PathsStandardErrors{i} = sqrt(Results.covb(Row,Row,Col));
+            PathsParameters{i} = Results.beta(Row+1,Col);
+            PathsStandardErrors{i} = (Results.covb(Row+1,Row+1,Col));
         else
             % YES, there is an interaction in this model?
             F = find(tempInter) + 1;
@@ -52,19 +53,19 @@ for j = 1:size(Paths,3)
                     probeValues = [zeros(size(probeMod,1),1) probeMod];
                     %  probeValues = probeValues(:,1)*probeValues(:,2)';
                 end
-                % What is the effect for this step of teh path?
+                % What is the effect for this step of the path?
                 % It is the parameter for the direct effect PLUS the
                 % interaction effect multiplied by the moderator at the
                 % probed values.
                 PathsParameters{i} = Results.beta(DirectEffectParameter,Col) + Results.beta(M+1+1,Col).*probeValues;
                 % Get the standard error of the direct component
                 % Standard error of the interaction term
-                PathsStandardErrors{i} = Results.covb(DirectEffectParameter,DirectEffectParameter,Col) + ...
-                2.*Results.covb(M+1+1,DirectEffectParameter,Col).*probeValues + ...
-                Results.covb(M+1+1,M+1+1,Col).*probeValues.^2;
+                PathsStandardErrors{i} = Results.covb(DirectEffectParameter,DirectEffectParameter,Col) + ...% good
+                2.*Results.covb(M,DirectEffectParameter,Col).*probeValues + ... % I am not sure if the use of M will generalize
+                Results.covb(M,M,Col).*probeValues.^2;
             else
                 PathsParameters{i} = Results.beta(Row,Col);
-                PathsStandardErrors{i} = sqrt(Results.covb(Row,Row,Col));
+                PathsStandardErrors{i} = (Results.covb(Row,Row,Col));
             end
         end
     end
