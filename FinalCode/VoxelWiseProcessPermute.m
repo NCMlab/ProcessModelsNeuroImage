@@ -219,8 +219,8 @@ for k = 1:NRuns
         % Shuffle the specified column
         % tempData.data(:,tempData.ColumnToShuffle) = tempData.data(Samp(:,k),tempData.ColumnToShuffle);
 
-        Results = FitProcessModelPermute(tempData,Samp(:,k));
-        
+        %Results = FitProcessModelPermute(tempData,Samp(:,k));
+        Results = FitProcessModel(tempData,Samp(:,k));
         if Nperm == 0
             % this is the point estimate, keep everything
             Parameters{i} = Results;

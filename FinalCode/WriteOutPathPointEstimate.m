@@ -1,4 +1,5 @@
 function WriteOutPathPointEstimate(Parameters,ModelInfo)
+% Is this path modulated?
 
 NPaths = size(Parameters{1}.Paths,1);
 temp = zeros(ModelInfo.Nvoxels,NPaths);

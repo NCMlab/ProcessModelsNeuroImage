@@ -1,4 +1,4 @@
-function Results = FitProcessModel(data)
+function Results = FitProcessModel(data, Samp)
 % This is the program that fits the multiple regression models defined by
 % this analysis.
 % For the direct effects the unstandardized parameter estimates are
@@ -18,6 +18,9 @@ function Results = FitProcessModel(data)
 % single path step.
 
 [N M] = size(data.data);
+if nargin == 1
+    Samp = 1:N;
+end
 MaxNumberInter = 0;
 if ~isempty(find(data.Inter))
     MaxNumberInter = size(data.Inter,3);
@@ -55,7 +58,7 @@ for i = 1:M
         % sub-function would need to be optimized. This could be done be
         % eliminating all the regression metrics/tests that are performed
         % and only leave the absolute minimum.
-        S = ProcessRegStats(data.data(:,i),[data.data(:,Col) Interaction]);
+        S = ProcessRegStats(data.data(Samp,i),[data.data(:,Col) Interaction]);
         % Once the regression model is fit, extract the required estimated
         % values.
         %
