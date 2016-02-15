@@ -268,10 +268,10 @@ for k = 1:NRuns
 %%%% THIS NEEDS TO BE RESHAPED %%%%%%%%%%%%%%%%5                    
                     [maxTFCE, minTFCE] = subfnApplyTFCE(Vo.fname, Vm.fname,TFCEparams);
                     
-                    TFCEpathsMax(i,j,k) = maxTFCE;
-                    TFCEpathsMin(i,j,k) = minTFCE;
-                    PermResults.TFCEpathsMax = maxTFCE;
-                    PermResults.TFCEpathsMin = minTFCE;
+                    TFCEpathsMax(i,m,j,k) = maxTFCE;
+                    TFCEpathsMin(i,m,j,k) = minTFCE;
+                    PermResults.TFCEpathsMax(i,m,j,k) = maxTFCE;
+                    PermResults.TFCEpathsMin(i,m,j,k) = minTFCE;
                 end
             end
         end
