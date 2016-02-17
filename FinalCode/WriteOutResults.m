@@ -152,10 +152,10 @@ switch ModelType
         %%%%%%% TO DO
         % Create the TFCE parameter estimate images
         
-        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,o,m,'perm',Nperm)
+        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,o,n,'perm',Nperm)
 
         
-        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MinTFCEpaths,PointEstimatePathtfce,o,m,'tfce',Nperm)
+        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MinTFCEpaths,PointEstimatePathtfce,o,n,'tfce',Nperm)
 %         figure
 %         subplot(311)
 %         hist(squeeze(MaxTFCEpaths(1,1,1,:)),100)
@@ -252,7 +252,7 @@ for i = 1:m % cycle over path number
         
         % write unthresholed path estimate
         Vo = ModelInfo.DataHeader;
-        Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d.nii',i,j)));
+        Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%03d.nii',i,j)));
         % Prepare the data matrix
         I = zeros(ModelInfo.DataHeader.dim);
         % Extract the path data values
@@ -272,7 +272,7 @@ for k = 1:length(ModelInfo.Thresholds)
             % CI do not include zero.
             temp = squeeze(BCaCILower(j,i,k,:).*BCaCIUpper(j,i,k,:)) > 0;
             Vo = ModelInfo.DataHeader;
-            Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%0.3f.nii',i,j,ModelInfo.Thresholds(k))));
+            Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%03d_%0.3f.nii',i,j,ModelInfo.Thresholds(k))));
             % Prepare the data matrix
             I = zeros(ModelInfo.DataHeader.dim);
             
@@ -304,33 +304,33 @@ for kk = 1:o % cycle over the number of paths
     % The code does not handle multidimensional interactions yet.
     for i = 1:m
         % sort the max and min permutation results
-        sMax(:,i) = sort(squeeze(MaxPermPaths(i,:,kk,:)),'descend');
-        sMin(:,i) = sort(squeeze(MinPermPaths(i,:,kk,:)));
+        sMax(:,i) = sort(squeeze(MaxPermPaths(1,i,kk,:)),'descend');
+        sMin(:,i) = sort(squeeze(MinPermPaths(1,i,kk,:)));
         % find the permutation value based on the sorted values
         
         
         % write unthresholded path estimate
         Vo = ModelInfo.DataHeader;
-        Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_pe_%s.nii',kk,i,Tag)));
+        Vo.fname = (fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%03d_pe_%s.nii',kk,i,Tag)));
         % Prepare the data matrix
         I = zeros(ModelInfo.DataHeader.dim);
         % Extract the path data values
-        temp = squeeze(PointEstimate(i,1,kk,:));
-        I(ModelInfo.Indices) = temp;
+        temp = squeeze(PointEstimate(1,i,kk,:));
+%        I(ModelInfo.Indices) = temp;
         % Write the images
-        spm_write_vol(Vo,I);
+%        spm_write_vol(Vo,I);
         
         % Find the locations that exceed the two-tailed threshold
         probTemp = zeros(ModelInfo.Nvoxels,1);
         for ind = 1:ModelInfo.Nvoxels
             if temp(ind) > 0
-                probTemp(ind) = length(find(temp(ind) > sMax))/Nperm;
+                probTemp(ind) = length(find(temp(ind) > sMax(:,i)))/Nperm;
             else
-                probTemp(ind) = length(find(temp(ind) < sMin))/Nperm;
+                probTemp(ind) = length(find(temp(ind) < sMin(:,i)))/Nperm;
             end
         end
         % Create the thresholded path output file name.
-        Vo.fname=(fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%d_%s_NPerm_%d.nii',kk,i,Tag,Nperm)));
+        Vo.fname=(fullfile(ModelInfo.ResultsPath,sprintf('Path%d_level%03d_%s_NPerm_%d.nii',kk,i,Tag,Nperm)));
         I = zeros(Vo.dim);
         I(ModelInfo.Indices) = probTemp;
         % Write the image.
@@ -371,10 +371,6 @@ for i = 1:ModelInfo.Nvar
                         probTemp(ind) = length(find(temp(ind) < sMin))/Nperm;
                     end
                 end
-                
-              
-                
-                
                 I = zeros(ModelInfo.DataHeader.dim);
 %                whos temps(ModelInfo.DataHeader.dim);
                 I(ModelInfo.Indices) = probTemp;
@@ -391,7 +387,7 @@ for i = 1:ModelInfo.Nvar
             for j = 1:length(InterVar)
                 FileName = sprintf('%s%sX',FileName,ModelInfo.Names{InterVar(j)});
             end
-            FileName = sprintf('%s_%s.nii',FileName(1:end-1),Tag);
+            FileName = sprintf('%s_%s_NPerm_%d.nii',FileName(1:end-1),Tag,Nperm);
             
             % sort the max and min permutation results
             sMax = sort(squeeze(MaxB(ModelInfo.Nvar+2,i,:)),'descend');
@@ -407,11 +403,8 @@ for i = 1:ModelInfo.Nvar
                     probTemp(ind) = length(find(temp(ind) < sMin))/Nperm;
                 end
             end
-            
-            
-            
             I = zeros(ModelInfo.DataHeader.dim);
-            I(ModelInfo.Indices) = squeeze(temp);
+            I(ModelInfo.Indices) = squeeze(probTemp);
             % Create the header for this image
             Vo = ModelInfo.DataHeader;
             Vo.fname = fullfile(ModelInfo.ResultsPath,FileName);

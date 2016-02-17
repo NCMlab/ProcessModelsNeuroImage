@@ -1,31 +1,38 @@
 function WriteOutPathPointEstimate(Parameters,ModelInfo)
 % Is this path modulated?
 
-NPaths = size(Parameters{1}.Paths,1);
-temp = zeros(ModelInfo.Nvoxels,NPaths);
-tempT = zeros(ModelInfo.Nvoxels,NPaths);
+[NPaths] = size(Parameters{1}.Paths,1);
+% How many steps are there in the path?
+NSteps = size(Parameters{1}.Paths{1},2);
+temp = zeros(ModelInfo.Nvoxels,NPaths,NSteps);
+tempT = zeros(ModelInfo.Nvoxels,NPaths,NSteps);
+
 for j = 1:ModelInfo.Nvoxels
     for k = 1:NPaths
-        temp(j,k) = Parameters{j}.Paths{k};
-        tempT(j,k) = Parameters{j}.PathsTnorm{k};
+        temp(j,k,:) = Parameters{j}.Paths{k};
+        tempT(j,k,:) = Parameters{j}.PathsTnorm{k};
     end
 end
 for i = 1:NPaths
-    FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path%d_PointEstimate.nii',i));
-    I = zeros(ModelInfo.DataHeader.dim);
-    I(ModelInfo.Indices) = squeeze(temp(:,i));
-    % Create the header for this image
-    Vo = ModelInfo.DataHeader;
-    Vo.fname = FileName;
-    spm_write_vol(Vo,I);
+    for k = 1:NSteps
+        FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path%d_Step%03d_PE.nii',i,k));
+        I = zeros(ModelInfo.DataHeader.dim);
+        I(ModelInfo.Indices) = squeeze(temp(:,i,k));
+        % Create the header for this image
+        Vo = ModelInfo.DataHeader;
+        Vo.fname = FileName;
+        spm_write_vol(Vo,I);
+    end
 end
 
 for i = 1:NPaths
-    FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path%d_Tnorm.nii',i));
-    I = zeros(ModelInfo.DataHeader.dim);
-    I(ModelInfo.Indices) = squeeze(tempT(:,i));
-    % Create the header for this image
-    Vo = ModelInfo.DataHeader;
-    Vo.fname = FileName;
-    spm_write_vol(Vo,I);
+    for k = 1:NSteps
+        FileName = fullfile(ModelInfo.ResultsPath,sprintf('Path%d_Step%03d_Tnorm.nii',i,k));
+        I = zeros(ModelInfo.DataHeader.dim);
+        I(ModelInfo.Indices) = squeeze(tempT(:,i,k));
+        % Create the header for this image
+        Vo = ModelInfo.DataHeader;
+        Vo.fname = FileName;
+        spm_write_vol(Vo,I);
+    end
 end

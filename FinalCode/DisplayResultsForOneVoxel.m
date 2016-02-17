@@ -1,4 +1,4 @@
-function [Parameters1 SinglePointModel SelectedPath] = DisplayResultsForOneVoxel(VOXmm,SelectedPath,PrintFlag)
+function [OutResults, SinglePointModel, SelectedPath] = DisplayResultsForOneVoxel(VOXmm,SelectedPath,PrintFlag)
 if nargin < 2
     SelectedPath = spm_select(1,'dir');
     PrintFlag = 1;
@@ -12,7 +12,7 @@ if exist('ModelInfo.mat')
 else
     errordlg('this folder does not have the required AnalysticParameters.mat file');
 end
-
+cd ..
 
 % Get the header information
 V = ModelInfo.DataHeader;
@@ -67,7 +67,7 @@ switch ModelType
             
             
             Parameters1 = Results{dataChunkIndex};
-            
+            OutResults = Parameters1;
             SinglePointModel = ExtractDataFromVoxel(subModelInfo,dataChunkIndex);
         else
             DataFileIndex = 1;
@@ -76,15 +76,23 @@ switch ModelType
             F = dir(fullfile(SelectedPath,'Results',sprintf('BootStrap*')));
             load(fullfile(SelectedPath,'Results',F.name));
             Parameters1 = Parameters{DataIndex};
+             OutResults = Parameters1;
             SinglePointModel = ExtractDataFromVoxel(ModelInfo,DataIndex);
         end
+    case 'permutation'
+        fprintf(1,'Hello World\n')
+        ModelInfo.Nperm = 0;
+        ModelInfo.Nboot = 1000;
+        SinglePointModel = ExtractDataFromVoxel(ModelInfo,DataIndex);
+        OutResults = OneVoxelProcessBootstrap(SinglePointModel);
+        PrintResults(SinglePointModel,OutResults)
 end
 % Reprocess the data location
 %Parameters = subfnVoxelWiseProcessBatch(data1);
 % Print the results to the screen
-if PrintFlag == 1
-    PrintResults(SinglePointModel,Parameters1)
-end
+%if PrintFlag == 1
+%    PrintResults(SinglePointModel,Parameters1)
+%end
 
 
 

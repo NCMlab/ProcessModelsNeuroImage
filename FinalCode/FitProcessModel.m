@@ -114,6 +114,7 @@ Results.Paths = cell(NumberOfPaths,1);
 Results.PathsSE = cell(NumberOfPaths,1);
 Results.PathsTnorm = cell(NumberOfPaths,1);
 Results.ProbeValues = cell(MaxNumberInter,MaxNumberInter);
+
 [OutPath, OutSE, ProbeValues] = subfnCalculatePathSE(Results, data);
 Results.Paths{1} = OutPath;
 Results.PathsSE{1} = OutSE;

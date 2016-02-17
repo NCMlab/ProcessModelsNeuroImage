@@ -61,11 +61,11 @@ for j = 1:size(Paths,3)
                 % Get the standard error of the direct component
                 % Standard error of the interaction term
                 PathsStandardErrors{i} = Results.covb(DirectEffectParameter,DirectEffectParameter,Col) + ...% good
-                2.*Results.covb(M,DirectEffectParameter,Col).*probeValues + ... % I am not sure if the use of M will generalize
-                Results.covb(M,M,Col).*probeValues.^2;
+                2.*Results.covb(M+2,DirectEffectParameter,Col).*probeValues + ... % I am not sure if the use of M will generalize
+                Results.covb(M+2,M+2,Col).*probeValues.^2;
             else
-                PathsParameters{i} = Results.beta(Row,Col);
-                PathsStandardErrors{i} = (Results.covb(Row,Row,Col));
+                PathsParameters{i} = Results.beta(Row+1,Col);
+                PathsStandardErrors{i} = (Results.covb(Row+1,Row+1,Col));
             end
         end
     end
