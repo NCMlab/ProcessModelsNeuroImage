@@ -104,9 +104,9 @@ Results = OneVoxelProcessBootstrap(Model1);
 PrintResults(Model1,Results)
 
 
-
-if nargout == 0
-    PrintResults(Model1,Results);
-end
+% 
+% if nargout == 0
+%     PrintResults(Model1,Results);
+% end
 
 

@@ -1,4 +1,4 @@
-function [Results] = FitProcessModel(data, Samp)
+function [Results, Sout] = FitProcessModelAndResids(data, Samp)
 % This is the program that fits the multiple regression models defined by
 % this analysis.
 % For the direct effects the unstandardized parameter estimates are
@@ -40,6 +40,7 @@ Results.p = zeros(M+1+MaxNumberInter,M);
 Results.df = zeros(M+1+MaxNumberInter,M);
 Results.r2 = zeros(1,M);
 Results.covb = zeros(M+1+MaxNumberInter,M+1+MaxNumberInter,M);
+Sout = {};
 for i = 1:M
     Col = find(data.Direct(:,i));
     if ~isempty(Col)
@@ -58,7 +59,12 @@ for i = 1:M
         % sub-function would need to be optimized. This could be done be
         % eliminating all the regression metrics/tests that are performed
         % and only leave the absolute minimum.
+        X = [data.data(:,Col) Interaction];
+        Y = data.data(Samp,i);
         S = ProcessRegStats(data.data(Samp,i),[data.data(:,Col) Interaction]);
+        Sout{i} = S;
+        Sout{i}.X = X;
+        Sout{i}.Y = Y;
         % Once the regression model is fit, extract the required estimated
         % values.
         %

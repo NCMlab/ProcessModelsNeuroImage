@@ -30,10 +30,10 @@ for j = 1:size(Paths,3)
             % YES, there is an interaction in this model?
             F = find(tempInter) + 1;
             % Is the interaction effect PART OF THIS Path?
-            if ~isempty(find(F == Col))
+            if ~isempty(find(F == Row + 1)) % CHANGED Col to Row + 1
                 % YES it is
                 % which variable do you probe?
-                F(find(F == Col)) = 0;
+                F(find(F == Row + 1)) = 0; % MADE SAME CHANGE HERE
                 % The following are in "parameter space"
                 ParameterToProbe = F(find(F));
                 DirectEffectParameter = Row + 1;

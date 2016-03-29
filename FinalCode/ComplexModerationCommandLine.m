@@ -6,6 +6,13 @@ switch nargin
         error('MediationCommandLine needs at least 3 input arguments')
     case 2
         error('MediationCommandLine needs at least 3 input arguments')
+    case 3
+        D = [];
+        COV = [];
+        names = {'A' 'B' 'C'};
+        alpha = 0.05;
+        Nboot = 1000;
+        ModelFlag = 0;
     case 4
         COV = [];
         names = {'A' 'B' 'C' 'D'};
@@ -119,5 +126,5 @@ Model1.Direct = Direct;
 Model1.Inter = Inter;
 Model1.Paths = Paths;
 Results = OneVoxelProcessBootstrap(Model1);
-%PrintResults(Model1,Results)
+PrintResults(Model1,Results)
 
