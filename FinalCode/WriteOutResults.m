@@ -97,6 +97,8 @@ switch ModelType
         for i = 1:NFiles
             Indices = (RunningSum(i)-PermPerFile(i)+1):RunningSum(i);
             load(fullfile(ResultsFolder,'Results',F(i).name))
+            
+            
             MaxPermPaths(:,:,:,Indices) = MaxPaths;
             MinPermPaths(:,:,:,Indices) = MinPaths;
             MaxPermB(:,:,Indices) = MaxBeta;
@@ -105,9 +107,16 @@ switch ModelType
             MinTFCEt(:,:,Indices) = TFCEtMin;
 
             %MaxTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMax(:,:,1,:)), 1,n,o,PermPerFile(i));
-            MaxTFCEpaths(:,:,:,Indices) = TFCEpathsMax;
+            % These structures are created with the wrong dimensions. This
+            % attempts to posthoc deal with it.
+            tt = squeeze(TFCEpathsMax(1,:,:,:));
+            tt = reshape(tt,m,n,o,PermPerFile(i));
+            MaxTFCEpaths(:,:,:,Indices) = tt;%TFCEpathsMax;
+            
             %MinTFCEpaths(:,:,:,Indices) = reshape(squeeze(TFCEpathsMin(:,1,:)), 1,1,o,PermPerFile(i));
-            MinTFCEpaths(:,:,:,Indices) = TFCEpathsMin;
+            tt = squeeze(TFCEpathsMin(1,:,:,:));
+            tt = reshape(tt,m,n,o,PermPerFile(i));
+            MinTFCEpaths(:,:,:,Indices) = tt;
         end
         
         
@@ -152,10 +161,10 @@ switch ModelType
         %%%%%%% TO DO
         % Create the TFCE parameter estimate images
         
-        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,o,n,'perm',Nperm)
+        WriteOutPermutationPaths(ModelInfo,MaxPermPaths,MinPermPaths,PointEstimatePath,m,n,'perm',Nperm)
 
         
-        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MinTFCEpaths,PointEstimatePathtfce,o,n,'tfce',Nperm)
+        WriteOutPermutationPaths(ModelInfo,MaxTFCEpaths,MinTFCEpaths,PointEstimatePathtfce,m,n,'tfce',Nperm)
 %         figure
 %         subplot(311)
 %         hist(squeeze(MaxTFCEpaths(1,1,1,:)),100)
@@ -304,8 +313,8 @@ for kk = 1:o % cycle over the number of paths
     % The code does not handle multidimensional interactions yet.
     for i = 1:m
         % sort the max and min permutation results
-        sMax(:,i) = sort(squeeze(MaxPermPaths(1,i,kk,:)),'descend');
-        sMin(:,i) = sort(squeeze(MinPermPaths(1,i,kk,:)));
+        sMax(:,i) = sort(squeeze(MaxPermPaths(kk,i,1,:)),'descend');
+        sMin(:,i) = sort(squeeze(MinPermPaths(kk,i,1,:)));
         % find the permutation value based on the sorted values
         
         
@@ -315,7 +324,7 @@ for kk = 1:o % cycle over the number of paths
         % Prepare the data matrix
         I = zeros(ModelInfo.DataHeader.dim);
         % Extract the path data values
-        temp = squeeze(PointEstimate(1,i,kk,:));
+        temp = squeeze(PointEstimate(kk,i,1,:));
 %        I(ModelInfo.Indices) = temp;
         % Write the images
 %        spm_write_vol(Vo,I);

@@ -116,10 +116,10 @@ Results.PathsTnorm = cell(NumberOfPaths,1);
 Results.ProbeValues = cell(MaxNumberInter,MaxNumberInter);
 
 [OutPath, OutSE, ProbeValues] = subfnCalculatePathSE(Results, data);
-Results.Paths{1} = OutPath;
-Results.PathsSE{1} = OutSE;
-Results.PathsTnorm{1} = OutPath./OutSE;
-Results.ProbeValues{1} = ProbeValues;
+Results.Paths = {OutPath};
+Results.PathsSE = {OutSE};
+Results.PathsTnorm = {OutPath./OutSE};
+Results.ProbeValues = ProbeValues;
 
 
 %% add a row of zeros so that the indexing matchs with the beta matrix

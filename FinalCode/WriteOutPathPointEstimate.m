@@ -1,7 +1,7 @@
 function WriteOutPathPointEstimate(Parameters,ModelInfo)
 % Is this path modulated?
 
-[NPaths] = size(Parameters{1}.Paths,1);
+[NPaths] = size(Parameters{1}.Paths{1},1);
 % How many steps are there in the path?
 NSteps = size(Parameters{1}.Paths{1},2);
 temp = zeros(ModelInfo.Nvoxels,NPaths,NSteps);
@@ -9,8 +9,8 @@ tempT = zeros(ModelInfo.Nvoxels,NPaths,NSteps);
 
 for j = 1:ModelInfo.Nvoxels
     for k = 1:NPaths
-        temp(j,k,:) = Parameters{j}.Paths{k};
-        tempT(j,k,:) = Parameters{j}.PathsTnorm{k};
+        temp(j,k,:) = Parameters{j}.Paths{1}(k);
+        tempT(j,k,:) = Parameters{j}.PathsTnorm{1}(k);
     end
 end
 for i = 1:NPaths

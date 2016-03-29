@@ -4,8 +4,11 @@ Direct = data.Direct;
 Inter = data.Inter;
 Paths = data.Paths;
 probeValues = [];
+NPath = size(Paths,3);
+OutPath = zeros(NPath,1);
+OutSE = zeros(NPath,1);
 % cycle over the different paths
-for j = 1:size(Paths,3)
+for j = 1:NPath
     % cycle over the steps in the path
    
     NSteps = max(max(Paths(:,:,j)));
@@ -69,26 +72,27 @@ for j = 1:size(Paths,3)
             end
         end
     end
-end
-     
-Path = 1;
-for i = 1:length(PathsParameters)
-    Path = PathsParameters{i}.*Path;
-end
-
-OutPath = Path;
-OutSE = 0;
-for i = 1:NSteps
-    AllSteps = 1:NSteps;
-    CurrentStep = i;
-    AllSteps(i) = 0;
-    OtherSteps = AllSteps(find(AllSteps));
-    ThisStepSE = 1;
-    for j = 1:length(OtherSteps)
-        ThisStepSE = ThisStepSE.*PathsParameters{OtherSteps(j)}.^2;
+    % Now that the step values are all calculated, calculate the out path
+    % values
+    tempPath = 1;
+    for i = 1:length(PathsParameters)
+        tempPath = PathsParameters{i}.*tempPath;
     end
-    ThisStepSE = ThisStepSE.*PathsStandardErrors{CurrentStep};
-    OutSE = OutSE + ThisStepSE;
-end
-OutSE = sqrt(OutSE);
     
+    OutPath(j) = tempPath;
+    tempOutSE = 0;
+    for i = 1:NSteps
+        AllSteps = 1:NSteps;
+        CurrentStep = i;
+        AllSteps(i) = 0;
+        OtherSteps = AllSteps(find(AllSteps));
+        ThisStepSE = 1;
+        for k = 1:length(OtherSteps)
+            ThisStepSE = ThisStepSE.*PathsParameters{OtherSteps(k)}.^2;
+        end
+        ThisStepSE = ThisStepSE.*PathsStandardErrors{CurrentStep};
+        tempOutSE = tempOutSE + ThisStepSE;
+    end
+    OutSE(j) = sqrt(tempOutSE);
+    
+end
