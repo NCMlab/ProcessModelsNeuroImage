@@ -318,6 +318,7 @@ if Nperm > 0
     OutFile = fullfile(ResultsFolder,sprintf('Permute_count%04d_%dSamp',StartIndex,Nperm));
     Str = sprintf('save %s MaxPaths MinPaths MaxBeta MinBeta TFCEtMax TFCEtMin TFCEpathsMax TFCEpathsMin',OutFile);
     eval(Str)
+    fprintf(1,'\t%s\n',OutFile);
 else
     [PathName FileName] = fileparts(InDataPath);
     [PathName FileName] = fileparts(PathName);
