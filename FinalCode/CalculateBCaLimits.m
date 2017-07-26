@@ -1,8 +1,15 @@
 function [Alpha1, Alpha2, Z, p] = CalculateBCaLimits(JackKnifeData,PointEstimate, BootStrapData,alpha)    
-
+% if iscell(PointEstimate)
+%     [m n] = size(PointEstimate{1}{1});
+%     N = length(JackKnifeData);
+%     Nboot = size(BootStrapData,2);
+% else
     [m n] = size(PointEstimate);
-    N = size(JackKnifeData,3);
+    N = size(JackKnifeData,3); % NUMBER OF SUBJECTS
     Nboot = size(BootStrapData,3);
+% end
+    
+    
     zA = norminv(alpha/2);
     z1mA = norminv(1 - alpha/2);
     Alpha1 = zeros(m,n);
@@ -12,7 +19,7 @@ function [Alpha1, Alpha2, Z, p] = CalculateBCaLimits(JackKnifeData,PointEstimate
     testValue = 0;
     for i = 1:m
         for j = 1:n
-            if PointEstimate(i,j) ~= 0
+            if PointEstimate ~= 0%{1}(i,j) ~= 0
                 % For diagnostic purposes
                 % fprintf(1,'i = %d,j = %d\n',i,j);
                 zh0 = norminv(length(find(BootStrapData(i,j,:) < PointEstimate(i,j)))/Nboot);

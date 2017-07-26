@@ -53,6 +53,8 @@ for i = 1:length(FieldNames)
         % TO DO: somehow UNFLATTEN the data
         BCaCI = setfield(BCaCI,FieldNames{i},CurrentBCaCI);
     else
+        % The path value may actually be an array. ANd therefore each
+        % element of the JK nad the BS are arrays
         CurrentBCaCI = zeros(size(getfield(BCaCI,FieldNames{i})));
         for t = 1:Nthresh
             CurrentAlpha = Thresholds(t);
@@ -60,7 +62,7 @@ for i = 1:length(FieldNames)
             JackKnifeData = getfield(JackKnife,FieldNames{i});
             PointEstimate = getfield(Results,FieldNames{i});
             [Alpha1 Alpha2 Z p] = CalculateBCaLimits(JackKnifeData,PointEstimate, BootStrapData,CurrentAlpha);
-          
+            
             % find the confidence intervals
             CurrentBCaCI(:,:,:,t) = CalculateBCaCI(BootStrapData,Alpha1,Alpha2,PointEstimate);
         end
